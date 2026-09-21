@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tổng quan — Course Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="mark">CM</div>
+            <span>Course Management</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard.html" class="item active">
+                <span class="icon">&#9632;</span> Tổng quan
+            </a>
+            <a href="#" class="item">
+                <span class="icon">&#128218;</span> Khóa học
+            </a>
+            <a href="#" class="item" id="usersNavItem" style="display:none;">
+                <span class="icon">&#128101;</span> Người dùng
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="avatar" id="avatarInitials">--</div>
+                <div class="meta">
+                    <div class="name" id="sideUserName">Đang tải...</div>
+                    <div class="role" id="sideUserRole">—</div>
+                </div>
+            </div>
+            <button class="sidebar-logout" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="page-header">
+            <h1>Tổng quan</h1>
+            <p>Thông tin tài khoản và hoạt động của bạn trong hệ thống.</p>
+        </div>
+
+        <div id="loadingLine" class="loading-line">Đang tải dữ liệu...</div>
+
+        <div class="panel" id="profilePanel" style="display:none;">
+            <div class="panel-header">
+                <h2>Thông tin tài khoản</h2>
+                <span class="badge accent" id="roleBadge">—</span>
+            </div>
+            <div class="panel-body">
+                <div class="data-row">
+                    <span class="label">Họ và tên</span>
+                    <span class="value" id="fullName">—</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Tên đăng nhập</span>
+                    <span class="value" id="username">—</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Email</span>
+                    <span class="value" id="email">—</span>
+                </div>
+                <div class="data-row">
+                    <span class="label">Trạng thái</span>
+                    <span class="value" id="statusValue">—</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Khóa học</h3>
+        <p class="section-sub">Danh sách khóa học sẽ hiển thị tại đây khi các endpoint tương ứng được kết nối.</p>
+        <div class="empty-state">Chưa có dữ liệu khóa học để hiển thị.</div>
+    </main>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+    function initials(name) {
+        if (!name) return '--';
+        const parts = name.trim().split(/\s+/);
+        const last = parts[parts.length - 1] || '';
+        const first = parts[0] || '';
+        return (first[0] || '').toUpperCase() + (last[0] || '').toUpperCase();
+    }
+
+    (async () => {
+        const profile = await requireAuth();
+        if (!profile) return;
+
+        document.getElementById('loadingLine').style.display = 'none';
+        document.getElementById('profilePanel').style.display = 'block';
+
+        document.getElementById('avatarInitials').textContent = initials(profile.fullName);
+        document.getElementById('sideUserName').textContent = profile.fullName;
+        document.getElementById('sideUserRole').textContent = roleLabel(profile.role);
+        document.getElementById('roleBadge').textContent = roleLabel(profile.role);
+
+        document.getElementById('fullName').textContent = profile.fullName;
+        document.getElementById('username').textContent = profile.username;
+        document.getElementById('email').textContent = profile.email;
+
+        const statusEl = document.getElementById('statusValue');
+        if (profile.isActive) {
+            statusEl.innerHTML = '<span class="badge success"><span class="dot"></span>Đang hoạt động</span>';
+        } else {
+            statusEl.innerHTML = '<span class="badge error"><span class="dot"></span>Đã vô hiệu hóa</span>';
+        }
+
+        if (profile.role === 'ADMIN') {
+            document.getElementById('usersNavItem').style.display = 'flex';
+        }
+    })();
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await Api.logout();
+        window.location.href = '/login.html';
+    });
+</script>
+</body>
+</html>

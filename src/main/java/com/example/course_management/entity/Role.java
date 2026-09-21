@@ -1,4 +1,7 @@
 package com.example.course_management.entity;
 
-public class Role {
+public enum Role {
+    ADMIN,
+    TEACHER,
+    STUDENT
 }

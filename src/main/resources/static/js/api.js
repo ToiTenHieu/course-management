@@ -44,6 +44,8 @@ const Api = {
     me: () => apiCall('/auth/me'),
 
     verify: () => apiCall('/auth/verify', { method: 'POST' }),
+
+    logout: () => apiCall('/auth/logout', { method: 'POST' }),
 };
 
 /**

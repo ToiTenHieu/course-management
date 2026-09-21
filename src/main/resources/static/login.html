@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng nhập — Course Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="auth-wrap">
+    <div class="auth-card">
+        <!-- ================= LOGO ================= -->
+        <div class="auth-brand" style="text-align: center;">
+
+            <div class="auth-logo" style="text-align: center;">
+
+                <svg
+                        viewBox="0 0 100 100"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-label="Course Management logo"
+                >
+                    <!-- Graduation cap -->
+                    <path
+                            d="M50 17L82 32L50 47L18 32L50 17Z"
+                            fill="white"
+                    />
+
+                    <path
+                            d="M29 39V53C29 53 38 63 50 63C62 63 71 53 71 53V39L50 49L29 39Z"
+                            fill="white"
+                            opacity="0.95"
+                    />
+
+                    <path
+                            d="M82 33V51"
+                            stroke="white"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                    />
+
+                    <!-- CM -->
+                    <text
+                            x="50"
+                            y="88"
+                            text-anchor="middle"
+                            font-size="29"
+                            font-weight="800"
+                            font-family="Arial, sans-serif"
+                            fill="white"
+                    >
+                        CM
+                    </text>
+                </svg>
+
+            </div>
+            <div class="auth-brand-name">
+                <h1>Course Management</h1>
+            </div>
+
+        </div>
+
+        <p class="sub">Đăng nhập bằng tài khoản được cấp để truy cập hệ thống quản lý khóa học.</p>
+
+        <div class="banner-error" id="bannerError"></div>
+
+        <form id="loginForm" novalidate>
+            <label for="username">Tên đăng nhập</label>
+            <input type="text" id="username" autocomplete="username" placeholder="vd: hieu.nguyen">
+            <div class="field-error" id="usernameError"></div>
+
+            <label for="password">Mật khẩu</label>
+            <input type="password" id="password" autocomplete="current-password" placeholder="••••••••">
+            <div class="field-error" id="passwordError"></div>
+
+            <button type="submit" class="primary" id="submitBtn">Đăng nhập</button>
+        </form>
+    </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+    const form = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const bannerError = document.getElementById('bannerError');
+
+    (async () => {
+        const check = await Api.verify();
+        if (check.ok && check.body.data === true) {
+            window.location.href = '/dashboard.html';
+        }
+    })();
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        bannerError.classList.remove('show');
+        document.getElementById('usernameError').textContent = '';
+        document.getElementById('passwordError').textContent = '';
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        let hasError = false;
+        if (!username) {
+            document.getElementById('usernameError').textContent = 'Vui lòng nhập tên đăng nhập';
+            hasError = true;
+        }
+        if (!password) {
+            document.getElementById('passwordError').textContent = 'Vui lòng nhập mật khẩu';
+            hasError = true;
+        }
+        if (hasError) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang đăng nhập...';
+
+        const result = await Api.login(username, password);
+
+        if (result.ok && result.body.success) {
+            window.location.href = '/dashboard.html';
+        } else {
+            bannerError.textContent = result.body.message || 'Đăng nhập thất bại';
+            bannerError.classList.add('show');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Đăng nhập';
+        }
+    });
+</script>
+</body>
+</html>
