@@ -1,0 +1,137 @@
+package com.example.course_management.service.impl;
+
+import com.example.course_management.dto.request.*;
+import com.example.course_management.dto.response.UserResponse;
+import com.example.course_management.entity.Role;
+import com.example.course_management.entity.User;
+import com.example.course_management.exception.ConflictException;
+import com.example.course_management.exception.ForbiddenException;
+import com.example.course_management.exception.ResourceNotFoundException;
+import com.example.course_management.repository.UserRepository;
+import com.example.course_management.security.CustomUserDetails;
+import com.example.course_management.service.UserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public List<UserResponse> getUsers(Role role, Boolean isActive) {
+        return userRepository.search(role, isActive).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    public UserResponse getUserById(Integer userId) {
+        return toResponse(findUserOrThrow(userId));
+    }
+
+    @Override
+    public UserResponse createUser(CreateUserRequest req) {
+        if (userRepository.existsByUsername(req.getUsername())) {
+            throw new ConflictException("Username đã tồn tại");
+        }
+        if (userRepository.existsByEmail(req.getEmail())) {
+            throw new ConflictException("Email đã tồn tại");
+        }
+
+        User user = new User();
+        user.setUsername(req.getUsername());
+        user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
+        user.setEmail(req.getEmail());
+        user.setFullName(req.getFullName());
+        user.setRole(req.getRole());
+        user.setIsActive(true);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return toResponse(userRepository.save(user));
+    }
+
+    @Override
+    public UserResponse updateRole(Integer userId, UpdateRoleRequest req) {
+        User user = findUserOrThrow(userId);
+
+        // Luật nghiệp vụ endpoint 7: ADMIN không được đổi role của một ADMIN khác
+        if (user.getRole() == Role.ADMIN) {
+            throw new ForbiddenException("Không được phép thay đổi role của một ADMIN khác");
+        }
+
+        user.setRole(req.getRole());
+        user.setUpdatedAt(LocalDateTime.now());
+        return toResponse(userRepository.save(user));
+    }
+
+    @Override
+    public UserResponse updateStatus(Integer userId, UpdateStatusRequest req) {
+        User user = findUserOrThrow(userId);
+        user.setIsActive(req.getIsActive());
+        user.setUpdatedAt(LocalDateTime.now());
+        return toResponse(userRepository.save(user));
+    }
+
+    @Override
+    public void deleteUser(Integer userId) {
+        User user = findUserOrThrow(userId);
+        userRepository.delete(user);
+    }
+
+    @Override
+    public UserResponse updateProfile(Integer userId, UpdateUserRequest req) {
+        User user = findUserOrThrow(userId);
+        user.setFullName(req.getFullName());
+        user.setEmail(req.getEmail());
+        user.setUpdatedAt(LocalDateTime.now());
+        return toResponse(userRepository.save(user));
+    }
+
+    @Override
+    public void changePassword(Integer userId, ChangePasswordRequest req, CustomUserDetails actor) {
+        User user = findUserOrThrow(userId);
+
+        boolean isSelf = actor.getUser().getUserId().equals(userId);
+        boolean isAdmin = actor.getUser().getRole() == Role.ADMIN;
+
+        // Nếu tự đổi mật khẩu của chính mình (không phải admin đổi hộ) → bắt buộc xác nhận mật khẩu cũ
+        if (isSelf && !isAdmin) {
+            if (req.getOldPassword() == null ||
+                    !passwordEncoder.matches(req.getOldPassword(), user.getPasswordHash())) {
+                throw new ForbiddenException("Mật khẩu hiện tại không đúng");
+            }
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    private User findUserOrThrow(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user id=" + userId));
+    }
+
+    private UserResponse toResponse(User u) {
+        return UserResponse.builder()
+                .userId(u.getUserId())
+                .username(u.getUsername())
+                .email(u.getEmail())
+                .fullName(u.getFullName())
+                .role(u.getRole().name())
+                .isActive(u.getIsActive())
+                .createdAt(u.getCreatedAt())
+                .build();
+    }
+}

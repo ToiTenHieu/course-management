@@ -46,6 +46,31 @@ const Api = {
     verify: () => apiCall('/auth/verify', { method: 'POST' }),
 
     logout: () => apiCall('/auth/logout', { method: 'POST' }),
+
+    // --- User management (Phase 2) ---
+    getUsers: (role, status) => {
+        const params = new URLSearchParams();
+        if (role) params.set('role', role);
+        if (status) params.set('status', status);
+        const qs = params.toString();
+        return apiCall('/users' + (qs ? '?' + qs : ''));
+    },
+
+    createUser: (data) => apiCall('/users', { method: 'POST', body: data }),
+
+    updateUserRole: (userId, role) =>
+        apiCall(`/users/${userId}/role`, { method: 'PUT', body: { role } }),
+
+    updateUserStatus: (userId, isActive) =>
+        apiCall(`/users/${userId}/status`, { method: 'PUT', body: { isActive } }),
+
+    deleteUser: (userId) => apiCall(`/users/${userId}`, { method: 'DELETE' }),
+
+    updateUserProfile: (userId, fullName, email) =>
+        apiCall(`/users/${userId}`, { method: 'PUT', body: { fullName, email } }),
+
+    changePassword: (userId, oldPassword, newPassword) =>
+        apiCall(`/users/${userId}/password`, { method: 'PUT', body: { oldPassword, newPassword } }),
 };
 
 /**

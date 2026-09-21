@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Người dùng — Course Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="mark">CM</div>
+            <span>Course Management</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard.html" class="item">
+                <span class="icon">&#9632;</span> Tổng quan
+            </a>
+            <a href="#" class="item">
+                <span class="icon">&#128218;</span> Khóa học
+            </a>
+            <a href="/users.html" class="item active" id="usersNavItem" style="display:none;">
+                <span class="icon">&#128101;</span> Người dùng
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/profile.html" class="sidebar-user" style="text-decoration:none; cursor:pointer;">
+                <div class="avatar" id="avatarInitials">--</div>
+                <div class="meta">
+                    <div class="name" id="sideUserName">Đang tải...</div>
+                    <div class="role" id="sideUserRole">—</div>
+                </div>
+            </a>
+            <button class="sidebar-logout" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="page-header">
+            <h1>Người dùng</h1>
+            <p>Quản lý tài khoản, vai trò và trạng thái hoạt động của toàn hệ thống.</p>
+        </div>
+
+        <div class="toolbar">
+            <div class="toolbar-filters">
+                <select id="filterRole">
+                    <option value="">Tất cả vai trò</option>
+                    <option value="ADMIN">Quản trị viên</option>
+                    <option value="TEACHER">Giảng viên</option>
+                    <option value="STUDENT">Học viên</option>
+                </select>
+                <select id="filterStatus">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Đang hoạt động</option>
+                    <option value="inactive">Đã vô hiệu hóa</option>
+                </select>
+            </div>
+            <button class="primary width-auto" id="openCreateBtn">+ Thêm người dùng</button>
+        </div>
+
+        <div class="panel">
+            <div id="loadingLine" class="loading-line" style="padding: 20px;">Đang tải danh sách...</div>
+            <div class="table-wrap">
+                <table class="data-table" id="usersTable" style="display:none;">
+                    <thead>
+                    <tr>
+                        <th>Họ tên</th>
+                        <th>Tên đăng nhập</th>
+                        <th>Email</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody id="usersBody"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="emptyState" style="display:none; border:none;">
+                Không có người dùng nào khớp bộ lọc hiện tại.
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal: Thêm người dùng -->
+<div class="modal-overlay hidden" id="createModal">
+    <div class="modal">
+        <h2>Thêm người dùng</h2>
+        <p class="sub">Tạo tài khoản mới trong hệ thống.</p>
+
+        <div class="banner-error" id="createError"></div>
+
+        <form id="createForm">
+            <label for="cUsername">Tên đăng nhập</label>
+            <input type="text" id="cUsername" placeholder="vd: hieu.nguyen">
+
+            <label for="cFullName">Họ và tên</label>
+            <input type="text" id="cFullName" placeholder="vd: Nguyễn Văn A">
+
+            <label for="cEmail">Email</label>
+            <input type="text" id="cEmail" placeholder="vd: a@example.com">
+
+            <label for="cPassword">Mật khẩu tạm thời</label>
+            <input type="password" id="cPassword" placeholder="tối thiểu 6 ký tự">
+
+            <label for="cRole">Vai trò</label>
+            <select id="cRole">
+                <option value="STUDENT">Học viên</option>
+                <option value="TEACHER">Giảng viên</option>
+                <option value="ADMIN">Quản trị viên</option>
+            </select>
+
+            <div class="modal-actions">
+                <button type="button" class="secondary width-auto" id="cancelCreateBtn">Hủy</button>
+                <button type="submit" class="primary width-auto" id="createSubmitBtn">Tạo tài khoản</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Sửa thông tin -->
+<div class="modal-overlay hidden" id="editModal">
+    <div class="modal">
+        <h2>Sửa thông tin</h2>
+        <p class="sub">Cập nhật họ tên và email của người dùng.</p>
+
+        <div class="banner-error" id="editError"></div>
+
+        <form id="editForm">
+            <label for="eFullName">Họ và tên</label>
+            <input type="text" id="eFullName">
+
+            <label for="eEmail">Email</label>
+            <input type="text" id="eEmail">
+
+            <div class="modal-actions">
+                <button type="button" class="secondary width-auto" id="cancelEditBtn">Hủy</button>
+                <button type="submit" class="primary width-auto" id="editSubmitBtn">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Đổi vai trò -->
+<div class="modal-overlay hidden" id="roleModal">
+    <div class="modal">
+        <h2>Đổi vai trò</h2>
+        <p class="sub" id="roleModalSub">Chọn vai trò mới cho người dùng này.</p>
+        <select id="rNewRole">
+            <option value="STUDENT">Học viên</option>
+            <option value="TEACHER">Giảng viên</option>
+            <option value="ADMIN">Quản trị viên</option>
+        </select>
+        <div class="modal-actions">
+            <button type="button" class="secondary width-auto" id="cancelRoleBtn">Hủy</button>
+            <button type="button" class="primary width-auto" id="confirmRoleBtn">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+    let currentTargetUserId = null;
+
+    function initials(name) {
+        if (!name) return '--';
+        const parts = name.trim().split(/\s+/);
+        return ((parts[0]||'')[0]||'').toUpperCase() + ((parts[parts.length-1]||'')[0]||'').toUpperCase();
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast show ' + type;
+        setTimeout(() => { toast.className = 'toast ' + type; }, 2600);
+    }
+
+    function roleBadgeClass(role) {
+        if (role === 'ADMIN') return 'warning';
+        if (role === 'TEACHER') return 'accent';
+        return 'success';
+    }
+
+    function renderRow(user) {
+        const statusBadge = user.isActive
+            ? '<span class="badge success status-badge"><span class="dot"></span>Hoạt động</span>'
+            : '<span class="badge error status-badge"><span class="dot"></span>Vô hiệu hóa</span>';
+
+        return `
+            <tr data-user-id="${user.userId}" data-full-name="${escapeHtml(user.fullName)}" data-email="${escapeHtml(user.email)}">
+                <td class="cell-primary">${escapeHtml(user.fullName)}</td>
+                <td class="cell-muted">${escapeHtml(user.username)}</td>
+                <td class="cell-muted">${escapeHtml(user.email)}</td>
+                <td><span class="badge ${roleBadgeClass(user.role)}">${roleLabel(user.role)}</span></td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div class="row-actions">
+                        <button class="link-btn" data-action="edit">Sửa</button>
+                        <button class="link-btn" data-action="role">Đổi vai trò</button>
+                        <button class="link-btn" data-action="toggle">${user.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}</button>
+                        <button class="danger-text" data-action="delete">Xóa</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str ?? '';
+        return div.innerHTML;
+    }
+
+    async function loadUsers() {
+        document.getElementById('loadingLine').style.display = 'block';
+        document.getElementById('usersTable').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'none';
+
+        const role = document.getElementById('filterRole').value;
+        const status = document.getElementById('filterStatus').value;
+        const result = await Api.getUsers(role, status);
+
+        document.getElementById('loadingLine').style.display = 'none';
+
+        if (!result.ok) {
+            showToast(result.body.message || 'Không tải được danh sách', 'error');
+            return;
+        }
+
+        const users = result.body.data || [];
+        if (users.length === 0) {
+            document.getElementById('emptyState').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('usersBody').innerHTML = users.map(renderRow).join('');
+        document.getElementById('usersTable').style.display = 'table';
+    }
+
+    document.getElementById('filterRole').addEventListener('change', loadUsers);
+    document.getElementById('filterStatus').addEventListener('change', loadUsers);
+
+    // ---- Table row actions (event delegation) ----
+    document.getElementById('usersBody').addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const row = btn.closest('tr');
+        const userId = row.dataset.userId;
+        const action = btn.dataset.action;
+
+        if (action === 'edit') {
+            currentTargetUserId = userId;
+            document.getElementById('eFullName').value = row.dataset.fullName;
+            document.getElementById('eEmail').value = row.dataset.email;
+            document.getElementById('editError').classList.remove('show');
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        if (action === 'role') {
+            currentTargetUserId = userId;
+            document.getElementById('roleModal').classList.remove('hidden');
+        }
+
+        if (action === 'toggle') {
+            const isCurrentlyActive = row.querySelector('.status-badge').textContent.includes('Hoạt động');
+            const result = await Api.updateUserStatus(userId, !isCurrentlyActive);
+            if (result.ok) {
+                showToast('Cập nhật trạng thái thành công');
+                loadUsers();
+            } else {
+                showToast(result.body.message || 'Cập nhật thất bại', 'error');
+            }
+        }
+
+        if (action === 'delete') {
+            if (!confirm('Xóa người dùng này? Hành động không thể hoàn tác.')) return;
+            const result = await Api.deleteUser(userId);
+            if (result.ok) {
+                showToast('Đã xóa người dùng');
+                loadUsers();
+            } else {
+                showToast(result.body.message || 'Xóa thất bại', 'error');
+            }
+        }
+    });
+
+    // ---- Modal: sửa thông tin ----
+    document.getElementById('cancelEditBtn').addEventListener('click', () => {
+        document.getElementById('editModal').classList.add('hidden');
+    });
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('editSubmitBtn');
+        const errorBanner = document.getElementById('editError');
+        errorBanner.classList.remove('show');
+
+        const fullName = document.getElementById('eFullName').value.trim();
+        const email = document.getElementById('eEmail').value.trim();
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang lưu...';
+
+        const result = await Api.updateUserProfile(currentTargetUserId, fullName, email);
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Lưu thay đổi';
+
+        if (result.ok) {
+            document.getElementById('editModal').classList.add('hidden');
+            showToast('Cập nhật thông tin thành công');
+            loadUsers();
+        } else {
+            errorBanner.textContent = result.body.message || 'Cập nhật thất bại';
+            errorBanner.classList.add('show');
+        }
+    });
+
+    // ---- Modal: đổi role ----
+    document.getElementById('cancelRoleBtn').addEventListener('click', () => {
+        document.getElementById('roleModal').classList.add('hidden');
+    });
+    document.getElementById('confirmRoleBtn').addEventListener('click', async () => {
+        const newRole = document.getElementById('rNewRole').value;
+        const result = await Api.updateUserRole(currentTargetUserId, newRole);
+        document.getElementById('roleModal').classList.add('hidden');
+        if (result.ok) {
+            showToast('Cập nhật vai trò thành công');
+            loadUsers();
+        } else {
+            showToast(result.body.message || 'Không thể đổi vai trò', 'error');
+        }
+    });
+
+    // ---- Modal: tạo user ----
+    document.getElementById('openCreateBtn').addEventListener('click', () => {
+        document.getElementById('createForm').reset();
+        document.getElementById('createError').classList.remove('show');
+        document.getElementById('createModal').classList.remove('hidden');
+    });
+    document.getElementById('cancelCreateBtn').addEventListener('click', () => {
+        document.getElementById('createModal').classList.add('hidden');
+    });
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('createSubmitBtn');
+        const errorBanner = document.getElementById('createError');
+        errorBanner.classList.remove('show');
+
+        const payload = {
+            username: document.getElementById('cUsername').value.trim(),
+            fullName: document.getElementById('cFullName').value.trim(),
+            email: document.getElementById('cEmail').value.trim(),
+            password: document.getElementById('cPassword').value,
+            role: document.getElementById('cRole').value,
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang tạo...';
+
+        const result = await Api.createUser(payload);
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Tạo tài khoản';
+
+        if (result.ok) {
+            document.getElementById('createModal').classList.add('hidden');
+            showToast('Tạo người dùng thành công');
+            loadUsers();
+        } else {
+            errorBanner.textContent = result.body.message || 'Tạo người dùng thất bại';
+            errorBanner.classList.add('show');
+        }
+    });
+
+    // ---- Khởi tạo trang ----
+    (async () => {
+        const profile = await requireAuth();
+        if (!profile) return;
+
+        if (profile.role !== 'ADMIN') {
+            // Trang này chỉ dành ADMIN — người khác vào thẳng URL sẽ bị đá về dashboard
+            window.location.href = '/dashboard.html';
+            return;
+        }
+
+        document.getElementById('avatarInitials').textContent = initials(profile.fullName);
+        document.getElementById('sideUserName').textContent = profile.fullName;
+        document.getElementById('sideUserRole').textContent = roleLabel(profile.role);
+        document.getElementById('usersNavItem').style.display = 'flex';
+
+        loadUsers();
+    })();
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await Api.logout();
+        window.location.href = '/login.html';
+    });
+</script>
+</body>
+</html>

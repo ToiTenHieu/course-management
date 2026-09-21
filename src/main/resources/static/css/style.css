@@ -255,7 +255,7 @@ button.primary:disabled { opacity: 0.55; cursor: default; }
     flex: 1;
     min-width: 0;
     padding: 32px 40px 60px;
-    max-width: 980px;
+    max-width: 1200px;
 }
 .page-header { margin-bottom: 24px; }
 .page-header h1 { font-size: 1.3rem; }
@@ -331,3 +331,138 @@ button.primary:disabled { opacity: 0.55; cursor: default; }
     font-size: 0.86rem;
     padding: 20px 0;
 }
+
+/* ---- Toolbar (filters + action button) ---- */
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.toolbar-filters { display: flex; gap: 8px; }
+.toolbar-filters select {
+    padding: 7px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.83rem;
+    font-family: inherit;
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+button.secondary {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+}
+button.secondary:hover { border-color: #c7cbdb; background: #FAFBFD; }
+button.danger-text {
+    background: none;
+    border: none;
+    color: var(--color-error);
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 4px 6px;
+}
+button.danger-text:hover { text-decoration: underline; }
+button.link-btn {
+    background: none;
+    border: none;
+    color: var(--color-accent);
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 4px 6px;
+}
+button.link-btn:hover { text-decoration: underline; }
+button.width-auto { width: auto; padding: 9px 18px; }
+
+/* ---- Table ---- */
+.table-wrap { overflow-x: auto; }
+table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+table.data-table th {
+    text-align: left;
+    padding: 10px 20px;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+table.data-table td {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+table.data-table tr:last-child td { border-bottom: none; }
+table.data-table tr:hover td { background: #FAFBFD; }
+.cell-primary { font-weight: 500; color: var(--color-text); }
+.cell-muted { color: var(--color-text-muted); }
+.row-actions { display: flex; gap: 4px; align-items: center; white-space: nowrap; }
+
+/* ---- Modal ---- */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(20, 24, 38, 0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 20px;
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+    background: var(--color-surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 400px;
+    padding: 24px;
+}
+.modal h2 { font-size: 1.02rem; margin-bottom: 4px; }
+.modal p.sub { color: var(--color-text-muted); font-size: 0.83rem; margin: 0 0 18px; }
+.modal select {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: var(--color-surface);
+    color: var(--color-text);
+    margin-bottom: 16px;
+}
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+.modal-actions button.width-auto { width: auto; }
+
+/* ---- Toast ---- */
+.toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--color-text);
+    color: #fff;
+    padding: 11px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    box-shadow: var(--shadow-md);
+    z-index: 200;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.error { background: var(--color-error); }
+.toast.success { background: var(--color-success); }
