@@ -19,11 +19,20 @@
             <a href="/dashboard.html" class="item active">
                 <span class="icon">&#9632;</span> Tổng quan
             </a>
-            <a href="#" class="item">
+            <a href="/courses.html" class="item">
                 <span class="icon">&#128218;</span> Khóa học
+            </a>
+            <a href="/my-courses.html" class="item" id="myCoursesNavItem" style="display:none;">
+                <span class="icon">&#127891;</span> Khóa học của tôi
             </a>
             <a href="/users.html" class="item" id="usersNavItem" style="display:none;">
                 <span class="icon">&#128101;</span> Người dùng
+            </a>
+            <a href="/notifications.html" class="item" id="notifNavItem">
+                <span class="icon">&#128276;</span> Thông báo <span class="nav-badge" id="notifBadge" style="display:none;"></span>
+            </a>
+            <a href="/reports.html" class="item" id="reportsNavItem" style="display:none;">
+                <span class="icon">&#128200;</span> Báo cáo
             </a>
         </nav>
 
@@ -72,9 +81,28 @@
             </div>
         </div>
 
-        <h3 class="section-title">Khóa học</h3>
-        <p class="section-sub">Danh sách khóa học sẽ hiển thị tại đây khi các endpoint tương ứng được kết nối.</p>
-        <div class="empty-state">Chưa có dữ liệu khóa học để hiển thị.</div>
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Khóa học</h2>
+                <a href="/courses.html" style="font-size:0.83rem;">Xem tất cả &rarr;</a>
+            </div>
+            <div id="coursesLoading" class="loading-line" style="padding: 8px 20px 16px;">Đang tải...</div>
+            <div class="table-wrap">
+                <table class="data-table" id="coursesPreviewTable" style="display:none;">
+                    <thead>
+                    <tr>
+                        <th>Tiêu đề</th>
+                        <th>Giảng viên</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody id="coursesPreviewBody"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="coursesEmptyState" style="display:none; border:none;">
+                Chưa có khóa học nào để hiển thị.
+            </div>
+        </div>
     </main>
 </div>
 
@@ -86,6 +114,44 @@
         const last = parts[parts.length - 1] || '';
         const first = parts[0] || '';
         return (first[0] || '').toUpperCase() + (last[0] || '').toUpperCase();
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str ?? '';
+        return div.innerHTML;
+    }
+
+    function statusBadgeClass(status) {
+        if (status === 'PUBLISHED') return 'success';
+        if (status === 'ARCHIVED') return 'error';
+        return 'warning'; // DRAFT
+    }
+
+    async function loadCoursesPreview() {
+        const result = await Api.getCourses();
+        document.getElementById('coursesLoading').style.display = 'none';
+
+        if (!result.ok) {
+            document.getElementById('coursesEmptyState').textContent = result.body.message || 'Không tải được danh sách khóa học';
+            document.getElementById('coursesEmptyState').style.display = 'block';
+            return;
+        }
+
+        const courses = (result.body.data || []).slice(0, 5);
+        if (courses.length === 0) {
+            document.getElementById('coursesEmptyState').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('coursesPreviewBody').innerHTML = courses.map(c => `
+            <tr>
+                <td class="cell-primary">${escapeHtml(c.title)}</td>
+                <td class="cell-muted">${escapeHtml(c.teacherName)}</td>
+                <td><span class="badge ${statusBadgeClass(c.status)}">${courseStatusLabel(c.status)}</span></td>
+            </tr>
+        `).join('');
+        document.getElementById('coursesPreviewTable').style.display = 'table';
     }
 
     (async () => {
@@ -114,6 +180,11 @@
         if (profile.role === 'ADMIN') {
             document.getElementById('usersNavItem').style.display = 'flex';
         }
+        if (profile.role === 'STUDENT') {
+            document.getElementById('myCoursesNavItem').style.display = 'flex';
+        }
+
+        loadCoursesPreview();
     })();
 
     document.getElementById('logoutBtn').addEventListener('click', async () => {

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Thông báo — Course Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="mark">CM</div>
+            <span>Course Management</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard.html" class="item">
+                <span class="icon">&#9632;</span> Tổng quan
+            </a>
+            <a href="/courses.html" class="item">
+                <span class="icon">&#128218;</span> Khóa học
+            </a>
+            <a href="/my-courses.html" class="item" id="myCoursesNavItem" style="display:none;">
+                <span class="icon">&#127891;</span> Khóa học của tôi
+            </a>
+            <a href="/users.html" class="item" id="usersNavItem" style="display:none;">
+                <span class="icon">&#128101;</span> Người dùng
+            </a>
+            <a href="/notifications.html" class="item active" id="notifNavItem">
+                <span class="icon">&#128276;</span> Thông báo <span class="nav-badge" id="notifBadge" style="display:none;"></span>
+            </a>
+            <a href="/reports.html" class="item" id="reportsNavItem" style="display:none;">
+                <span class="icon">&#128200;</span> Báo cáo
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/profile.html" class="sidebar-user" style="text-decoration:none; cursor:pointer;">
+                <div class="avatar" id="avatarInitials">--</div>
+                <div class="meta">
+                    <div class="name" id="sideUserName">Đang tải...</div>
+                    <div class="role" id="sideUserRole">—</div>
+                </div>
+            </a>
+            <button class="sidebar-logout" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+            <div>
+                <h1>Thông báo</h1>
+                <p>Các thông báo gửi đến tài khoản của bạn.</p>
+            </div>
+            <button class="primary width-auto" id="openSendBtn" style="display:none;">+ Gửi thông báo</button>
+        </div>
+
+        <div class="panel">
+            <div id="loadingLine" class="loading-line" style="padding: 20px;">Đang tải thông báo...</div>
+            <div id="notifList"></div>
+            <div class="empty-state" id="emptyState" style="display:none; border:none;">
+                Bạn chưa có thông báo nào.
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal: Gửi thông báo (ADMIN) -->
+<div class="modal-overlay hidden" id="sendModal">
+    <div class="modal" style="max-width: 440px;">
+        <h2>Gửi thông báo</h2>
+        <p class="sub">Gửi một thông báo tới người dùng trong hệ thống.</p>
+
+        <div class="banner-error" id="sendError"></div>
+
+        <form id="sendForm">
+            <label for="sUser">Người nhận</label>
+            <select id="sUser"></select>
+
+            <label for="sType">Loại thông báo</label>
+            <select id="sType">
+                <option value="GENERAL">Thông báo chung</option>
+                <option value="NEW_COURSE">Khóa học mới</option>
+                <option value="LESSON_UPDATED">Bài học được cập nhật</option>
+                <option value="ENROLLMENT_CONFIRMED">Xác nhận đăng ký</option>
+            </select>
+
+            <label for="sMessage">Nội dung</label>
+            <textarea id="sMessage" placeholder="Nhập nội dung thông báo"></textarea>
+
+            <label for="sUrl">Đường dẫn liên quan (không bắt buộc)</label>
+            <input type="text" id="sUrl" placeholder="vd: /courses.html">
+
+            <div class="modal-actions">
+                <button type="button" class="secondary width-auto" id="cancelSendBtn">Hủy</button>
+                <button type="submit" class="primary width-auto" id="sendSubmitBtn">Gửi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+    let myProfile = null;
+
+    function initials(name) {
+        if (!name) return '--';
+        const parts = name.trim().split(/\s+/);
+        return ((parts[0]||'')[0]||'').toUpperCase() + ((parts[parts.length-1]||'')[0]||'').toUpperCase();
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast show ' + type;
+        setTimeout(() => { toast.className = 'toast ' + type; }, 2600);
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str ?? '';
+        return div.innerHTML;
+    }
+
+    function typeLabel(type) {
+        switch (type) {
+            case 'NEW_COURSE': return 'Khóa học mới';
+            case 'LESSON_UPDATED': return 'Bài học cập nhật';
+            case 'ENROLLMENT_CONFIRMED': return 'Xác nhận đăng ký';
+            case 'GENERAL': return 'Thông báo chung';
+            default: return type || 'Thông báo';
+        }
+    }
+
+    function timeAgo(iso) {
+        const then = new Date(iso);
+        const diff = Math.floor((Date.now() - then.getTime()) / 1000);
+        if (diff < 60) return 'Vừa xong';
+        if (diff < 3600) return Math.floor(diff / 60) + ' phút trước';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' giờ trước';
+        if (diff < 86400 * 7) return Math.floor(diff / 86400) + ' ngày trước';
+        return then.toLocaleDateString('vi-VN');
+    }
+
+    function refreshBadge(list) {
+        const unread = list.filter(n => !n.isRead).length;
+        const badge = document.getElementById('notifBadge');
+        if (unread > 0) {
+            badge.textContent = unread > 99 ? '99+' : unread;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function renderItem(n) {
+        const isAdmin = myProfile.role === 'ADMIN';
+        return `
+            <div class="notif-item ${n.isRead ? '' : 'unread'}" data-id="${n.notificationId}" data-url="${escapeHtml(n.targetUrl || '')}">
+                <span class="dot"></span>
+                <div class="content">
+                    <div class="msg">${escapeHtml(n.message)}</div>
+                    <div class="meta">
+                        <span class="badge accent">${typeLabel(n.type)}</span>
+                        <span>${timeAgo(n.createdAt)}</span>
+                        ${n.targetUrl ? '<a href="#" data-action="open">Xem chi tiết &rarr;</a>' : ''}
+                    </div>
+                </div>
+                <div class="item-actions">
+                    ${n.isRead ? '' : '<button class="link-btn" data-action="read">Đã đọc</button>'}
+                    ${isAdmin ? '<button class="danger-text" data-action="delete">Xóa</button>' : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    let currentList = [];
+
+    async function loadNotifications() {
+        const result = await Api.getMyNotifications();
+        document.getElementById('loadingLine').style.display = 'none';
+
+        if (!result.ok) {
+            showToast(result.body.message || 'Không tải được thông báo', 'error');
+            return;
+        }
+
+        currentList = result.body.data || [];
+        refreshBadge(currentList);
+
+        if (currentList.length === 0) {
+            document.getElementById('notifList').innerHTML = '';
+            document.getElementById('emptyState').style.display = 'block';
+            return;
+        }
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('notifList').innerHTML = currentList.map(renderItem).join('');
+    }
+
+    document.getElementById('notifList').addEventListener('click', async (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        e.preventDefault();
+        const item = btn.closest('.notif-item');
+        const id = item.dataset.id;
+        const action = btn.dataset.action;
+
+        if (action === 'read') {
+            const result = await Api.markNotificationRead(id);
+            if (result.ok) loadNotifications();
+            else showToast(result.body.message || 'Không thể cập nhật', 'error');
+        }
+
+        if (action === 'open') {
+            // Mở link và đánh dấu đã đọc luôn nếu chưa đọc
+            const url = item.dataset.url;
+            if (item.classList.contains('unread')) await Api.markNotificationRead(id);
+            window.location.href = url;
+        }
+
+        if (action === 'delete') {
+            if (!confirm('Xóa thông báo này?')) return;
+            const result = await Api.deleteNotification(id);
+            if (result.ok) { showToast('Đã xóa thông báo'); loadNotifications(); }
+            else showToast(result.body.message || 'Xóa thất bại', 'error');
+        }
+    });
+
+    // ---- Modal gửi thông báo (ADMIN) ----
+    document.getElementById('openSendBtn').addEventListener('click', () => {
+        document.getElementById('sendForm').reset();
+        document.getElementById('sendError').classList.remove('show');
+        document.getElementById('sendModal').classList.remove('hidden');
+    });
+    document.getElementById('cancelSendBtn').addEventListener('click', () => {
+        document.getElementById('sendModal').classList.add('hidden');
+    });
+
+    document.getElementById('sendForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('sendSubmitBtn');
+        const errorBanner = document.getElementById('sendError');
+        errorBanner.classList.remove('show');
+
+        const message = document.getElementById('sMessage').value.trim();
+        if (!message) {
+            errorBanner.textContent = 'Vui lòng nhập nội dung thông báo';
+            errorBanner.classList.add('show');
+            return;
+        }
+
+        const payload = {
+            userId: parseInt(document.getElementById('sUser').value, 10),
+            type: document.getElementById('sType').value,
+            message,
+            targetUrl: document.getElementById('sUrl').value.trim() || null,
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang gửi...';
+        const result = await Api.createNotification(payload);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Gửi';
+
+        if (result.ok) {
+            document.getElementById('sendModal').classList.add('hidden');
+            showToast('Đã gửi thông báo');
+            loadNotifications();
+        } else {
+            errorBanner.textContent = result.body.message || 'Gửi thất bại';
+            errorBanner.classList.add('show');
+        }
+    });
+
+    // ---- Khởi tạo trang ----
+    (async () => {
+        const profile = await requireAuth();
+        if (!profile) return;
+        myProfile = profile;
+
+        document.getElementById('avatarInitials').textContent = initials(profile.fullName);
+        document.getElementById('sideUserName').textContent = profile.fullName;
+        document.getElementById('sideUserRole').textContent = roleLabel(profile.role);
+
+        if (profile.role === 'ADMIN') {
+            document.getElementById('openSendBtn').style.display = 'inline-block';
+            const usersResult = await Api.getUsers();
+            if (usersResult.ok) {
+                document.getElementById('sUser').innerHTML = (usersResult.body.data || [])
+                    .map(u => `<option value="${u.userId}">${escapeHtml(u.fullName)} (${roleLabel(u.role)})</option>`)
+                    .join('');
+            }
+        }
+
+        loadNotifications();
+    })();
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await Api.logout();
+        window.location.href = '/login.html';
+    });
+</script>
+</body>
+</html>

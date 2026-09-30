@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chi tiết khóa học — Course Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="mark">CM</div>
+            <span>Course Management</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard.html" class="item">
+                <span class="icon">&#9632;</span> Tổng quan
+            </a>
+            <a href="/courses.html" class="item active">
+                <span class="icon">&#128218;</span> Khóa học
+            </a>
+            <a href="/my-courses.html" class="item" id="myCoursesNavItem" style="display:none;">
+                <span class="icon">&#127891;</span> Khóa học của tôi
+            </a>
+            <a href="/users.html" class="item" id="usersNavItem" style="display:none;">
+                <span class="icon">&#128101;</span> Người dùng
+            </a>
+            <a href="/notifications.html" class="item" id="notifNavItem">
+                <span class="icon">&#128276;</span> Thông báo <span class="nav-badge" id="notifBadge" style="display:none;"></span>
+            </a>
+            <a href="/payments.html" class="item" id="paymentsNavItem" style="display:none;">
+                <span class="icon">&#128179;</span> Thanh toán
+            </a>
+            <a href="/my-payments.html" class="item" id="myPaymentsNavItem" style="display:none;">
+                <span class="icon">&#128179;</span> Thanh toán của tôi
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/profile.html" class="sidebar-user" style="text-decoration:none; cursor:pointer;">
+                <div class="avatar" id="avatarInitials">--</div>
+                <div class="meta">
+                    <div class="name" id="sideUserName">Đang tải...</div>
+                    <div class="role" id="sideUserRole">—</div>
+                </div>
+            </a>
+            <button class="sidebar-logout" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <a href="/courses.html" style="font-size:0.83rem; display:inline-block; margin-bottom:14px;">&larr; Quay lại danh sách khóa học</a>
+
+        <div id="loadingLine" class="loading-line">Đang tải thông tin khóa học...</div>
+
+        <div id="content" style="display:none;">
+            <div class="page-header">
+                <h1 id="cTitle">—</h1>
+                <p id="cTeacher">—</p>
+            </div>
+
+            <div class="panel">
+                <div class="panel-body" style="padding: 16px 20px;">
+                    <div class="data-row"><span class="label">Giá</span><span class="value" id="cPrice">—</span></div>
+                    <div class="data-row"><span class="label">Thời lượng</span><span class="value" id="cDuration">—</span></div>
+                    <div class="data-row"><span class="label">Trạng thái</span><span class="value" id="cStatus">—</span></div>
+                    <p style="font-size:0.86rem; color:var(--color-text-muted); margin: 14px 0 0; line-height:1.6;" id="cDescription"></p>
+                </div>
+            </div>
+
+            <div id="enrollBanner" style="display:none;"></div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Bài học</h2>
+                    <button class="primary width-auto" id="openAddLessonBtn" style="display:none;">+ Thêm bài học</button>
+                </div>
+                <div id="lessonsLoading" class="loading-line" style="padding: 16px 20px;">Đang tải danh sách bài học...</div>
+                <div class="table-wrap">
+                    <table class="data-table" id="lessonsTable" style="display:none;">
+                        <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th>Tiêu đề</th>
+                            <th id="publishHeader" style="display:none;">Xuất bản</th>
+                            <th id="progressHeader" style="display:none;">Tiến độ</th>
+                            <th id="lessonActionsHeader" style="display:none;">Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody id="lessonsBody"></tbody>
+                    </table>
+                </div>
+                <div class="empty-state" id="lessonsEmptyState" style="display:none; border:none;">
+                    Chưa có bài học nào trong khóa học này.
+                </div>
+            </div>
+
+            <div class="panel" id="reviewsPanel">
+                <div class="panel-header">
+                    <h2>Đánh giá</h2>
+                    <div class="rating-summary" id="ratingSummary"></div>
+                </div>
+
+                <div class="review-hint" id="reviewHint" style="display:none;">
+                    Hãy đăng ký khóa học để có thể gửi đánh giá.
+                </div>
+
+                <div class="review-form" id="reviewFormWrap" style="display:none;">
+                    <div class="stars-input" id="starsInput">
+                        <button type="button" data-value="1" aria-label="1 sao">&#9733;</button>
+                        <button type="button" data-value="2" aria-label="2 sao">&#9733;</button>
+                        <button type="button" data-value="3" aria-label="3 sao">&#9733;</button>
+                        <button type="button" data-value="4" aria-label="4 sao">&#9733;</button>
+                        <button type="button" data-value="5" aria-label="5 sao">&#9733;</button>
+                    </div>
+                    <textarea id="reviewComment" placeholder="Chia sẻ cảm nhận của bạn về khóa học (không bắt buộc)"></textarea>
+                    <div class="banner-error" id="reviewError"></div>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" class="primary width-auto" id="reviewSubmitBtn">Gửi đánh giá</button>
+                        <button type="button" class="secondary width-auto" id="reviewCancelBtn" style="display:none;">Hủy</button>
+                    </div>
+                </div>
+
+                <div id="reviewsLoading" class="loading-line" style="padding: 16px 20px;">Đang tải đánh giá...</div>
+                <div id="reviewsList"></div>
+                <div class="empty-state" id="reviewsEmpty" style="display:none; border:none;">
+                    Chưa có đánh giá nào cho khóa học này.
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal: Thông tin chuyển khoản -->
+<div class="modal-overlay hidden" id="paymentModal">
+    <div class="modal" style="max-width: 440px;">
+        <h2>Thông tin chuyển khoản</h2>
+        <p class="sub">Chuyển khoản đúng số tiền và nội dung dưới đây, sau đó chờ quản trị viên xác nhận.</p>
+
+        <div class="bank-info-box">
+            <div class="bank-info-row"><span class="label">Ngân hàng</span><span class="value" id="pmBankName">—</span></div>
+            <div class="bank-info-row"><span class="label">Số tài khoản</span><span class="value mono" id="pmAccountNumber">—</span></div>
+            <div class="bank-info-row"><span class="label">Chủ tài khoản</span><span class="value" id="pmAccountHolder">—</span></div>
+            <div class="bank-info-row"><span class="label">Số tiền</span><span class="value" id="pmAmount">—</span></div>
+        </div>
+
+        <div class="transfer-note-highlight">
+            Nội dung chuyển khoản (bắt buộc ghi đúng):<br>
+            <strong id="pmNote">—</strong>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="primary width-auto" id="closePaymentModalBtn">Đã hiểu</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Xem nội dung bài học (mọi role) -->
+<div class="modal-overlay hidden" id="viewLessonModal">
+    <div class="modal" style="max-width: 520px;">
+        <h2 id="vlTitle">—</h2>
+        <p class="sub" id="vlMeta">—</p>
+        <div id="vlContentUrlWrap" style="margin-bottom: 14px;">
+            <a id="vlContentUrl" href="#" target="_blank" rel="noopener">Mở tài liệu / video &rarr;</a>
+        </div>
+        <p style="font-size:0.88rem; line-height:1.7; white-space:pre-wrap;" id="vlTextContent"></p>
+        <div class="modal-actions">
+            <button type="button" class="secondary width-auto" id="closeViewLessonBtn">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Thêm / Sửa bài học (TEACHER phụ trách, ADMIN) -->
+<div class="modal-overlay hidden" id="lessonFormModal">
+    <div class="modal">
+        <h2 id="lessonFormTitle">Thêm bài học</h2>
+        <p class="sub">Nhập nội dung bài học.</p>
+
+        <div class="banner-error" id="lessonFormError"></div>
+
+        <form id="lessonForm">
+            <label for="lTitle">Tiêu đề</label>
+            <input type="text" id="lTitle" placeholder="vd: Bài 1: Giới thiệu ngôn ngữ Java">
+
+            <label for="lOrder">Thứ tự (order index)</label>
+            <input type="text" id="lOrder" placeholder="vd: 1">
+
+            <label for="lContentUrl">Link nội dung (video/slide, không bắt buộc)</label>
+            <input type="text" id="lContentUrl" placeholder="https://...">
+
+            <label for="lTextContent">Nội dung văn bản (không bắt buộc)</label>
+            <input type="text" id="lTextContent" placeholder="Tóm tắt nội dung bài học">
+
+            <div class="modal-actions">
+                <button type="button" class="secondary width-auto" id="cancelLessonFormBtn">Hủy</button>
+                <button type="submit" class="primary width-auto" id="lessonFormSubmitBtn">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const courseId = params.get('id');
+
+    let myProfile = null;
+    let canManageLessons = false;
+    let currentLessonId = null;
+    let myEnrollment = null; // null nếu chưa đăng ký (chỉ áp dụng khi role STUDENT)
+    let currentCourse = null;
+    let myPayment = null; // yêu cầu thanh toán gần nhất cho khóa học này (nếu có)
+    let myReview = null;          // đánh giá của chính mình (nếu có)
+    let editingReviewId = null;   // đang sửa đánh giá nào (null = đang tạo mới)
+    let selectedRating = 0;
+    let reviewsLoaded = false;
+
+    if (!courseId) {
+        window.location.href = '/courses.html';
+    }
+
+    function initials(name) {
+        if (!name) return '--';
+        const parts = name.trim().split(/\s+/);
+        return ((parts[0]||'')[0]||'').toUpperCase() + ((parts[parts.length-1]||'')[0]||'').toUpperCase();
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast show ' + type;
+        setTimeout(() => { toast.className = 'toast ' + type; }, 2600);
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str ?? '';
+        return div.innerHTML;
+    }
+
+    function statusBadgeClass(status) {
+        if (status === 'PUBLISHED') return 'success';
+        if (status === 'ARCHIVED') return 'error';
+        return 'warning';
+    }
+
+    async function loadCourseInfo() {
+        const result = await Api.getCourseById(courseId);
+        if (!result.ok) {
+            document.getElementById('loadingLine').textContent = result.body.message || 'Không tải được khóa học';
+            return false;
+        }
+        const c = result.body.data;
+        currentCourse = c;
+
+        document.getElementById('loadingLine').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+
+        document.getElementById('cTitle').textContent = c.title;
+        document.getElementById('cTeacher').textContent = 'Giảng viên: ' + c.teacherName;
+        document.getElementById('cPrice').textContent = formatMoney(c.price);
+        document.getElementById('cDuration').textContent = (c.durationHours ?? '—') + ' giờ';
+        document.getElementById('cStatus').innerHTML = `<span class="badge ${statusBadgeClass(c.status)}">${courseStatusLabel(c.status)}</span>`;
+        document.getElementById('cDescription').textContent = c.description || 'Chưa có mô tả.';
+
+        const isAdmin = myProfile.role === 'ADMIN';
+        const isOwnerTeacher = myProfile.role === 'TEACHER' && myProfile.userId === c.teacherId;
+        canManageLessons = isAdmin || isOwnerTeacher;
+
+        if (canManageLessons) {
+            document.getElementById('openAddLessonBtn').style.display = 'inline-block';
+            document.getElementById('publishHeader').style.display = 'table-cell';
+            document.getElementById('lessonActionsHeader').style.display = 'table-cell';
+        }
+        return true;
+    }
+
+    async function loadEnrollmentStatus() {
+        if (myProfile.role !== 'STUDENT') return;
+
+        const enrollResult = await Api.getMyEnrollments();
+        if (enrollResult.ok) {
+            const found = (enrollResult.body.data || []).find(e => e.courseId === parseInt(courseId, 10));
+            myEnrollment = found || null;
+        }
+
+        // Nếu chưa đăng ký và khóa học có phí, kiểm tra xem đã có yêu cầu thanh toán nào chưa
+        const isPaidCourse = currentCourse && parseFloat(currentCourse.price) > 0;
+        if (!myEnrollment && isPaidCourse) {
+            const payResult = await Api.getMyPayments();
+            if (payResult.ok) {
+                const payments = (payResult.body.data || []).filter(p => p.courseId === parseInt(courseId, 10));
+                // Ưu tiên PENDING, nếu không có thì lấy bản ghi mới nhất (đã REJECTED)
+                myPayment = payments.find(p => p.status === 'PENDING') || payments[0] || null;
+            }
+        } else {
+            myPayment = null;
+        }
+
+        renderEnrollBanner();
+        updateReviewFormVisibility();
+    }
+
+    function openPaymentModal(payment) {
+        document.getElementById('pmAmount').textContent = formatMoney(payment.amount);
+        document.getElementById('pmNote').textContent = payment.transferNote;
+        document.getElementById('paymentModal').classList.remove('hidden');
+
+        Api.getBankInfo().then(res => {
+            if (res.ok) {
+                document.getElementById('pmBankName').textContent = res.body.data.bankName;
+                document.getElementById('pmAccountNumber').textContent = res.body.data.accountNumber;
+                document.getElementById('pmAccountHolder').textContent = res.body.data.accountHolder;
+            }
+        });
+    }
+
+    function renderEnrollBanner() {
+        const banner = document.getElementById('enrollBanner');
+        if (myProfile.role !== 'STUDENT') { banner.style.display = 'none'; return; }
+
+        const isPaidCourse = currentCourse && parseFloat(currentCourse.price) > 0;
+
+        if (myEnrollment) {
+            const pct = parseFloat(myEnrollment.progressPercentage) || 0;
+            const isComplete = pct >= 100;
+            banner.innerHTML = `
+                <div class="banner-info" style="background: var(--color-success-soft); border-color: rgba(18,121,90,0.2); color: var(--color-success); flex-direction:column; align-items:stretch;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span>${isComplete ? 'Bạn đã hoàn thành khóa học này' : 'Bạn đã đăng ký khóa học này'}</span>
+                        <span style="font-weight:600;">${pct.toFixed(0)}%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill ${isComplete ? 'complete' : ''}" style="width:${pct}%;"></div>
+                    </div>
+                </div>`;
+            banner.style.display = 'block';
+            return;
+        }
+
+        if (!isPaidCourse) {
+            // Khóa học miễn phí — đăng ký thẳng như trước
+            banner.innerHTML = `
+                <div class="banner-info">
+                    <span>Bạn chưa đăng ký khóa học này. Đăng ký để xem nội dung bài học và theo dõi tiến độ.</span>
+                    <button class="primary width-auto" id="enrollNowBtn">Đăng ký ngay</button>
+                </div>`;
+            banner.style.display = 'block';
+            document.getElementById('enrollNowBtn').addEventListener('click', async () => {
+                const btn = document.getElementById('enrollNowBtn');
+                btn.disabled = true;
+                btn.textContent = 'Đang đăng ký...';
+                const result = await Api.enroll(courseId);
+                if (result.ok) {
+                    showToast('Đăng ký khóa học thành công');
+                    await loadEnrollmentStatus();
+                    loadLessons();
+                } else {
+                    showToast(result.body.message || 'Đăng ký thất bại', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Đăng ký ngay';
+                }
+            });
+            return;
+        }
+
+        // Khóa học có phí
+        if (myPayment && myPayment.status === 'PENDING') {
+            banner.innerHTML = `
+                <div class="banner-info" style="background: var(--color-warning-soft); border-color: rgba(154,91,18,0.25); color: var(--color-warning-text);">
+                    <span>Yêu cầu thanh toán của bạn đang chờ xác nhận (mã: <strong>${myPayment.transferNote}</strong>).</span>
+                    <div style="display:flex; gap:8px;">
+                        <button class="secondary width-auto" id="viewPaymentInfoBtn">Xem lại thông tin</button>
+                        <button class="secondary width-auto" id="recheckPaymentBtn">Kiểm tra lại</button>
+                    </div>
+                </div>`;
+            banner.style.display = 'block';
+            document.getElementById('viewPaymentInfoBtn').addEventListener('click', () => openPaymentModal(myPayment));
+            document.getElementById('recheckPaymentBtn').addEventListener('click', async () => {
+                showToast('Đang kiểm tra trạng thái...');
+                await loadEnrollmentStatus();
+                if (myEnrollment) { showToast('Đã được xác nhận, chúc bạn học tốt!'); loadLessons(); }
+                else showToast('Chưa có cập nhật, vui lòng chờ quản trị viên xác nhận', 'error');
+            });
+            return;
+        }
+
+        const rejectedNote = myPayment && myPayment.status === 'REJECTED'
+            ? `<div style="font-size:0.8rem; margin-top:2px;">Yêu cầu trước đó đã bị từ chối, bạn có thể thử lại.</div>` : '';
+
+        banner.innerHTML = `
+            <div class="banner-info">
+                <div>
+                    <span>Khóa học có phí <strong>${formatMoney(currentCourse.price)}</strong>. Thanh toán qua chuyển khoản để đăng ký.</span>
+                    ${rejectedNote}
+                </div>
+                <button class="primary width-auto" id="payNowBtn">Thanh toán ngay</button>
+            </div>`;
+        banner.style.display = 'block';
+        document.getElementById('payNowBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('payNowBtn');
+            btn.disabled = true;
+            btn.textContent = 'Đang tạo yêu cầu...';
+            const result = await Api.createPayment(courseId);
+            btn.disabled = false;
+            btn.textContent = 'Thanh toán ngay';
+            if (result.ok) {
+                myPayment = result.body.data;
+                renderEnrollBanner();
+                openPaymentModal(myPayment);
+            } else {
+                showToast(result.body.message || 'Không thể tạo yêu cầu thanh toán', 'error');
+            }
+        });
+    }
+
+    function renderLessonRow(lesson) {
+        const publishCell = canManageLessons ? `
+            <td>
+                <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:0.82rem;">
+                    <input type="checkbox" data-action="toggle-publish" ${lesson.isPublished ? 'checked' : ''}>
+                    ${lesson.isPublished ? 'Đã xuất bản' : 'Bản nháp'}
+                </label>
+            </td>` : '';
+
+        const actionsCell = canManageLessons ? `
+            <td>
+                <div class="row-actions">
+                    <button class="link-btn" data-action="edit">Sửa</button>
+                    <button class="danger-text" data-action="delete">Xóa</button>
+                </div>
+            </td>` : '';
+
+        // Cột tiến độ chỉ hiện với STUDENT đã đăng ký (lesson lúc này có field isCompleted từ enrollment detail)
+        let progressCell = '';
+        if (myProfile.role === 'STUDENT' && myEnrollment) {
+            progressCell = lesson.isCompleted
+                ? `<td><span class="badge success"><span class="dot"></span>Đã hoàn thành</span></td>`
+                : `<td><button class="link-btn" data-action="complete">Đánh dấu hoàn thành</button></td>`;
+        }
+
+        // Nếu STUDENT chưa đăng ký, khóa việc mở nội dung — chỉ cho xem tiêu đề, không click được
+        const isLocked = myProfile.role === 'STUDENT' && !myEnrollment;
+        const titleAttrs = isLocked
+            ? 'style="cursor:pointer;" data-action="preview" title="Bấm để xem trước"'
+            : 'style="cursor:pointer;" data-action="view"';
+        const lockIcon = isLocked ? ' &#128274;' : '';
+
+        return `
+            <tr data-lesson-id="${lesson.lessonId}">
+                <td class="cell-muted">${lesson.orderIndex}</td>
+                <td class="cell-primary" ${titleAttrs}>${escapeHtml(lesson.title)}${lockIcon}</td>
+                ${publishCell}
+                ${progressCell}
+                ${actionsCell}
+            </tr>
+        `;
+    }
+
+    async function loadLessons() {
+        document.getElementById('lessonsLoading').style.display = 'block';
+        document.getElementById('lessonsTable').style.display = 'none';
+        document.getElementById('lessonsEmptyState').style.display = 'none';
+
+        let lessons;
+
+        if (myProfile.role === 'STUDENT' && myEnrollment) {
+            // Đã đăng ký — lấy kèm trạng thái hoàn thành từng bài
+            const result = await Api.getEnrollmentDetail(myEnrollment.enrollmentId);
+            document.getElementById('lessonsLoading').style.display = 'none';
+            if (!result.ok) { showToast(result.body.message || 'Không tải được tiến độ', 'error'); return; }
+            lessons = result.body.data.lessons || [];
+            document.getElementById('progressHeader').style.display = 'table-cell';
+        } else {
+            const result = await Api.getLessonsByCourse(courseId);
+            document.getElementById('lessonsLoading').style.display = 'none';
+            if (!result.ok) { showToast(result.body.message || 'Không tải được danh sách bài học', 'error'); return; }
+            lessons = result.body.data || [];
+            document.getElementById('progressHeader').style.display = 'none';
+        }
+
+        if (lessons.length === 0) {
+            document.getElementById('lessonsEmptyState').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('lessonsBody').innerHTML = lessons.map(renderLessonRow).join('');
+        document.getElementById('lessonsTable').style.display = 'table';
+    }
+
+    // ---- Xem nội dung bài học ----
+    async function openViewLesson(lessonId) {
+        const result = await Api.getLessonById(lessonId);
+        if (!result.ok) { showToast(result.body.message || 'Không tải được bài học', 'error'); return; }
+        const l = result.body.data;
+
+        document.getElementById('vlTitle').textContent = `Bài ${l.orderIndex}: ${l.title}`;
+        document.getElementById('vlMeta').textContent = l.isPublished ? 'Đã xuất bản' : 'Bản nháp';
+
+        const urlWrap = document.getElementById('vlContentUrlWrap');
+        if (l.contentUrl) {
+            document.getElementById('vlContentUrl').href = l.contentUrl;
+            urlWrap.style.display = 'block';
+        } else {
+            urlWrap.style.display = 'none';
+        }
+
+        document.getElementById('vlTextContent').textContent = l.textContent || 'Chưa có nội dung văn bản.';
+        document.getElementById('viewLessonModal').classList.remove('hidden');
+    }
+    document.getElementById('closeViewLessonBtn').addEventListener('click', () => {
+        document.getElementById('viewLessonModal').classList.add('hidden');
+    });
+    document.getElementById('closePaymentModalBtn').addEventListener('click', () => {
+        document.getElementById('paymentModal').classList.add('hidden');
+    });
+
+    // ---- Modal thêm / sửa bài học ----
+    function openAddLessonForm() {
+        currentLessonId = null;
+        document.getElementById('lessonFormTitle').textContent = 'Thêm bài học';
+        document.getElementById('lessonForm').reset();
+        document.getElementById('lessonFormError').classList.remove('show');
+        document.getElementById('lessonFormModal').classList.remove('hidden');
+    }
+
+    async function openEditLessonForm(lessonId) {
+        const result = await Api.getLessonById(lessonId);
+        if (!result.ok) { showToast(result.body.message || 'Không tải được bài học', 'error'); return; }
+        const l = result.body.data;
+
+        currentLessonId = lessonId;
+        document.getElementById('lessonFormTitle').textContent = 'Sửa bài học';
+        document.getElementById('lessonFormError').classList.remove('show');
+        document.getElementById('lTitle').value = l.title;
+        document.getElementById('lOrder').value = l.orderIndex;
+        document.getElementById('lContentUrl').value = l.contentUrl || '';
+        document.getElementById('lTextContent').value = l.textContent || '';
+        document.getElementById('lessonFormModal').classList.remove('hidden');
+    }
+
+    document.getElementById('openAddLessonBtn').addEventListener('click', openAddLessonForm);
+    document.getElementById('cancelLessonFormBtn').addEventListener('click', () => {
+        document.getElementById('lessonFormModal').classList.add('hidden');
+    });
+
+    document.getElementById('lessonForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('lessonFormSubmitBtn');
+        const errorBanner = document.getElementById('lessonFormError');
+        errorBanner.classList.remove('show');
+
+        const payload = {
+            title: document.getElementById('lTitle').value.trim(),
+            orderIndex: parseInt(document.getElementById('lOrder').value, 10),
+            contentUrl: document.getElementById('lContentUrl').value.trim() || null,
+            textContent: document.getElementById('lTextContent').value.trim() || null,
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang lưu...';
+
+        const result = currentLessonId
+            ? await Api.updateLesson(currentLessonId, payload)
+            : await Api.createLesson(courseId, payload);
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Lưu';
+
+        if (result.ok) {
+            document.getElementById('lessonFormModal').classList.add('hidden');
+            showToast(currentLessonId ? 'Cập nhật bài học thành công' : 'Thêm bài học thành công');
+            loadLessons();
+        } else {
+            errorBanner.textContent = result.body.message || 'Thao tác thất bại';
+            errorBanner.classList.add('show');
+        }
+    });
+
+    // ---- Hành động trên từng dòng bài học ----
+    document.getElementById('lessonsBody').addEventListener('click', async (e) => {
+        const cell = e.target.closest('[data-action]');
+        if (!cell) return;
+        const row = cell.closest('tr');
+        const lessonId = row.dataset.lessonId;
+        const action = cell.dataset.action;
+
+        if (action === 'view') {
+            openViewLesson(lessonId);
+        }
+        if (action === 'preview') {
+            openPreviewLesson(lessonId);
+        }
+        if (action === 'edit') {
+            openEditLessonForm(lessonId);
+        }
+        if (action === 'delete') {
+            if (!confirm('Xóa bài học này? Hành động không thể hoàn tác.')) return;
+            const result = await Api.deleteLesson(lessonId);
+            if (result.ok) { showToast('Đã xóa bài học'); loadLessons(); }
+            else { showToast(result.body.message || 'Xóa thất bại', 'error'); }
+        }
+
+        if (action === 'complete') {
+            const result = await Api.completeLesson(myEnrollment.enrollmentId, lessonId);
+            if (result.ok) {
+                showToast('Đã đánh dấu hoàn thành');
+                await loadEnrollmentStatus();
+                loadLessons();
+            } else {
+                showToast(result.body.message || 'Không thể cập nhật', 'error');
+            }
+        }
+    });
+
+    // Checkbox publish nằm trong label, cần bắt sự kiện change riêng
+    document.getElementById('lessonsBody').addEventListener('change', async (e) => {
+        if (e.target.dataset.action !== 'toggle-publish') return;
+        const row = e.target.closest('tr');
+        const lessonId = row.dataset.lessonId;
+        const isPublished = e.target.checked;
+
+        const result = await Api.updateLessonPublish(lessonId, isPublished);
+        if (result.ok) {
+            showToast(isPublished ? 'Đã xuất bản bài học' : 'Đã chuyển về bản nháp');
+            loadLessons();
+        } else {
+            e.target.checked = !isPublished; // hoàn tác nếu lỗi
+            showToast(result.body.message || 'Không thể cập nhật', 'error');
+        }
+    });
+
+    // ---- Xem trước bài học (STUDENT chưa đăng ký) ----
+    async function openPreviewLesson(lessonId) {
+        const result = await Api.getLessonPreview(lessonId);
+        if (!result.ok) { showToast(result.body.message || 'Không tải được bản xem trước', 'error'); return; }
+        const p = result.body.data;
+
+        document.getElementById('vlTitle').textContent = `Bài ${p.orderIndex}: ${p.title}`;
+        document.getElementById('vlMeta').textContent = 'Bản xem trước — đăng ký khóa học để xem đầy đủ nội dung';
+        document.getElementById('vlContentUrlWrap').style.display = 'none';
+
+        let text = p.preview && p.preview.length ? p.preview : 'Bài học này chưa có đoạn xem trước.';
+        if (p.hasVideoOrDocument) text += '\n\nBài học có kèm video/tài liệu, sẽ mở khóa sau khi bạn đăng ký.';
+        document.getElementById('vlTextContent').textContent = text;
+        document.getElementById('viewLessonModal').classList.remove('hidden');
+    }
+
+    // ---- Đánh giá khóa học ----
+    function starsText(n) {
+        return '&#9733;'.repeat(n) + '&#9734;'.repeat(5 - n);
+    }
+
+    function setStars(n) {
+        selectedRating = n;
+        document.querySelectorAll('#starsInput button').forEach(b => {
+            b.classList.toggle('on', parseInt(b.dataset.value, 10) <= n);
+        });
+    }
+
+    function updateReviewFormVisibility() {
+        const wrap = document.getElementById('reviewFormWrap');
+        const hint = document.getElementById('reviewHint');
+        if (!reviewsLoaded || !myProfile) { wrap.style.display = 'none'; hint.style.display = 'none'; return; }
+
+        const isStudent = myProfile.role === 'STUDENT';
+        const canCreate = isStudent && myEnrollment && !myReview;
+        const editing = editingReviewId !== null;
+
+        wrap.style.display = (canCreate || editing) ? 'block' : 'none';
+        hint.style.display = (isStudent && !myEnrollment) ? 'block' : 'none';
+        document.getElementById('reviewCancelBtn').style.display = editing ? 'inline-block' : 'none';
+        document.getElementById('reviewSubmitBtn').textContent = editing ? 'Lưu thay đổi' : 'Gửi đánh giá';
+    }
+
+    function resetReviewForm() {
+        editingReviewId = null;
+        setStars(0);
+        document.getElementById('reviewComment').value = '';
+        document.getElementById('reviewError').classList.remove('show');
+        updateReviewFormVisibility();
+    }
+
+    function renderReview(r) {
+        const canModify = myProfile.role === 'ADMIN' || r.studentId === myProfile.userId;
+        const isMine = r.studentId === myProfile.userId;
+        return `
+            <div class="review-item" data-review-id="${r.reviewId}" data-rating="${r.rating}">
+                <div class="head">
+                    <span class="stars">${starsText(r.rating)}</span>
+                    <span class="who">${escapeHtml(r.studentName)}${isMine ? ' (bạn)' : ''}</span>
+                    <span class="when">${new Date(r.createdAt).toLocaleDateString('vi-VN')}</span>
+                </div>
+                ${r.comment ? `<div class="body" data-comment>${escapeHtml(r.comment)}</div>` : ''}
+                ${canModify ? `
+                <div class="item-actions">
+                    <button class="link-btn" data-action="edit-review">Sửa</button>
+                    <button class="danger-text" data-action="delete-review">Xóa</button>
+                </div>` : ''}
+            </div>`;
+    }
+
+    async function loadReviews() {
+        document.getElementById('reviewsLoading').style.display = 'block';
+        const result = await Api.getReviews(courseId);
+        document.getElementById('reviewsLoading').style.display = 'none';
+
+        if (!result.ok) { showToast(result.body.message || 'Không tải được đánh giá', 'error'); return; }
+
+        const reviews = result.body.data || [];
+        myReview = reviews.find(r => r.studentId === myProfile.userId) || null;
+        reviewsLoaded = true;
+
+        // Điểm trung bình
+        const summary = document.getElementById('ratingSummary');
+        if (reviews.length > 0) {
+            const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+            summary.innerHTML = `<span class="stars">&#9733;</span><strong>${avg.toFixed(1)}</strong><span>(${reviews.length} đánh giá)</span>`;
+        } else {
+            summary.innerHTML = '';
+        }
+
+        document.getElementById('reviewsList').innerHTML = reviews.map(renderReview).join('');
+        document.getElementById('reviewsEmpty').style.display = reviews.length === 0 ? 'block' : 'none';
+        updateReviewFormVisibility();
+    }
+
+    document.getElementById('starsInput').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-value]');
+        if (btn) setStars(parseInt(btn.dataset.value, 10));
+    });
+
+    document.getElementById('reviewCancelBtn').addEventListener('click', resetReviewForm);
+
+    document.getElementById('reviewSubmitBtn').addEventListener('click', async () => {
+        const errorBanner = document.getElementById('reviewError');
+        errorBanner.classList.remove('show');
+
+        if (selectedRating < 1) {
+            errorBanner.textContent = 'Vui lòng chọn số sao';
+            errorBanner.classList.add('show');
+            return;
+        }
+
+        const btn = document.getElementById('reviewSubmitBtn');
+        const comment = document.getElementById('reviewComment').value.trim() || null;
+        const wasEditing = editingReviewId !== null;
+
+        btn.disabled = true;
+        const result = wasEditing
+            ? await Api.updateReview(editingReviewId, selectedRating, comment)
+            : await Api.createReview(courseId, selectedRating, comment);
+        btn.disabled = false;
+
+        if (result.ok) {
+            showToast(wasEditing ? 'Đã cập nhật đánh giá' : 'Cảm ơn bạn đã đánh giá');
+            resetReviewForm();
+            loadReviews();
+        } else {
+            errorBanner.textContent = result.body.message || 'Không thể gửi đánh giá';
+            errorBanner.classList.add('show');
+        }
+    });
+
+    document.getElementById('reviewsList').addEventListener('click', async (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const item = btn.closest('.review-item');
+        const reviewId = item.dataset.reviewId;
+
+        if (btn.dataset.action === 'edit-review') {
+            editingReviewId = parseInt(reviewId, 10);
+            setStars(parseInt(item.dataset.rating, 10));
+            const commentEl = item.querySelector('[data-comment]');
+            document.getElementById('reviewComment').value = commentEl ? commentEl.textContent : '';
+            updateReviewFormVisibility();
+            document.getElementById('reviewFormWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        if (btn.dataset.action === 'delete-review') {
+            if (!confirm('Xóa đánh giá này?')) return;
+            const result = await Api.deleteReview(reviewId);
+            if (result.ok) {
+                showToast('Đã xóa đánh giá');
+                if (editingReviewId === parseInt(reviewId, 10)) resetReviewForm();
+                loadReviews();
+            } else {
+                showToast(result.body.message || 'Xóa thất bại', 'error');
+            }
+        }
+    });
+
+    // ---- Khởi tạo trang ----
+    (async () => {
+        const profile = await requireAuth();
+        if (!profile) return;
+        myProfile = profile;
+
+        document.getElementById('avatarInitials').textContent = initials(profile.fullName);
+        document.getElementById('sideUserName').textContent = profile.fullName;
+        document.getElementById('sideUserRole').textContent = roleLabel(profile.role);
+        if (profile.role === 'ADMIN') {
+            document.getElementById('usersNavItem').style.display = 'flex';
+        }
+        if (profile.role === 'STUDENT') {
+            document.getElementById('myCoursesNavItem').style.display = 'flex';
+        }
+
+        const ok = await loadCourseInfo();
+        if (ok) {
+            await loadEnrollmentStatus();
+            loadLessons();
+            loadReviews();
+        }
+    })();
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await Api.logout();
+        window.location.href = '/login.html';
+    });
+</script>
+</body>
+</html>

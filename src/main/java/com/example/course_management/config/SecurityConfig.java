@@ -32,8 +32,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // tạm tắt để test API bằng Postman, sau có thể bật lại
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login" ,
-                                "/api/auth/login",
+                        .requestMatchers("/api/auth/login",
                                 "/login.html",
                                 "/dashboard.html",
                                 "/css/**",

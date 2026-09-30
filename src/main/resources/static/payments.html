@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Thanh toán — Course Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="mark">CM</div>
+            <span>Course Management</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard.html" class="item">
+                <span class="icon">&#9632;</span> Tổng quan
+            </a>
+            <a href="/courses.html" class="item">
+                <span class="icon">&#128218;</span> Khóa học
+            </a>
+            <a href="/my-courses.html" class="item" id="myCoursesNavItem" style="display:none;">
+                <span class="icon">&#127891;</span> Khóa học của tôi
+            </a>
+            <a href="/users.html" class="item" id="usersNavItem" style="display:none;">
+                <span class="icon">&#128101;</span> Người dùng
+            </a>
+            <a href="/notifications.html" class="item" id="notifNavItem">
+                <span class="icon">&#128276;</span> Thông báo <span class="nav-badge" id="notifBadge" style="display:none;"></span>
+            </a>
+            <a href="/reports.html" class="item" id="reportsNavItem" style="display:none;">
+                <span class="icon">&#128200;</span> Báo cáo
+            </a>
+            <a href="/payments.html" class="item active" id="paymentsNavItem" style="display:none;">
+                <span class="icon">&#128179;</span> Thanh toán
+            </a>
+            <a href="/my-payments.html" class="item" id="myPaymentsNavItem" style="display:none;">
+                <span class="icon">&#128179;</span> Thanh toán của tôi
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/profile.html" class="sidebar-user" style="text-decoration:none; cursor:pointer;">
+                <div class="avatar" id="avatarInitials">--</div>
+                <div class="meta">
+                    <div class="name" id="sideUserName">Đang tải...</div>
+                    <div class="role" id="sideUserRole">—</div>
+                </div>
+            </a>
+            <button class="sidebar-logout" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="page-header">
+            <h1>Thanh toán</h1>
+            <p>Đối chiếu sao kê ngân hàng và xác nhận các yêu cầu chuyển khoản của sinh viên.</p>
+        </div>
+
+        <div class="toolbar">
+            <div class="toolbar-filters">
+                <select id="filterStatus">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="PENDING" selected>Đang chờ xác nhận</option>
+                    <option value="CONFIRMED">Đã xác nhận</option>
+                    <option value="REJECTED">Đã từ chối</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div id="loadingLine" class="loading-line" style="padding: 20px;">Đang tải danh sách...</div>
+            <div class="table-wrap">
+                <table class="data-table" id="paymentsTable" style="display:none;">
+                    <thead>
+                    <tr>
+                        <th>Mã GD</th>
+                        <th>Sinh viên</th>
+                        <th>Khóa học</th>
+                        <th>Số tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thời gian</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody id="paymentsBody"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="emptyState" style="display:none; border:none;">
+                Không có yêu cầu thanh toán nào khớp bộ lọc hiện tại.
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+    function initials(name) {
+        if (!name) return '--';
+        const parts = name.trim().split(/\s+/);
+        return ((parts[0]||'')[0]||'').toUpperCase() + ((parts[parts.length-1]||'')[0]||'').toUpperCase();
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast show ' + type;
+        setTimeout(() => { toast.className = 'toast ' + type; }, 2600);
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str ?? '';
+        return div.innerHTML;
+    }
+
+    function statusLabel(status) {
+        if (status === 'CONFIRMED') return 'Đã xác nhận';
+        if (status === 'REJECTED') return 'Đã từ chối';
+        return 'Đang chờ';
+    }
+    function statusBadgeClass(status) {
+        if (status === 'CONFIRMED') return 'success';
+        if (status === 'REJECTED') return 'error';
+        return 'warning';
+    }
+
+    function renderRow(p) {
+        const actions = p.status === 'PENDING' ? `
+            <div class="row-actions">
+                <button class="link-btn" data-action="confirm">Xác nhận</button>
+                <button class="danger-text" data-action="reject">Từ chối</button>
+            </div>` : '<span class="cell-muted">—</span>';
+
+        return `
+            <tr data-payment-id="${p.paymentId}">
+                <td class="cell-muted" style="font-family: ui-monospace, monospace;">${escapeHtml(p.transferNote || '—')}</td>
+                <td class="cell-primary">${escapeHtml(p.studentName)}</td>
+                <td class="cell-muted">${escapeHtml(p.courseTitle)}</td>
+                <td class="cell-primary">${formatMoney(p.amount)}</td>
+                <td><span class="badge ${statusBadgeClass(p.status)}">${statusLabel(p.status)}</span></td>
+                <td class="cell-muted">${new Date(p.createdAt).toLocaleString('vi-VN')}</td>
+                <td>${actions}</td>
+            </tr>
+        `;
+    }
+
+    async function loadPayments() {
+        document.getElementById('loadingLine').style.display = 'block';
+        document.getElementById('paymentsTable').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'none';
+
+        const status = document.getElementById('filterStatus').value;
+        const result = await Api.getAllPayments(status);
+        document.getElementById('loadingLine').style.display = 'none';
+
+        if (!result.ok) { showToast(result.body.message || 'Không tải được danh sách', 'error'); return; }
+
+        const rows = result.body.data || [];
+        if (rows.length === 0) { document.getElementById('emptyState').style.display = 'block'; return; }
+
+        document.getElementById('paymentsBody').innerHTML = rows.map(renderRow).join('');
+        document.getElementById('paymentsTable').style.display = 'table';
+    }
+    document.getElementById('filterStatus').addEventListener('change', loadPayments);
+
+    document.getElementById('paymentsBody').addEventListener('click', async (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const row = btn.closest('tr');
+        const paymentId = row.dataset.paymentId;
+        const action = btn.dataset.action;
+
+        if (action === 'confirm') {
+            if (!confirm('Xác nhận đã nhận được khoản chuyển khoản này? Hệ thống sẽ tự động kích hoạt khóa học cho sinh viên.')) return;
+            const result = await Api.confirmPayment(paymentId);
+            if (result.ok) { showToast('Đã xác nhận thanh toán'); loadPayments(); }
+            else showToast(result.body.message || 'Xác nhận thất bại', 'error');
+        }
+
+        if (action === 'reject') {
+            if (!confirm('Từ chối yêu cầu thanh toán này?')) return;
+            const result = await Api.rejectPayment(paymentId);
+            if (result.ok) { showToast('Đã từ chối yêu cầu'); loadPayments(); }
+            else showToast(result.body.message || 'Thao tác thất bại', 'error');
+        }
+    });
+
+    (async () => {
+        const profile = await requireAuth();
+        if (!profile) return;
+
+        if (profile.role !== 'ADMIN') {
+            window.location.href = '/dashboard.html';
+            return;
+        }
+
+        document.getElementById('avatarInitials').textContent = initials(profile.fullName);
+        document.getElementById('sideUserName').textContent = profile.fullName;
+        document.getElementById('sideUserRole').textContent = roleLabel(profile.role);
+
+        loadPayments();
+    })();
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await Api.logout();
+        window.location.href = '/login.html';
+    });
+</script>
+</body>
+</html>

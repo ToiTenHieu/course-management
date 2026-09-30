@@ -13,6 +13,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByUsername(String username);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
-    @Query("SELECT u FROM User u WHERE (:role IS NULL OR u.role = :role) AND (:isActive IS NULL OR u.isActive = :isActive)")
+    @Query("SELECT u FROM User u WHERE (:role IS NULL OR u.role = :role) AND (:isActive IS NULL OR u.isActive = :isActive) ORDER BY u.fullName ASC")
     List<User> search(@Param("role") Role role, @Param("isActive") Boolean isActive);
 }

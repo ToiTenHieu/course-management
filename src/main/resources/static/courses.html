@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Khóa học — Course Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="mark">CM</div>
+            <span>Course Management</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard.html" class="item">
+                <span class="icon">&#9632;</span> Tổng quan
+            </a>
+            <a href="/courses.html" class="item active">
+                <span class="icon">&#128218;</span> Khóa học
+            </a>
+            <a href="/my-courses.html" class="item" id="myCoursesNavItem" style="display:none;">
+                <span class="icon">&#127891;</span> Khóa học của tôi
+            </a>
+            <a href="/users.html" class="item" id="usersNavItem" style="display:none;">
+                <span class="icon">&#128101;</span> Người dùng
+            </a>
+            <a href="/notifications.html" class="item" id="notifNavItem">
+                <span class="icon">&#128276;</span> Thông báo <span class="nav-badge" id="notifBadge" style="display:none;"></span>
+            </a>
+            <a href="/reports.html" class="item" id="reportsNavItem" style="display:none;">
+                <span class="icon">&#128200;</span> Báo cáo
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/profile.html" class="sidebar-user" style="text-decoration:none; cursor:pointer;">
+                <div class="avatar" id="avatarInitials">--</div>
+                <div class="meta">
+                    <div class="name" id="sideUserName">Đang tải...</div>
+                    <div class="role" id="sideUserRole">—</div>
+                </div>
+            </a>
+            <button class="sidebar-logout" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="page-header">
+            <h1>Khóa học</h1>
+            <p id="pageSub">Danh sách khóa học trong hệ thống.</p>
+        </div>
+
+        <div class="toolbar">
+            <div class="toolbar-filters">
+                <input type="text" id="searchInput" placeholder="Tìm theo tiêu đề, mô tả..."
+                       style="padding:7px 10px; border:1px solid var(--color-border); border-radius:var(--radius-sm); font-size:0.83rem; font-family:inherit; width:220px;">
+                <select id="filterTeacher" style="display:none;">
+                    <option value="">Tất cả giảng viên</option>
+                </select>
+                <select id="filterStatus" style="display:none;">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="DRAFT">Bản nháp</option>
+                    <option value="PUBLISHED">Đã xuất bản</option>
+                    <option value="ARCHIVED">Đã lưu trữ</option>
+                </select>
+            </div>
+            <button class="primary width-auto" id="openCreateBtn" style="display:none;">+ Thêm khóa học</button>
+        </div>
+
+        <div class="panel">
+            <div id="loadingLine" class="loading-line" style="padding: 20px;">Đang tải danh sách...</div>
+            <div class="table-wrap">
+                <table class="data-table" id="coursesTable" style="display:none;">
+                    <thead>
+                    <tr>
+                        <th>Tiêu đề</th>
+                        <th>Giảng viên</th>
+                        <th>Giá</th>
+                        <th>Thời lượng</th>
+                        <th>Trạng thái</th>
+                        <th id="actionsHeader" style="display:none;">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody id="coursesBody"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="emptyState" style="display:none; border:none;">
+                Không có khóa học nào khớp bộ lọc hiện tại.
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal: Thêm / Sửa khóa học (ADMIN) -->
+<div class="modal-overlay hidden" id="formModal">
+    <div class="modal">
+        <h2 id="formTitle">Thêm khóa học</h2>
+        <p class="sub">Nhập thông tin khóa học.</p>
+
+        <div class="banner-error" id="formError"></div>
+
+        <form id="courseForm">
+            <label for="fTitle">Tiêu đề</label>
+            <input type="text" id="fTitle" placeholder="vd: Lập trình Java cơ bản">
+
+            <label for="fDescription">Mô tả</label>
+            <input type="text" id="fDescription" placeholder="Mô tả ngắn về khóa học">
+
+            <label for="fTeacher">Giảng viên phụ trách</label>
+            <select id="fTeacher"></select>
+
+            <label for="fPrice">Giá (VNĐ)</label>
+            <input type="text" id="fPrice" placeholder="vd: 500000">
+
+            <label for="fDuration">Thời lượng (giờ)</label>
+            <input type="text" id="fDuration" placeholder="vd: 20">
+
+            <div class="modal-actions">
+                <button type="button" class="secondary width-auto" id="cancelFormBtn">Hủy</button>
+                <button type="submit" class="primary width-auto" id="formSubmitBtn">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Đổi trạng thái -->
+<div class="modal-overlay hidden" id="statusModal">
+    <div class="modal">
+        <h2>Đổi trạng thái</h2>
+        <p class="sub">Chọn trạng thái mới cho khóa học.</p>
+        <select id="sNewStatus">
+            <option value="DRAFT">Bản nháp</option>
+            <option value="PUBLISHED">Đã xuất bản</option>
+            <option value="ARCHIVED">Đã lưu trữ</option>
+        </select>
+        <div class="modal-actions">
+            <button type="button" class="secondary width-auto" id="cancelStatusBtn">Hủy</button>
+            <button type="button" class="primary width-auto" id="confirmStatusBtn">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+    let myProfile = null;
+    let isAdmin = false;
+    let currentCourseId = null;
+    let teacherList = [];
+
+    function initials(name) {
+        if (!name) return '--';
+        const parts = name.trim().split(/\s+/);
+        return ((parts[0]||'')[0]||'').toUpperCase() + ((parts[parts.length-1]||'')[0]||'').toUpperCase();
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast show ' + type;
+        setTimeout(() => { toast.className = 'toast ' + type; }, 2600);
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str ?? '';
+        return div.innerHTML;
+    }
+
+    function statusBadgeClass(status) {
+        if (status === 'PUBLISHED') return 'success';
+        if (status === 'ARCHIVED') return 'error';
+        return 'warning'; // DRAFT
+    }
+
+    function renderRow(course) {
+        const actionsCell = isAdmin ? `
+            <td>
+                <div class="row-actions">
+                    <button class="link-btn" data-action="edit">Sửa</button>
+                    <button class="link-btn" data-action="status">Trạng thái</button>
+                    <button class="danger-text" data-action="delete">Xóa</button>
+                </div>
+            </td>` : '';
+
+        return `
+            <tr data-course-id="${course.courseId}">
+                <td class="cell-primary" style="cursor:pointer;" data-action="view">${escapeHtml(course.title)}</td>
+                <td class="cell-muted">${escapeHtml(course.teacherName)}</td>
+                <td class="cell-muted">${formatMoney(course.price)}</td>
+                <td class="cell-muted">${course.durationHours ?? '—'} giờ</td>
+                <td><span class="badge ${statusBadgeClass(course.status)}">${courseStatusLabel(course.status)}</span></td>
+                ${actionsCell}
+            </tr>
+        `;
+    }
+
+    async function loadCourses() {
+        document.getElementById('loadingLine').style.display = 'block';
+        document.getElementById('coursesTable').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'none';
+
+        const search = document.getElementById('searchInput').value.trim();
+        const teacherId = document.getElementById('filterTeacher').value;
+        const status = document.getElementById('filterStatus').value;
+
+        const result = await Api.getCourses(search, teacherId, status);
+        document.getElementById('loadingLine').style.display = 'none';
+
+        if (!result.ok) {
+            showToast(result.body.message || 'Không tải được danh sách', 'error');
+            return;
+        }
+
+        const courses = result.body.data || [];
+        if (courses.length === 0) {
+            document.getElementById('emptyState').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('coursesBody').innerHTML = courses.map(renderRow).join('');
+        document.getElementById('coursesTable').style.display = 'table';
+    }
+
+    let searchDebounce;
+    document.getElementById('searchInput').addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(loadCourses, 400);
+    });
+    document.getElementById('filterTeacher').addEventListener('change', loadCourses);
+    document.getElementById('filterStatus').addEventListener('change', loadCourses);
+
+    // ---- Table row actions ----
+    document.getElementById('coursesBody').addEventListener('click', async (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const row = btn.closest('tr');
+        const courseId = row.dataset.courseId;
+        const action = btn.dataset.action;
+
+        if (action === 'view') {
+            window.location.href = `/course-detail.html?id=${courseId}`;
+            return;
+        }
+
+        if (action === 'edit') {
+            const result = await Api.getCourseById(courseId);
+            if (!result.ok) { showToast(result.body.message || 'Không tải được dữ liệu', 'error'); return; }
+            openEditForm(result.body.data);
+        }
+
+        if (action === 'status') {
+            currentCourseId = courseId;
+            document.getElementById('statusModal').classList.remove('hidden');
+        }
+
+        if (action === 'delete') {
+            if (!confirm('Xóa khóa học này? Hành động không thể hoàn tác.')) return;
+            const result = await Api.deleteCourse(courseId);
+            if (result.ok) { showToast('Đã xóa khóa học'); loadCourses(); }
+            else { showToast(result.body.message || 'Xóa thất bại', 'error'); }
+        }
+    });
+
+    // ---- Modal: đổi trạng thái ----
+    document.getElementById('cancelStatusBtn').addEventListener('click', () => {
+        document.getElementById('statusModal').classList.add('hidden');
+    });
+    document.getElementById('confirmStatusBtn').addEventListener('click', async () => {
+        const newStatus = document.getElementById('sNewStatus').value;
+        const result = await Api.updateCourseStatus(currentCourseId, newStatus);
+        document.getElementById('statusModal').classList.add('hidden');
+        if (result.ok) { showToast('Cập nhật trạng thái thành công'); loadCourses(); }
+        else { showToast(result.body.message || 'Không thể cập nhật', 'error'); }
+    });
+
+    // ---- Modal: thêm / sửa ----
+    function openCreateForm() {
+        currentCourseId = null;
+        document.getElementById('formTitle').textContent = 'Thêm khóa học';
+        document.getElementById('courseForm').reset();
+        document.getElementById('formError').classList.remove('show');
+        document.getElementById('formModal').classList.remove('hidden');
+    }
+
+    function openEditForm(course) {
+        currentCourseId = course.courseId;
+        document.getElementById('formTitle').textContent = 'Sửa khóa học';
+        document.getElementById('formError').classList.remove('show');
+        document.getElementById('fTitle').value = course.title;
+        document.getElementById('fDescription').value = course.description || '';
+        document.getElementById('fTeacher').value = course.teacherId;
+        document.getElementById('fPrice').value = course.price ?? '';
+        document.getElementById('fDuration').value = course.durationHours ?? '';
+        document.getElementById('formModal').classList.remove('hidden');
+    }
+
+    document.getElementById('openCreateBtn').addEventListener('click', openCreateForm);
+    document.getElementById('cancelFormBtn').addEventListener('click', () => {
+        document.getElementById('formModal').classList.add('hidden');
+    });
+
+    document.getElementById('courseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('formSubmitBtn');
+        const errorBanner = document.getElementById('formError');
+        errorBanner.classList.remove('show');
+
+        const payload = {
+            title: document.getElementById('fTitle').value.trim(),
+            description: document.getElementById('fDescription').value.trim(),
+            teacherId: parseInt(document.getElementById('fTeacher').value, 10),
+            price: parseFloat(document.getElementById('fPrice').value) || 0,
+            durationHours: parseInt(document.getElementById('fDuration').value, 10) || null,
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang lưu...';
+
+        const result = currentCourseId
+            ? await Api.updateCourse(currentCourseId, payload)
+            : await Api.createCourse(payload);
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Lưu';
+
+        if (result.ok) {
+            document.getElementById('formModal').classList.add('hidden');
+            showToast(currentCourseId ? 'Cập nhật khóa học thành công' : 'Tạo khóa học thành công');
+            loadCourses();
+        } else {
+            errorBanner.textContent = result.body.message || 'Thao tác thất bại';
+            errorBanner.classList.add('show');
+        }
+    });
+
+    // ---- Khởi tạo trang ----
+    (async () => {
+        const profile = await requireAuth();
+        if (!profile) return;
+        myProfile = profile;
+        isAdmin = profile.role === 'ADMIN';
+
+        document.getElementById('avatarInitials').textContent = initials(profile.fullName);
+        document.getElementById('sideUserName').textContent = profile.fullName;
+        document.getElementById('sideUserRole').textContent = roleLabel(profile.role);
+
+        if (isAdmin) {
+            document.getElementById('usersNavItem').style.display = 'flex';
+            document.getElementById('openCreateBtn').style.display = 'inline-block';
+            document.getElementById('filterTeacher').style.display = 'inline-block';
+            document.getElementById('filterStatus').style.display = 'inline-block';
+            document.getElementById('actionsHeader').style.display = 'table-cell';
+            document.getElementById('pageSub').textContent = 'Quản lý toàn bộ khóa học trong hệ thống.';
+
+            // Nạp danh sách giảng viên cho dropdown lọc + form tạo/sửa
+            const teacherResult = await Api.getUsers('TEACHER', 'active');
+            if (teacherResult.ok) {
+                teacherList = teacherResult.body.data || [];
+                const filterOptions = teacherList.map(t => `<option value="${t.userId}">${escapeHtml(t.fullName)}</option>`).join('');
+                document.getElementById('filterTeacher').insertAdjacentHTML('beforeend', filterOptions);
+                document.getElementById('fTeacher').innerHTML = filterOptions;
+            }
+        } else {
+            document.getElementById('pageSub').textContent = 'Danh sách khóa học đã xuất bản.';
+        }
+        if (profile.role === 'STUDENT') {
+            document.getElementById('myCoursesNavItem').style.display = 'flex';
+        }
+
+        loadCourses();
+    })();
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await Api.logout();
+        window.location.href = '/login.html';
+    });
+</script>
+</body>
+</html>

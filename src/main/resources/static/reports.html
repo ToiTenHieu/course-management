@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Báo cáo — Course Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="mark">CM</div>
+            <span>Course Management</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard.html" class="item">
+                <span class="icon">&#9632;</span> Tổng quan
+            </a>
+            <a href="/courses.html" class="item">
+                <span class="icon">&#128218;</span> Khóa học
+            </a>
+            <a href="/my-courses.html" class="item" id="myCoursesNavItem" style="display:none;">
+                <span class="icon">&#127891;</span> Khóa học của tôi
+            </a>
+            <a href="/users.html" class="item" id="usersNavItem" style="display:none;">
+                <span class="icon">&#128101;</span> Người dùng
+            </a>
+            <a href="/notifications.html" class="item" id="notifNavItem">
+                <span class="icon">&#128276;</span> Thông báo <span class="nav-badge" id="notifBadge" style="display:none;"></span>
+            </a>
+            <a href="/reports.html" class="item active" id="reportsNavItem" style="display:none;">
+                <span class="icon">&#128200;</span> Báo cáo
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/profile.html" class="sidebar-user" style="text-decoration:none; cursor:pointer;">
+                <div class="avatar" id="avatarInitials">--</div>
+                <div class="meta">
+                    <div class="name" id="sideUserName">Đang tải...</div>
+                    <div class="role" id="sideUserRole">—</div>
+                </div>
+            </a>
+            <button class="sidebar-logout" id="logoutBtn">Đăng xuất</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="page-header">
+            <h1>Báo cáo</h1>
+            <p>Thống kê tổng hợp về khóa học, sinh viên và giảng viên.</p>
+        </div>
+
+        <!-- 1. Top khóa học -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Khóa học phổ biến nhất</h2>
+                <select id="topLimit" style="padding:6px 10px; border:1px solid var(--color-border); border-radius:4px; font-family:inherit; font-size:0.83rem;">
+                    <option value="5">Top 5</option>
+                    <option value="10">Top 10</option>
+                </select>
+            </div>
+            <div id="topLoading" class="loading-line" style="padding: 16px 20px;">Đang tải...</div>
+            <div id="topBars" style="padding: 8px 0;"></div>
+            <div class="empty-state" id="topEmpty" style="display:none; border:none;">Chưa có lượt đăng ký nào để thống kê.</div>
+        </div>
+
+        <!-- 2. Tiến độ sinh viên -->
+        <div class="panel">
+            <div class="panel-header"><h2>Tiến độ học của sinh viên</h2></div>
+            <div class="panel-toolbar">
+                <select id="studentSelect"><option value="">Chọn sinh viên...</option></select>
+            </div>
+            <div id="studentResult">
+                <div class="empty-state" style="border:none;">Chọn một sinh viên để xem thống kê.</div>
+            </div>
+        </div>
+
+        <!-- 3. Tổng quan giảng viên -->
+        <div class="panel">
+            <div class="panel-header"><h2>Tổng quan giảng viên</h2></div>
+            <div class="panel-toolbar">
+                <select id="teacherSelect"><option value="">Chọn giảng viên...</option></select>
+            </div>
+            <div id="teacherResult">
+                <div class="empty-state" style="border:none;">Chọn một giảng viên để xem thống kê.</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+    function initials(name) {
+        if (!name) return '--';
+        const parts = name.trim().split(/\s+/);
+        return ((parts[0]||'')[0]||'').toUpperCase() + ((parts[parts.length-1]||'')[0]||'').toUpperCase();
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast show ' + type;
+        setTimeout(() => { toast.className = 'toast ' + type; }, 2600);
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str ?? '';
+        return div.innerHTML;
+    }
+
+    function statusBadgeClass(status) {
+        if (status === 'PUBLISHED') return 'success';
+        if (status === 'ARCHIVED') return 'error';
+        return 'warning';
+    }
+
+    function enrollStatusLabel(status) {
+        if (status === 'COMPLETED') return 'Đã hoàn thành';
+        if (status === 'DROPPED') return 'Đã hủy';
+        return 'Đang học';
+    }
+
+    function statCard(num, label) {
+        return `<div class="stat-card"><div class="num">${num}</div><div class="lbl">${label}</div></div>`;
+    }
+
+    // ---- 1. Top khóa học ----
+    async function loadTopCourses() {
+        document.getElementById('topLoading').style.display = 'block';
+        document.getElementById('topBars').innerHTML = '';
+        document.getElementById('topEmpty').style.display = 'none';
+
+        const limit = document.getElementById('topLimit').value;
+        const result = await Api.getTopCourses(limit);
+        document.getElementById('topLoading').style.display = 'none';
+
+        if (!result.ok) { showToast(result.body.message || 'Không tải được báo cáo', 'error'); return; }
+
+        const rows = result.body.data || [];
+        if (rows.length === 0) { document.getElementById('topEmpty').style.display = 'block'; return; }
+
+        const max = Math.max(...rows.map(r => r.enrollmentCount), 1);
+        document.getElementById('topBars').innerHTML = rows.map(r => `
+            <div class="bar-row">
+                <div class="name" title="${escapeHtml(r.title)}">${escapeHtml(r.title)}</div>
+                <div class="track"><div class="fill" style="width:${(r.enrollmentCount / max) * 100}%;"></div></div>
+                <div class="count">${r.enrollmentCount}</div>
+            </div>
+        `).join('');
+    }
+    document.getElementById('topLimit').addEventListener('change', loadTopCourses);
+
+    // ---- 2. Tiến độ sinh viên ----
+    document.getElementById('studentSelect').addEventListener('change', async (e) => {
+        const box = document.getElementById('studentResult');
+        if (!e.target.value) {
+            box.innerHTML = '<div class="empty-state" style="border:none;">Chọn một sinh viên để xem thống kê.</div>';
+            return;
+        }
+        box.innerHTML = '<div class="loading-line" style="padding:16px 20px;">Đang tải...</div>';
+
+        const result = await Api.getStudentProgress(e.target.value);
+        if (!result.ok) {
+            box.innerHTML = '';
+            showToast(result.body.message || 'Không tải được báo cáo', 'error');
+            return;
+        }
+        const r = result.body.data;
+
+        const rows = (r.courses || []).map(c => {
+            const pct = parseFloat(c.progressPercentage) || 0;
+            return `
+                <tr>
+                    <td class="cell-primary">${escapeHtml(c.courseTitle)}</td>
+                    <td><span class="badge ${c.status === 'COMPLETED' ? 'success' : c.status === 'DROPPED' ? 'error' : 'accent'}">${enrollStatusLabel(c.status)}</span></td>
+                    <td style="min-width:160px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div class="progress-track" style="flex:1;"><div class="progress-fill ${pct >= 100 ? 'complete' : ''}" style="width:${pct}%;"></div></div>
+                            <span class="cell-muted" style="font-size:0.8rem; min-width:34px; text-align:right;">${pct.toFixed(0)}%</span>
+                        </div>
+                    </td>
+                </tr>`;
+        }).join('');
+
+        box.innerHTML = `
+            <div class="stat-grid">
+                ${statCard(r.totalEnrollments, 'Khóa học đã đăng ký')}
+                ${statCard(r.completedCount, 'Đã hoàn thành')}
+                ${statCard((r.averageProgress ?? 0).toFixed(1) + '%', 'Tiến độ trung bình')}
+            </div>
+            ${rows ? `
+            <div class="table-wrap" style="margin-top:12px;">
+                <table class="data-table">
+                    <thead><tr><th>Khóa học</th><th>Trạng thái</th><th>Tiến độ</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>` : '<div class="empty-state" style="border:none;">Sinh viên này chưa đăng ký khóa học nào.</div>'}
+        `;
+    });
+
+    // ---- 3. Tổng quan giảng viên ----
+    document.getElementById('teacherSelect').addEventListener('change', async (e) => {
+        const box = document.getElementById('teacherResult');
+        if (!e.target.value) {
+            box.innerHTML = '<div class="empty-state" style="border:none;">Chọn một giảng viên để xem thống kê.</div>';
+            return;
+        }
+        box.innerHTML = '<div class="loading-line" style="padding:16px 20px;">Đang tải...</div>';
+
+        const result = await Api.getTeacherOverview(e.target.value);
+        if (!result.ok) {
+            box.innerHTML = '';
+            showToast(result.body.message || 'Không tải được báo cáo', 'error');
+            return;
+        }
+        const r = result.body.data;
+
+        const rows = (r.courses || []).map(c => {
+            const rating = (c.averageRating === null || c.averageRating === undefined)
+                ? '<span class="cell-muted">Chưa có</span>'
+                : `<span class="stars" style="font-size:0.85rem;">&#9733;</span> ${c.averageRating.toFixed(1)}`;
+            return `
+                <tr>
+                    <td class="cell-primary">${escapeHtml(c.title)}</td>
+                    <td><span class="badge ${statusBadgeClass(c.status)}">${courseStatusLabel(c.status)}</span></td>
+                    <td>${c.enrollmentCount}</td>
+                    <td>${c.lessonCount}</td>
+                    <td>${rating}</td>
+                </tr>`;
+        }).join('');
+
+        box.innerHTML = `
+            <div class="stat-grid">
+                ${statCard(r.totalCourses, 'Khóa học phụ trách')}
+                ${statCard(r.totalEnrollments, 'Tổng lượt đăng ký')}
+            </div>
+            ${rows ? `
+            <div class="table-wrap" style="margin-top:12px;">
+                <table class="data-table">
+                    <thead><tr><th>Khóa học</th><th>Trạng thái</th><th>Đăng ký</th><th>Bài học</th><th>Đánh giá TB</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>` : '<div class="empty-state" style="border:none;">Giảng viên này chưa phụ trách khóa học nào.</div>'}
+        `;
+    });
+
+    // ---- Khởi tạo trang ----
+    (async () => {
+        const profile = await requireAuth();
+        if (!profile) return;
+
+        if (profile.role !== 'ADMIN') {
+            window.location.href = '/dashboard.html';
+            return;
+        }
+
+        document.getElementById('avatarInitials').textContent = initials(profile.fullName);
+        document.getElementById('sideUserName').textContent = profile.fullName;
+        document.getElementById('sideUserRole').textContent = roleLabel(profile.role);
+
+        loadTopCourses();
+
+        const [students, teachers] = await Promise.all([Api.getUsers('STUDENT'), Api.getUsers('TEACHER')]);
+        if (students.ok) {
+            document.getElementById('studentSelect').insertAdjacentHTML('beforeend',
+                (students.body.data || []).map(u => `<option value="${u.userId}">${escapeHtml(u.fullName)} (${escapeHtml(u.username)})</option>`).join(''));
+        }
+        if (teachers.ok) {
+            document.getElementById('teacherSelect').insertAdjacentHTML('beforeend',
+                (teachers.body.data || []).map(u => `<option value="${u.userId}">${escapeHtml(u.fullName)} (${escapeHtml(u.username)})</option>`).join(''));
+        }
+    })();
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await Api.logout();
+        window.location.href = '/login.html';
+    });
+</script>
+</body>
+</html>
