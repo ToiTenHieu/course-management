@@ -729,3 +729,40 @@ textarea:focus {
     text-align: center;
 }
 .transfer-note-highlight strong { font-size: 1.05rem; letter-spacing: 0.03em; }
+
+/* ---- Payment ---- */
+.bank-info-box {
+    background: #FAFBFD;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 4px 16px;
+    margin: 14px 0;
+}
+.bank-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.86rem;
+}
+.bank-info-row:last-child { border-bottom: none; }
+.bank-info-row .label { color: var(--color-text-muted); }
+.bank-info-row .value { font-weight: 600; }
+.bank-info-row .value.mono { font-family: ui-monospace, 'SF Mono', monospace; letter-spacing: 0.3px; }
+
+.transfer-note-highlight {
+    background: var(--color-accent-soft);
+    border: 1px dashed var(--color-accent);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--color-text);
+    margin-bottom: 16px;
+}
+.transfer-note-highlight strong {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    letter-spacing: 0.5px;
+}

@@ -36,9 +36,9 @@ public class PaymentServiceImpl implements PaymentService {
         // Thông tin ngân hàng cố định — đồ án nhỏ nên khai báo tĩnh, không cần bảng riêng.
         // Muốn đổi số tài khoản, sửa trực tiếp 3 dòng dưới đây.
         return BankInfoResponse.builder()
-                .bankName("Ngân hàng TMCP Á Châu (ACB)")
-                .accountNumber("123456789")
-                .accountHolder("NGUYEN VAN HIEU")
+                .bankName("Ngân hàng MBbank Quân Đội (MB)")
+                .accountNumber("0366567296")
+                .accountHolder("NGUYEN DANG HIEU")
                 .build();
     }
 
