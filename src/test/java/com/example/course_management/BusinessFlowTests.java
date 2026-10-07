@@ -43,6 +43,8 @@ class BusinessFlowTests {
   @Autowired PaymentService paymentService;
   @Autowired UserService userService;
   @Autowired PasswordEncoder encoder;
+  @Autowired ReviewRepository reviews;
+  @Autowired jakarta.persistence.EntityManagerFactory entityManagerFactory;
   @MockitoSpyBean NotificationRepository notifications;
   User admin, teacher, student, outsider;
   Course free, paid;
@@ -166,6 +168,229 @@ class BusinessFlowTests {
     assertFalse(
         courseService.getCourses(null, null, null, actor(outsider)).stream()
             .anyMatch(c -> c.getCourseId().equals(free.getCourseId())));
+  }
+
+  @Test
+  void catalogPaginatesBeforeReturningVisibleCourses() throws Exception {
+    var hidden = course("Hidden", BigDecimal.ZERO);
+    hidden.setStatus(CourseStatus.DRAFT);
+    courses.saveAndFlush(hidden);
+    var session = login(student);
+    mvc.perform(get("/api/courses/catalog").session(session).param("size", "1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.totalElements").value(2))
+        .andExpect(jsonPath("$.data.totalPages").value(2))
+        .andExpect(jsonPath("$.data.content.length()").value(1))
+        .andExpect(jsonPath("$.data.content[0].courseId").value(paid.getCourseId()))
+        .andExpect(jsonPath("$.data.content[0].lessons").isEmpty());
+    mvc.perform(get("/api/courses/catalog").session(session).param("size", "1").param("page", "1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.page").value(1))
+        .andExpect(jsonPath("$.data.content[0].courseId").value(free.getCourseId()));
+    mvc.perform(get("/api/courses/catalog").session(session).param("page", "99"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.totalElements").value(2))
+        .andExpect(jsonPath("$.data.content.length()").value(0));
+  }
+
+  @Test
+  void catalogAndCategoriesRespectEachRole() throws Exception {
+    free.setStatus(CourseStatus.DRAFT);
+    free.setCategory("Private category");
+    courses.saveAndFlush(free);
+    assertEquals(
+        2,
+        courseService
+            .getCatalog(null, null, null, null, false, "new", 0, 9, actor(admin))
+            .totalElements());
+    assertEquals(
+        2,
+        courseService
+            .getCatalog(null, null, null, null, false, "new", 0, 9, actor(teacher))
+            .totalElements());
+    assertEquals(
+        1,
+        courseService
+            .getCatalog(null, null, null, null, false, "new", 0, 9, actor(outsider))
+            .totalElements());
+    assertEquals(
+        0,
+        courseService
+            .getCatalog(
+                null,
+                teacher.getUserId(),
+                CourseStatus.DRAFT,
+                null,
+                false,
+                "new",
+                0,
+                9,
+                actor(student))
+            .totalElements());
+    assertEquals(
+        1,
+        courseService
+            .getCatalog(
+                null,
+                teacher.getUserId(),
+                CourseStatus.DRAFT,
+                null,
+                false,
+                "new",
+                0,
+                9,
+                actor(teacher))
+            .totalElements());
+    assertTrue(
+        courseService
+            .getCategories(teacher.getUserId(), actor(teacher))
+            .contains("Private category"));
+    assertFalse(
+        courseService
+            .getCategories(teacher.getUserId(), actor(outsider))
+            .contains("Private category"));
+    mvc.perform(get("/api/courses/categories").session(login(student)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.length()").value(1))
+        .andExpect(jsonPath("$.data[0]").value("Lập trình"));
+  }
+
+  @Test
+  void catalogCombinesSearchCategoryPriceAndTeacherFilters() {
+    free.setCategory("Thiết kế");
+    courses.saveAndFlush(free);
+    var result =
+        courseService.getCatalog(
+            " TEACHER ",
+            teacher.getUserId(),
+            CourseStatus.PUBLISHED,
+            "Thiết kế",
+            true,
+            "price",
+            0,
+            9,
+            actor(student));
+    assertEquals(1, result.totalElements());
+    assertEquals(free.getCourseId(), result.content().getFirst().getCourseId());
+    assertEquals(
+        0,
+        courseService
+            .getCatalog(null, outsider.getUserId(), null, null, false, "new", 0, 9, actor(student))
+            .totalElements());
+    paid.setDescription("Special syllabus");
+    courses.saveAndFlush(paid);
+    assertEquals(
+        paid.getCourseId(),
+        courseService
+            .getCatalog("SYLLABUS", null, null, null, false, "new", 0, 9, actor(student))
+            .content()
+            .getFirst()
+            .getCourseId());
+  }
+
+  @Test
+  void catalogSearchTreatsWildcardCharactersLiterally() {
+    var special = course("100%_\\ complete", BigDecimal.ZERO);
+    assertEquals(
+        special.getCourseId(),
+        courseService
+            .getCatalog("%_\\", null, null, null, false, "new", 0, 9, actor(student))
+            .content()
+            .getFirst()
+            .getCourseId());
+    assertEquals(
+        1,
+        courseService
+            .getCatalog("%", null, null, null, false, "new", 0, 9, actor(student))
+            .totalElements());
+  }
+
+  @Test
+  void catalogSortHasStableTieBreakerAcrossPages() {
+    var newest = course("Another free", BigDecimal.ZERO);
+    var firstPage =
+        courseService.getCatalog(null, null, null, null, false, "price", 0, 1, actor(student));
+    var secondPage =
+        courseService.getCatalog(null, null, null, null, false, "price", 1, 1, actor(student));
+    assertEquals(newest.getCourseId(), firstPage.content().getFirst().getCourseId());
+    assertEquals(free.getCourseId(), secondPage.content().getFirst().getCourseId());
+    assertEquals(
+        newest.getCourseId(),
+        courseService
+            .getCatalog(null, null, null, null, false, "title", 0, 1, actor(student))
+            .content()
+            .getFirst()
+            .getCourseId());
+  }
+
+  @Test
+  void catalogReturnsCorrectAggregatesWithoutCountingDraftLessons() {
+    lesson(free, "Hidden lesson", 3, false);
+    enrollmentService.enroll(free.getCourseId(), actor(student));
+    var review = new Review();
+    review.setCourse(free);
+    review.setStudent(student);
+    review.setRating(4);
+    reviews.saveAndFlush(review);
+    var result =
+        courseService
+            .getCatalog("Free", null, null, null, false, "new", 0, 9, actor(student))
+            .content()
+            .getFirst();
+    assertEquals(2L, result.getLessonCount());
+    assertEquals(1L, result.getEnrollmentCount());
+    assertEquals(4.0, result.getAverageRating());
+    var emptyCourse = course("Empty", BigDecimal.ZERO);
+    var empty =
+        courseService
+            .getCatalog("Empty", null, null, null, false, "new", 0, 9, actor(student))
+            .content()
+            .getFirst();
+    assertEquals(emptyCourse.getCourseId(), empty.getCourseId());
+    assertEquals(0L, empty.getLessonCount());
+    assertEquals(0L, empty.getEnrollmentCount());
+    assertNull(empty.getAverageRating());
+  }
+
+  @Test
+  void catalogQueryCountDoesNotGrowWithCourseCount() {
+    for (int i = 0; i < 15; i++) course("Extra " + i, BigDecimal.ZERO);
+    var statistics =
+        entityManagerFactory.unwrap(org.hibernate.SessionFactory.class).getStatistics();
+    boolean enabled = statistics.isStatisticsEnabled();
+    statistics.setStatisticsEnabled(true);
+    try {
+      statistics.clear();
+      assertEquals(
+          9,
+          courseService
+              .getCatalog(null, null, null, null, false, "new", 0, 9, actor(student))
+              .content()
+              .size());
+      assertTrue(
+          statistics.getPrepareStatementCount() <= 5,
+          "Catalog must use at most 5 queries: courses with teacher, total, and 3 grouped"
+              + " statistics");
+    } finally {
+      statistics.setStatisticsEnabled(enabled);
+    }
+  }
+
+  @Test
+  void catalogRejectsInvalidParametersAndRequiresLogin() throws Exception {
+    mvc.perform(get("/api/courses/catalog")).andExpect(status().isUnauthorized());
+    mvc.perform(get("/api/courses/categories")).andExpect(status().isUnauthorized());
+    var session = login(student);
+    for (var parameter :
+        new String[][] {
+          {"page", "-1"}, {"page", "2147483647"}, {"size", "0"}, {"size", "101"},
+          {"size", "abc"}, {"sort", "unknown"}, {"status", "unknown"}, {"freeOnly", "unknown"},
+          {"search", "x".repeat(256)}, {"category", "x".repeat(256)}
+        }) {
+      mvc.perform(get("/api/courses/catalog").session(session).param(parameter[0], parameter[1]))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.success").value(false));
+    }
   }
 
   @Test

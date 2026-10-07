@@ -24,6 +24,14 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
   long countByCourse_CourseId(Integer courseId);
 
+  @Query(
+      """
+      SELECT e.course.courseId AS courseId, COUNT(e) AS total FROM Enrollment e
+      WHERE e.course.courseId IN :ids GROUP BY e.course.courseId
+      """)
+  List<CourseCount> countByCourses(
+      @org.springframework.data.repository.query.Param("ids") List<Integer> ids);
+
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT x FROM Enrollment x WHERE x.enrollmentId = :id")
   Optional<Enrollment> findLockedById(

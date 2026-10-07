@@ -3,6 +3,7 @@ package com.example.course_management.controller;
 import com.example.course_management.dto.request.*;
 import com.example.course_management.dto.response.ApiResponse;
 import com.example.course_management.dto.response.CourseResponse;
+import com.example.course_management.dto.response.PageResponse;
 import com.example.course_management.entity.CourseStatus;
 import com.example.course_management.security.CustomUserDetails;
 import com.example.course_management.service.CourseService;
@@ -20,6 +21,30 @@ public class CourseController {
 
   public CourseController(CourseService courseService) {
     this.courseService = courseService;
+  }
+
+  @GetMapping("/catalog")
+  public ApiResponse<PageResponse<CourseResponse>> getCatalog(
+      @RequestParam(required = false) String search,
+      @RequestParam(required = false) Integer teacherId,
+      @RequestParam(required = false) CourseStatus status,
+      @RequestParam(required = false) String category,
+      @RequestParam(defaultValue = "false") boolean freeOnly,
+      @RequestParam(defaultValue = "new") String sort,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "9") int size,
+      @AuthenticationPrincipal CustomUserDetails actor) {
+    return ApiResponse.success(
+        "OK",
+        courseService.getCatalog(
+            search, teacherId, status, category, freeOnly, sort, page, size, actor));
+  }
+
+  @GetMapping("/categories")
+  public ApiResponse<List<String>> getCategories(
+      @RequestParam(required = false) Integer teacherId,
+      @AuthenticationPrincipal CustomUserDetails actor) {
+    return ApiResponse.success("OK", courseService.getCategories(teacherId, actor));
   }
 
   // Endpoint 10 + 28 + 29 + 32: GET /api/courses — AUTH, lọc search/teacherId/status

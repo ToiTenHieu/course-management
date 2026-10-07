@@ -7,9 +7,14 @@ import com.example.course_management.exception.*;
 import com.example.course_management.repository.*;
 import com.example.course_management.security.CustomUserDetails;
 import com.example.course_management.service.*;
+import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,17 +43,99 @@ public class CourseServiceImpl implements CourseService {
     this.policy = policy;
   }
 
+  @Transactional(readOnly = true)
+  public PageResponse<CourseResponse> getCatalog(
+      String search,
+      Integer teacherId,
+      CourseStatus status,
+      String category,
+      boolean freeOnly,
+      String sort,
+      int page,
+      int size,
+      CustomUserDetails actor) {
+    if (page < 0 || size < 1 || size > 100 || (long) page * size > Integer.MAX_VALUE)
+      throw new BadRequestException("Trang phải từ 0 và kích thước trang từ 1 đến 100");
+    if ((search != null && search.length() > 255) || (category != null && category.length() > 255))
+      throw new BadRequestException("Từ khóa và chủ đề không được vượt quá 255 ký tự");
+    Sort ordering =
+        switch (sort) {
+          case "new" -> Sort.by(Sort.Direction.DESC, "courseId");
+          case "price" -> Sort.by("price").and(Sort.by(Sort.Direction.DESC, "courseId"));
+          case "title" -> Sort.by("title").and(Sort.by(Sort.Direction.DESC, "courseId"));
+          default -> throw new BadRequestException("Cách sắp xếp không hợp lệ");
+        };
+    var result =
+        courses.findAll(
+            catalogFilter(search, teacherId, status, category, freeOnly, actor),
+            PageRequest.of(page, size, ordering));
+    return new PageResponse<>(
+        toResponses(result.getContent()),
+        page,
+        size,
+        result.getTotalElements(),
+        result.getTotalPages());
+  }
+
+  @Transactional(readOnly = true)
+  public List<String> getCategories(Integer teacherId, CustomUserDetails actor) {
+    var u = actor.getUser();
+    return courses.findVisibleCategories(
+        u.getRole() == Role.ADMIN,
+        CourseStatus.PUBLISHED,
+        u.getRole() == Role.TEACHER ? u.getUserId() : -1,
+        teacherId);
+  }
+
+  private Specification<Course> catalogFilter(
+      String search,
+      Integer teacherId,
+      CourseStatus status,
+      String category,
+      boolean freeOnly,
+      CustomUserDetails actor) {
+    return (root, query, cb) -> {
+      var predicates = new ArrayList<Predicate>();
+      var u = actor.getUser();
+      if (u.getRole() != Role.ADMIN) {
+        var published = cb.equal(root.get("status"), CourseStatus.PUBLISHED);
+        predicates.add(
+            u.getRole() == Role.TEACHER
+                ? cb.or(published, cb.equal(root.get("teacher").get("userId"), u.getUserId()))
+                : published);
+      }
+      if (status != null) predicates.add(cb.equal(root.get("status"), status));
+      if (teacherId != null) predicates.add(cb.equal(root.get("teacher").get("userId"), teacherId));
+      if (category != null && !category.isBlank())
+        predicates.add(cb.equal(root.get("category"), category.trim()));
+      if (freeOnly) predicates.add(cb.equal(root.get("price"), BigDecimal.ZERO));
+      if (search != null && !search.isBlank()) {
+        String pattern =
+            "%"
+                + search
+                    .trim()
+                    .toLowerCase(Locale.ROOT)
+                    .replace("\\", "\\\\")
+                    .replace("%", "\\%")
+                    .replace("_", "\\_")
+                + "%";
+        predicates.add(
+            cb.or(
+                cb.like(cb.lower(root.get("title")), pattern, '\\'),
+                cb.like(cb.lower(root.get("description")), pattern, '\\'),
+                cb.like(cb.lower(root.get("teacher").get("fullName")), pattern, '\\')));
+      }
+      return cb.and(predicates.toArray(Predicate[]::new));
+    };
+  }
+
+  @Transactional(readOnly = true)
   public List<CourseResponse> getCourses(
       String search, Integer teacherId, CourseStatus status, CustomUserDetails actor) {
-    boolean admin = actor.getUser().getRole() == Role.ADMIN;
-    var found =
-        courses.search(admin ? status : null, teacherId, search == null ? "" : search.trim());
-    return found.stream()
-        .filter(c -> admin || c.getStatus() == CourseStatus.PUBLISHED || policy.manages(c, actor))
-        .filter(c -> admin || status == null || c.getStatus() == status)
-        .sorted(Comparator.comparing(Course::getCourseId).reversed())
-        .map(this::toResponse)
-        .toList();
+    return toResponses(
+        courses.findAll(
+            catalogFilter(search, teacherId, status, null, false, actor),
+            Sort.by(Sort.Direction.DESC, "courseId")));
   }
 
   public CourseResponse getCourseById(Integer id, CustomUserDetails actor) {
@@ -145,6 +232,34 @@ public class CourseServiceImpl implements CourseService {
   }
 
   private CourseResponse toResponse(Course c) {
+    return toResponses(List.of(c)).getFirst();
+  }
+
+  private List<CourseResponse> toResponses(List<Course> found) {
+    if (found.isEmpty()) return List.of();
+    var ids = found.stream().map(Course::getCourseId).toList();
+    var lessonCounts =
+        lessons.countPublishedByCourses(ids).stream()
+            .collect(Collectors.toMap(CourseCount::getCourseId, CourseCount::getTotal));
+    var enrollmentCounts =
+        enrollments.countByCourses(ids).stream()
+            .collect(Collectors.toMap(CourseCount::getCourseId, CourseCount::getTotal));
+    var ratings =
+        reviews.averageRatingByCourses(ids).stream()
+            .collect(Collectors.toMap(CourseRating::getCourseId, CourseRating::getAverageRating));
+    return found.stream()
+        .map(
+            c ->
+                toResponse(
+                    c,
+                    lessonCounts.getOrDefault(c.getCourseId(), 0L),
+                    enrollmentCounts.getOrDefault(c.getCourseId(), 0L),
+                    ratings.get(c.getCourseId())))
+        .toList();
+  }
+
+  private CourseResponse toResponse(
+      Course c, long lessonCount, long enrollmentCount, Double rating) {
     return CourseResponse.builder()
         .courseId(c.getCourseId())
         .title(c.getTitle())
@@ -158,13 +273,9 @@ public class CourseServiceImpl implements CourseService {
         .category(c.getCategory())
         .level(c.getLevel())
         .learningOutcomes(c.getLearningOutcomes())
-        .lessonCount(
-            (long)
-                lessons
-                    .findByCourse_CourseIdAndIsPublishedTrueOrderByOrderIndex(c.getCourseId())
-                    .size())
-        .enrollmentCount(enrollments.countByCourse_CourseId(c.getCourseId()))
-        .averageRating(reviews.averageRating(c.getCourseId()))
+        .lessonCount(lessonCount)
+        .enrollmentCount(enrollmentCount)
+        .averageRating(rating)
         .build();
   }
 }
