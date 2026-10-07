@@ -819,6 +819,8 @@ code {
 }
 .pagination {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
   gap: 8px;
   margin: 25px 0 0;

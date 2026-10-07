@@ -399,16 +399,17 @@ async function courseEditor(course, done) {
   );
 }
 async function courses() {
-  const data = await api("/courses"),
-    admin = user.role === "ADMIN",
+  const admin = user.role === "ADMIN",
     teacher = user.role === "TEACHER";
-  const all = teacher ? data.filter((c) => c.teacherId === user.userId) : data;
+  const categories = await api(
+    "/courses/categories" + (teacher ? "?teacherId=" + user.userId : ""),
+  );
   shell(
     teacher ? "Khóa học phụ trách" : "Khám phá khóa học",
     teacher
       ? "Chăm chút từng bài học, đồng hành cùng học viên."
       : "Chọn một kỹ năng mới. Bắt đầu một hành trình mới.",
-    `<div class="catalog-intro"><div><h2>Đầu tư vào điều<br>bạn <em>có thể trở thành.</em></h2><p>Học theo từng bước, theo tốc độ của riêng bạn.</p></div><span class="catalog-symbol">✳</span></div><div class="catalog-toolbar"><label class="search-box">${icon("search")}<input id="search" type="search" placeholder="Tìm khóa học hoặc giảng viên…" aria-label="Tìm khóa học"></label><select id="sort" aria-label="Sắp xếp"><option value="new">Mới nhất</option><option value="price">Học phí tăng dần</option><option value="title">Tên A–Z</option></select>${admin || teacher ? '<select id="status" aria-label="Trạng thái"><option value="">Mọi trạng thái</option><option value="DRAFT">Bản nháp</option><option value="PUBLISHED">Đã xuất bản</option><option value="ARCHIVED">Đã lưu trữ</option></select>' : ""}</div><div class="chips" id="categories"><button class="chip active" data-category="">Tất cả</button>${[...new Set(all.map((c) => c.category))].map((c) => `<button class="chip" data-category="${esc(c)}">${esc(c)}</button>`).join("")}<button class="chip" id="freeFilter">Miễn phí</button></div><div class="result-count" id="count"></div><div class="course-grid" id="catalog"></div><div class="pagination" id="pagination"></div>`,
+    `<div class="catalog-intro"><div><h2>Đầu tư vào điều<br>bạn <em>có thể trở thành.</em></h2><p>Học theo từng bước, theo tốc độ của riêng bạn.</p></div><span class="catalog-symbol">✳</span></div><div class="catalog-toolbar"><label class="search-box">${icon("search")}<input id="search" type="search" placeholder="Tìm khóa học hoặc giảng viên…" aria-label="Tìm khóa học"></label><select id="sort" aria-label="Sắp xếp"><option value="new">Mới nhất</option><option value="price">Học phí tăng dần</option><option value="title">Tên A–Z</option></select>${admin || teacher ? '<select id="status" aria-label="Trạng thái"><option value="">Mọi trạng thái</option><option value="DRAFT">Bản nháp</option><option value="PUBLISHED">Đã xuất bản</option><option value="ARCHIVED">Đã lưu trữ</option></select>' : ""}</div><div class="chips" id="categories"><button class="chip active" data-category="">Tất cả</button>${categories.map((c) => `<button class="chip" data-category="${esc(c)}">${esc(c)}</button>`).join("")}<button class="chip" id="freeFilter">Miễn phí</button></div><div class="result-count" id="count" role="status" aria-live="polite"></div><div class="course-grid" id="catalog"></div><nav class="pagination" id="pagination" aria-label="Phân trang khóa học"></nav>`,
     admin
       ? '<button class="btn" id="createCourse">' +
           icon("plus") +
@@ -417,56 +418,161 @@ async function courses() {
   );
   let category = "",
     free = false,
-    current = 1;
-  function draw() {
-    let found = all.filter(
-      (c) =>
-        (!category || c.category === category) &&
-        (!free || Number(c.price) === 0) &&
-        (!$("#status")?.value || c.status === $("#status").value) &&
-        [c.title, c.teacherName]
-          .join(" ")
-          .toLocaleLowerCase("vi")
-          .includes($("#search").value.trim().toLocaleLowerCase("vi")),
-    );
-    if ($("#sort").value === "price") found.sort((a, b) => a.price - b.price);
-    if ($("#sort").value === "title")
-      found.sort((a, b) => a.title.localeCompare(b.title, "vi"));
-    $("#count").textContent = found.length + " khóa học phù hợp";
-    $("#catalog").innerHTML =
-      found
-        .slice((current - 1) * 9, current * 9)
-        .map((c) =>
-          card(
-            c,
-            admin || teacher
-              ? `<div class="card-foot">${badge(c.status)}<strong>${money(c.price)}</strong></div>`
-              : "",
-          ),
+    current = 0,
+    revision = 0,
+    timer;
+  function restoreFilters() {
+    const query = new URLSearchParams(location.search);
+    $("#search").value = (query.get("search") || "").slice(0, 255);
+    $("#search").maxLength = 255;
+    $("#sort").value = ["new", "price", "title"].includes(query.get("sort"))
+      ? query.get("sort")
+      : "new";
+    if ($("#status"))
+      $("#status").value = ["DRAFT", "PUBLISHED", "ARCHIVED"].includes(
+        query.get("status"),
+      )
+        ? query.get("status")
+        : "";
+    category = categories.includes(query.get("category"))
+      ? query.get("category")
+      : "";
+    free = query.get("freeOnly") === "true";
+    const requestedPage = Number(query.get("page") || 1);
+    current =
+      Number.isSafeInteger(requestedPage) &&
+      requestedPage > 0 &&
+      requestedPage < 1000000
+        ? requestedPage - 1
+        : 0;
+    document
+      .querySelectorAll("[data-category]")
+      .forEach((b) =>
+        b.classList.toggle("active", b.dataset.category === category),
+      );
+    $("#freeFilter").classList.toggle("active", free);
+    $("#freeFilter").setAttribute("aria-pressed", String(free));
+  }
+  function queryForPage() {
+    const query = new URLSearchParams({
+      page: String(current),
+      size: "9",
+      sort: $("#sort").value,
+    });
+    if (teacher) query.set("teacherId", user.userId);
+    if ($("#search").value.trim())
+      query.set("search", $("#search").value.trim());
+    if ($("#status")?.value) query.set("status", $("#status").value);
+    if (category) query.set("category", category);
+    if (free) query.set("freeOnly", "true");
+    return query;
+  }
+  function saveFilters(replace = false) {
+    const query = queryForPage();
+    query.delete("size");
+    query.delete("teacherId");
+    query.set("page", String(current + 1));
+    const url = location.pathname + "?" + query;
+    if (url !== location.pathname + location.search)
+      history[replace ? "replaceState" : "pushState"](null, "", url);
+  }
+  function drawPagination(result) {
+    if (result.totalPages <= 1) {
+      $("#pagination").innerHTML = "";
+      return;
+    }
+    const pages = [
+      ...new Set([
+        0,
+        result.totalPages - 1,
+        current - 2,
+        current - 1,
+        current,
+        current + 1,
+        current + 2,
+      ]),
+    ]
+      .filter((p) => p >= 0 && p < result.totalPages)
+      .sort((a, b) => a - b);
+    const button = (p, text, disabled = false) =>
+      `<button class="chip ${p === current ? "active" : ""}" data-pagenum="${p}" ${disabled ? "disabled" : ""} ${p === current ? 'aria-current="page"' : ""}>${text}</button>`;
+    $("#pagination").innerHTML =
+      button(current - 1, "← Trước", current === 0) +
+      pages
+        .map(
+          (p, i) =>
+            (i > 0 && p - pages[i - 1] > 1
+              ? '<span aria-hidden="true">…</span>'
+              : "") + button(p, p + 1),
         )
-        .join("") ||
-      empty("Chưa tìm thấy khóa học", "Thử từ khóa hoặc bộ lọc khác.");
-    $("#pagination").innerHTML = Array.from(
-      { length: Math.ceil(found.length / 9) },
-      (_, i) =>
-        `<button class="chip ${current === i + 1 ? "active" : ""}" data-pagenum="${i + 1}">${i + 1}</button>`,
-    ).join("");
+        .join("") +
+      button(current + 1, "Sau →", current === result.totalPages - 1);
     document.querySelectorAll("[data-pagenum]").forEach(
       (b) =>
         (b.onclick = () => {
           current = Number(b.dataset.pagenum);
-          draw();
+          refresh();
         }),
     );
   }
-  $("#search").oninput = $("#sort").onchange = () => {
-    current = 1;
-    draw();
+  async function load(requestRevision) {
+    try {
+      const result = await api("/courses/catalog?" + queryForPage());
+      if (requestRevision !== revision) return;
+      if (current > 0 && current >= result.totalPages) {
+        current = Math.max(0, result.totalPages - 1);
+        saveFilters(true);
+        return await load(requestRevision);
+      }
+      $("#count").textContent = result.totalElements + " khóa học phù hợp";
+      $("#catalog").innerHTML =
+        result.content
+          .map((c) =>
+            card(
+              c,
+              admin || teacher
+                ? `<div class="card-foot">${badge(c.status)}<strong>${money(c.price)}</strong></div>`
+                : "",
+            ),
+          )
+          .join("") ||
+        empty("Chưa tìm thấy khóa học", "Thử từ khóa hoặc bộ lọc khác.");
+      drawPagination(result);
+    } catch (error) {
+      if (requestRevision !== revision) return;
+      $("#count").textContent = "Chưa tải được danh sách khóa học";
+      $("#catalog").innerHTML =
+        `<div>${errorBox(error)}<button class="btn secondary" id="retryCatalog">Thử lại</button></div>`;
+      $("#retryCatalog").onclick = () => refresh(0, true);
+      if (error.status === 401) location.href = "/login.html";
+    } finally {
+      if (requestRevision === revision)
+        $("#catalog").setAttribute("aria-busy", "false");
+    }
+  }
+  function refresh(delay = 0, replace = false) {
+    clearTimeout(timer);
+    const requestRevision = ++revision;
+    saveFilters(replace);
+    $("#count").textContent = "Đang tìm khóa học…";
+    $("#catalog").setAttribute("aria-busy", "true");
+    $("#catalog").innerHTML = "";
+    $("#pagination").innerHTML = "";
+    if (delay) timer = setTimeout(() => load(requestRevision), delay);
+    else return load(requestRevision);
+  }
+  $("#search").oninput = () => {
+    current = 0;
+    refresh(300, true);
+  };
+  $("#sort").onchange = () => {
+    current = 0;
+    refresh();
   };
   if ($("#status"))
     $("#status").onchange = () => {
-      current = 1;
-      draw();
+      current = 0;
+      refresh();
     };
   document.querySelectorAll("[data-category]").forEach(
     (b) =>
@@ -475,20 +581,26 @@ async function courses() {
         document
           .querySelectorAll("[data-category]")
           .forEach((x) => x.classList.toggle("active", x === b));
-        current = 1;
-        draw();
+        current = 0;
+        refresh();
       }),
   );
   $("#freeFilter").onclick = (e) => {
     free = !free;
     e.currentTarget.classList.toggle("active", free);
-    current = 1;
-    draw();
+    e.currentTarget.setAttribute("aria-pressed", String(free));
+    current = 0;
+    refresh();
+  };
+  window.onpopstate = () => {
+    restoreFilters();
+    refresh(0, true);
   };
   if (admin)
     $("#createCourse").onclick = () =>
       action(() => courseEditor(null, courses));
-  draw();
+  restoreFilters();
+  await refresh(0, true);
 }
 async function lessonEditor(courseId, lesson, done) {
   showDialog(
