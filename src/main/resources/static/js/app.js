@@ -1,4 +1,6 @@
 import { api, ApiError } from "./api.js";
+import { mountQuestions } from "./questions.js";
+import { mountQuiz } from "./quiz.js";
 const $ = (s) => document.querySelector(s);
 const app = $("#app"),
   modal = $("#modal");
@@ -862,6 +864,51 @@ async function detail() {
           await detail();
         }
       }, e.currentTarget);
+  if ((manager || enrollment) && lessons.length) {
+    const section = document.createElement("section");
+    section.className = "panel lesson-discussion";
+    section.id = "practice";
+    section.innerHTML = `<label>Thực hành và hỏi đáp trong bài<select id="questionLesson">${lessons.map((l) => `<option value="${l.lessonId}">${esc(l.title)}${l.isPublished ? "" : " · Bản nháp"}</option>`).join("")}</select></label><section id="quiz" class="lesson-quiz"></section><section id="questions"><div id="courseQuestions"></div></section>`;
+    $("#reviews").before(section);
+    const discussionLink = document.createElement("a");
+    discussionLink.href = "#questions";
+    discussionLink.textContent = "Hỏi đáp";
+    $(".detail-tabs").append(discussionLink);
+    const quizLink = document.createElement("a");
+    quizLink.href = "#quiz";
+    quizLink.textContent = "Quiz";
+    $(".detail-tabs").append(quizLink);
+    const discussionParams = new URLSearchParams(location.search);
+    const selected = Number(discussionParams.get("lessonId"));
+    if (lessons.some((l) => l.lessonId === selected))
+      $("#questionLesson").value = selected;
+    function discussion(target = null) {
+      const quizContainer = document.createElement("div");
+      $("#quiz").replaceChildren(quizContainer);
+      mountQuiz(
+        quizContainer,
+        Number($("#questionLesson").value),
+        manager,
+        user.userId,
+      );
+      const container = document.createElement("div");
+      $("#courseQuestions").replaceChildren(container);
+      mountQuestions(
+        container,
+        Number($("#questionLesson").value),
+        manager,
+        target,
+      );
+    }
+    $("#questionLesson").onchange = () => {
+      const url = new URL(location.href);
+      url.searchParams.set("lessonId", $("#questionLesson").value);
+      url.searchParams.delete("questionId");
+      history.replaceState(null, "", url);
+      discussion();
+    };
+    discussion(Number(discussionParams.get("questionId")) || null);
+  }
   if (manager) {
     $("#addLesson").onclick = () =>
       action(() => lessonEditor(id, null, detail));
@@ -895,7 +942,7 @@ async function detail() {
         (b.onclick = () =>
           confirmAction(
             "Xóa bài học",
-            "Bài học và tiến độ liên quan sẽ được xóa. Tiến độ khóa học sẽ được tính lại.",
+            "Bài học, tiến độ, hỏi đáp và lịch sử quiz của bài sẽ được xóa. Tiến độ khóa học sẽ được tính lại.",
             async () => {
               await api("/lessons/" + b.dataset.deleteLesson, "DELETE");
               await detail();
@@ -1217,6 +1264,14 @@ async function learn() {
         `<div class="lesson-position"><span class="eyebrow">BÀI ${index + 1} / ${e.lessons.length}</span><span id="completionBadge">${entry.isCompleted ? badge("COMPLETED") : '<span class="badge muted">Chưa hoàn thành</span>'}</span></div><h2 tabindex="-1">${esc(l.title)}</h2><div class="lesson-text">${esc(l.textContent || "Bài học sử dụng tài liệu hoặc video bên dưới.")}</div>${url ? link("Mở tài liệu / video ↗", url, "btn secondary resource-link") : ""}<div class="lesson-footer"><div><button class="btn" id="completeLesson" ${entry.isCompleted ? "disabled" : ""}>${icon("check")} ${entry.isCompleted ? "Đã hoàn thành" : "Đánh dấu hoàn thành"}</button></div><div class="lesson-step-actions">${previous ? '<button class="btn secondary compact" id="previousLesson">← Bài trước</button>' : ""}${next ? '<button class="btn secondary compact" id="nextLesson">Bài tiếp theo →</button>' : link("Việc học của tôi", "/my-courses.html", "btn secondary compact")}</div></div><section class="private-notes"><div class="section-heading"><div><h3>Ghi chú của tôi</h3><p>Ghi lại ý tưởng, điều cần ôn hoặc câu hỏi cho chính bạn.</p></div><span class="badge muted">${icon("lock")} Riêng tư</span></div><label for="lessonNote" class="sr-only">Ghi chú cho bài học</label><textarea id="lessonNote" rows="6" maxlength="10000" placeholder="Điều mình học được từ bài này…">${esc(note.note)}</textarea><div class="note-actions"><span id="noteStatus" role="status" aria-live="polite">${note.note ? "Ghi chú đã lưu. Chỉ bạn có thể xem." : "Lưu ghi chú để xem lại trên các thiết bị của bạn."}</span><button class="btn secondary compact" id="saveNote">Lưu ghi chú</button></div></section>${Number(e.progressPercentage) === 100 ? '<div class="notice completion-notice">' + icon("check") + "<div><strong>Bạn đã hoàn thành khóa học!</strong><p>Ôn lại những điều quan trọng hoặc chia sẻ trải nghiệm để giúp học viên khác chọn khóa học.</p>" + link("Đánh giá khóa học →", "/course-detail.html?id=" + e.courseId + "#reviews", "text-link") + "</div></div>" : ""}`;
       drawNav();
       const resource = $(".resource-link");
+      const discussion = document.createElement("section");
+      const quizContainer = document.createElement("section");
+      quizContainer.className = "lesson-quiz";
+      $("#lessonContent").append(quizContainer);
+      mountQuiz(quizContainer, lessonId, false, user.userId);
+      discussion.className = "lesson-discussion";
+      $("#lessonContent").append(discussion);
+      mountQuestions(discussion, lessonId, false);
       if (resource) {
         resource.target = "_blank";
         resource.rel = "noopener noreferrer";
