@@ -52,6 +52,8 @@ Profile `demo` tạo tài khoản và nội dung mẫu. Profile mặc định kh
 
 Demo có quiz **Java: chuẩn bị môi trường** ở bài **Bắt đầu và chuẩn bị môi trường** của khóa Java. Chỉ tạo khi bài mẫu chưa có quiz, giữ nguyên đề giảng viên đã sửa. Đăng nhập giảng viên để soạn tại trang khóa → Quiz; học viên đã đăng ký làm bài ngay trong phòng học.
 
+Profile demo còn tạo bộ tình huống theo vai trò: 36 khóa mới (xuất bản/nháp/lưu trữ), 26 học viên `student_scenario_1`–`student_scenario_26`, giảng viên `teacher_scenario`, chương trình dài, 12 lượt đăng ký cho `student_demo`, thanh toán chờ/xác nhận/từ chối, tiến độ/ghi chú, 26 đánh giá, câu hỏi và bài làm quiz. Mật khẩu mẫu vẫn là `Demo123!`; bốn học viên mẫu cuối bị khóa để kiểm tra bộ lọc. Dữ liệu được tạo qua nghiệp vụ, lưu PostgreSQL. Flyway V8 ghi nhận bộ mẫu đã hoàn tất; khởi động lại không tạo trùng, không khôi phục dữ liệu đã xóa hoặc ghi đè phần đã sửa. Profile thông thường không chạy bộ mẫu.
+
 ## Cấu hình và database
 
 `application.properties` đọc `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `PORT`, `BANK_NAME`, `BANK_ACCOUNT`, `BANK_HOLDER` từ môi trường. `.env.example` chỉ minh họa biến; Spring Boot không tự đọc file `.env`. Hãy export biến hoặc dùng file cấu hình bên ngoài. Không đưa thông tin đăng nhập thật vào repo.
@@ -68,7 +70,7 @@ node --check src/main/resources/static/js/questions.js
 node --check src/main/resources/static/js/quiz.js
 ```
 
-Bộ backend có 65 kiểm thử (64 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 và PostgreSQL với migration thật. Bao gồm quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 66 kiểm thử (65 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 và PostgreSQL với migration thật. Bao gồm quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
 Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
 

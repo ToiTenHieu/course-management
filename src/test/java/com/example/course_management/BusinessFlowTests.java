@@ -49,6 +49,7 @@ class BusinessFlowTests {
   @Autowired LessonQuizService quizService;
   @Autowired LessonQuizRepository quizzes;
   @Autowired QuizAttemptRepository quizAttempts;
+  @Autowired com.example.course_management.config.DemoScenarioSeeder demoScenarios;
   @Autowired jakarta.persistence.EntityManagerFactory entityManagerFactory;
   @MockitoSpyBean NotificationRepository notifications;
   User admin, teacher, student, outsider;
@@ -60,6 +61,7 @@ class BusinessFlowTests {
     reset(notifications);
     for (String table :
         new String[] {
+          "demo_seed_runs",
           "quiz_answers",
           "quiz_attempts",
           "quiz_questions",
@@ -138,6 +140,24 @@ class BusinessFlowTests {
     e.setStudent(u);
     e.setCourse(free);
     enrollments.saveAndFlush(e);
+  }
+
+  @Test
+  void demoScenariosAreConsistentAndDoNotOverwriteEditsOrCreateDuplicates() {
+    demoScenarios.seed();
+    assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM demo_seed_runs", Integer.class));
+    var demo = users.findByUsername("student_demo").orElseThrow();
+    assertEquals(12, enrollments.findByStudent_UserId(demo.getUserId()).size());
+    assertEquals(26, questions.count());
+    assertEquals(26, quizAttempts.count());
+    assertTrue(payments.search(PaymentStatus.PENDING).size() > 10);
+    var edited = courses.findAll().stream().filter(c -> c.getTitle().startsWith("Python thực hành")).findFirst().orElseThrow();
+    edited.setTitle("Tên đã được chỉnh sửa"); courses.saveAndFlush(edited);
+    long userCount = users.count(), courseCount = courses.count(), paymentCount = payments.count();
+    demoScenarios.seed();
+    assertEquals(userCount, users.count()); assertEquals(courseCount, courses.count());
+    assertEquals(paymentCount, payments.count());
+    assertEquals("Tên đã được chỉnh sửa", courses.findById(edited.getCourseId()).orElseThrow().getTitle());
   }
 
   SaveQuizRequest quizRequest(int revision, boolean published) {

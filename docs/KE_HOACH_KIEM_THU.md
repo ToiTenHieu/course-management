@@ -65,7 +65,7 @@ $env:SPRING_DATASOURCE_DRIVER_CLASS_NAME = 'org.postgresql.Driver'
 .\mvnw.cmd -B -ntp test
 ```
 
-Mỗi ca backend dọn 13 bảng (gồm hỏi đáp và bốn bảng quiz) trong database test trước khi tạo fixture. Không dùng database demo hoặc database thật. Xóa các biến `SPRING_DATASOURCE_*` trên sau khi test nếu tiếp tục chạy ứng dụng trong cùng terminal.
+Mỗi ca backend dọn 14 bảng (gồm bảng đánh dấu dữ liệu demo, hỏi đáp và bốn bảng quiz) trong database test trước khi tạo fixture. Không dùng database demo hoặc database thật. Xóa các biến `SPRING_DATASOURCE_*` trên sau khi test nếu tiếp tục chạy ứng dụng trong cùng terminal.
 
 Giao diện: làm theo mục Kiểm tra trong README. Chỉ trỏ E2E tới bản demo; các ca tạo tài khoản, enrollment, thanh toán giả và một khóa nháp mới.
 

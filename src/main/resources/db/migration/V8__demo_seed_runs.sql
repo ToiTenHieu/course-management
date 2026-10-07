@@ -1,0 +1,4 @@
+CREATE TABLE demo_seed_runs (
+    dataset_key VARCHAR(100) PRIMARY KEY,
+    completed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
