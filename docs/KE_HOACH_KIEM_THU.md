@@ -29,6 +29,10 @@ Các tên dưới đây nằm trong `src/test/java/com/example/course_management
 | Hoàn thành bài nháp, bài của khóa khác hoặc enrollment người khác | `unpublishedLessonCannotBeCompleted`, `lessonFromDifferentCourseCannotAffectProgress`, `enrollmentCannotBeReadOrCompletedByAnotherUser` | Bị từ chối và dữ liệu tiến độ giữ nguyên |
 | Nâng quyền, ghi thiếu CSRF, dữ liệu không hợp lệ | `registrationCannotEscalateRole`, `studentCannotConfirmPaymentEvenWithValidCsrf`, `authenticatedWriteWithoutCsrfDoesNotChangeData`, `negativeCoursePriceIsRejected`, `malformedRequestIsClientErrorAndAnonymousApiRequiresLogin` | Đúng HTTP 400/401/403 và không làm thay đổi dữ liệu |
 | Liên kết nguy hiểm và HTML trong hồ sơ | `dangerousContentLinkIsRejected` và E2E hồ sơ | Từ chối URL nguy hiểm; HTML hiển thị như văn bản và không sinh event handler |
+| Tổng/trang danh mục sai hoặc lộ khóa nháp qua bộ lọc/chủ đề | `catalogPaginatesBeforeReturningVisibleCourses`, `catalogAndCategoriesRespectEachRole` | Quyền xem áp dụng trước phân trang/tính tổng; metadata và chủ đề không lộ dữ liệu riêng |
+| Tìm/lọc hoặc thứ tự trang không ổn định | `catalogCombinesSearchCategoryPriceAndTeacherFilters`, `catalogSearchTreatsWildcardCharactersLiterally`, `catalogSortHasStableTieBreakerAcrossPages` | Kết hợp bộ lọc đúng; tìm theo giảng viên/mô tả; wildcard là ký tự thường; ID phân định khi bằng giá/tên |
+| Thống kê sai hoặc tăng truy vấn theo số khóa | `catalogReturnsCorrectAggregatesWithoutCountingDraftLessons`, `catalogQueryCountDoesNotGrowWithCourseCount` | Không tính bài nháp; khóa chưa có thống kê trả 0/null; tối đa 5 truy vấn cho trang 9 khóa |
+| Tham số phân trang không hợp lệ | `catalogRejectsInvalidParametersAndRequiresLogin` | HTTP 400 cho tham số sai/quá giới hạn và 401 nếu chưa đăng nhập |
 
 ## Sáu hành trình giao diện
 
@@ -69,10 +73,12 @@ Giao diện: làm theo mục Kiểm tra trong README. Chỉ trỏ E2E tới bả
 
 | Kiểm tra | Kết quả |
 |---|---|
-| Maven verify, JDK 21 + H2 | 33 test, 0 failure, 0 error; đóng gói JAR thành công |
-| Maven test, JDK 21 + PostgreSQL 18 | 33 test, 0 failure, 0 error |
+| Maven verify, JDK 21 + H2 | 41 test, 0 failure, 0 error; Flyway V3 đạt, đóng gói JAR thành công |
+| Maven test, JDK 21 + PostgreSQL 18 | 41 test, 0 failure, 0 error; Flyway V3 đạt |
 | Playwright Chromium, backend thật trên PostgreSQL demo | 6/6 hành trình đạt |
 | Cú pháp module JavaScript | `api.js` và `app.js` hợp lệ |
 | Giao diện thủ công | Đã xem login, dashboard, phòng học desktop và mobile |
+| Playwright CLI, danh mục mới | Chuyển trang 1/2, tải lại giữ trang; tìm giảng viên + lọc miễn phí + sắp xếp; quay lại khôi phục bộ lọc; chặn request tạo lỗi và thử lại thành công; phản hồi Java đến sau SQL không ghi đè kết quả |
+| Danh mục trên điện thoại | 390 × 844, không tràn ngang; đã xem ảnh chụp desktop/mobile trong `output/playwright` |
 
 Các log chạy tại máy và báo cáo nằm trong `target/local-demo` và `output`, không đưa vào Git. CI tạo bằng chứng độc lập trong mục Actions của repo. Các bài kiểm tra tải, nhiều trình duyệt và cổng thanh toán thật thuộc giai đoạn tiếp theo.

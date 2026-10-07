@@ -8,6 +8,7 @@ Nền tảng quản lý khóa học trực tuyến phục vụ đồ án/demo. B
 - Giảng viên: xem các khóa phụ trách kể cả bản nháp, thêm/sửa/xóa bài học, xuất bản/ẩn bài học.
 - Admin: quản lý người dùng và khóa học, xuất bản/lưu trữ, xác nhận/từ chối thanh toán, tạo thông báo và xem báo cáo.
 - Quyền học được kiểm tra ở backend; danh sách chương trình của người chưa đăng ký chỉ trả metadata, không trả nội dung hoặc URL tài liệu.
+- Danh mục khóa học phân trang ở máy chủ, tìm theo tên/mô tả/giảng viên, lọc chủ đề, học phí và trạng thái; bộ lọc và trang hiện tại được lưu trong URL.
 
 ## Chạy bản demo
 
@@ -60,7 +61,7 @@ node --check src/main/resources/static/js/api.js
 node --check src/main/resources/static/js/app.js
 ```
 
-Bộ backend có 33 kiểm thử (32 ca nghiệp vụ/API và một ca khởi động), chạy với H2 ở chế độ PostgreSQL và migration thật. Đã chạy cùng bộ test trên PostgreSQL 18. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 41 kiểm thử (40 ca nghiệp vụ/API và một ca khởi động), đã chạy trên H2 ở chế độ PostgreSQL và PostgreSQL 18 với migration thật. Có kiểm thử quyền xem danh mục, kết hợp bộ lọc, phân trang, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
 Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
 
@@ -85,6 +86,26 @@ GitHub Actions chạy backend trên cả H2 và PostgreSQL, kiểm tra cú pháp
 - Nội dung người dùng được escape trước khi render HTML; liên kết bài học chỉ chấp nhận HTTP/HTTPS, thông báo chỉ liên kết tới trang nội bộ.
 - Xóa dữ liệu đang được tham chiếu trả lỗi 409. Dùng khóa tài khoản/lưu trữ khóa học để giữ lịch sử.
 
+## API danh mục khóa học
+
+`GET /api/courses/catalog` yêu cầu đăng nhập, trả `data` gồm `content`, `page`, `size`, `totalElements`, `totalPages`. API đánh số trang từ **0**; URL giao diện đánh số từ **1**.
+
+| Tham số | Mặc định | Ý nghĩa |
+|---|---|---|
+| `page`, `size` | `0`, `9` | Trang và số khóa/trang; `size` từ 1 đến 100 |
+| `search` | rỗng | Tìm không phân biệt hoa/thường theo tên, mô tả hoặc tên giảng viên; tối đa 255 ký tự; `%`, `_` được tìm như ký tự thường |
+| `teacherId` | rỗng | Lọc khóa do một giảng viên phụ trách |
+| `category` | rỗng | Lọc đúng chủ đề; tối đa 255 ký tự |
+| `freeOnly` | `false` | Chỉ khóa miễn phí |
+| `status` | rỗng | `DRAFT`, `PUBLISHED`, `ARCHIVED`, trong phạm vi quyền xem |
+| `sort` | `new` | `new` (ID giảm dần), `price` (học phí tăng), `title` (tên tăng theo collation database); ID giảm dần làm tiêu chí phụ |
+
+Ví dụ: `/api/courses/catalog?page=0&size=9&freeOnly=true&sort=price`.
+
+`GET /api/courses/categories?teacherId=...` trả chủ đề của các khóa có quyền xem; không bị giới hạn bởi trang hiện tại. Học viên chỉ thấy khóa published; giảng viên còn thấy khóa nháp/lưu trữ của mình; admin thấy tất cả. Quyền xem áp dụng trước khi tính tổng và phân trang.
+
+`GET /api/courses` vẫn trả list cho các màn hình/API hiện có. Danh mục mới tải giảng viên cùng khóa học và dùng ba truy vấn thống kê theo nhóm, tối đa năm truy vấn cho một trang có dữ liệu. Flyway V3 bổ sung chỉ mục phục vụ bộ lọc và thống kê theo khóa học.
+
 ## Phạm vi bản nền
 
-Đây là bản demo hoàn chỉnh của các nghiệp vụ hiện có, chưa tích hợp cổng thanh toán tự động, upload/stream video, quiz hay chứng chỉ. Danh sách API vẫn dùng hợp đồng trả list; giao diện khóa học có phân trang phía client. Phân trang phía server và tối ưu truy vấn sẽ là công việc tiếp theo sau bản nền này.
+Đây là bản demo hoàn chỉnh của các nghiệp vụ hiện có, chưa tích hợp cổng thanh toán tự động, upload/stream video, quiz hay chứng chỉ. Danh mục khóa học đã phân trang phía server; các danh sách khác vẫn dùng hợp đồng trả list. Phân trang các màn hình quản trị còn lại và tìm kiếm toàn văn là các hướng phát triển tiếp theo.
