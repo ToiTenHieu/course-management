@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface LessonRepository extends JpaRepository<Lesson, Integer> {
+  @Query("SELECT l.course.courseId FROM Lesson l WHERE l.lessonId = :id")
+  java.util.Optional<Integer> findCourseId(Integer id);
+
   List<Lesson> findByCourse_CourseIdAndIsPublishedTrueOrderByOrderIndex(Integer courseId);
 
   List<Lesson> findByCourse_CourseIdOrderByOrderIndex(Integer courseId);

@@ -44,6 +44,8 @@ class BusinessFlowTests {
   @Autowired UserService userService;
   @Autowired PasswordEncoder encoder;
   @Autowired ReviewRepository reviews;
+  @Autowired LessonQuestionService questionService;
+  @Autowired LessonQuestionRepository questions;
   @Autowired jakarta.persistence.EntityManagerFactory entityManagerFactory;
   @MockitoSpyBean NotificationRepository notifications;
   User admin, teacher, student, outsider;
@@ -55,6 +57,7 @@ class BusinessFlowTests {
     reset(notifications);
     for (String table :
         new String[] {
+          "lesson_questions",
           "notifications",
           "reviews",
           "lesson_progress",
@@ -121,6 +124,227 @@ class BusinessFlowTests {
             .andReturn()
             .getRequest()
             .getSession(false);
+  }
+
+  void enrollForQuestions(User u) {
+    var e = new Enrollment();
+    e.setStudent(u);
+    e.setCourse(free);
+    enrollments.saveAndFlush(e);
+  }
+
+  @Test
+  void questionsRequireEnrollmentAndStayInsidePublishedLessons() throws Exception {
+    var path = "/api/lessons/" + first.getLessonId() + "/questions";
+    mvc.perform(get(path)).andExpect(status().isUnauthorized());
+    var session = login(student);
+    mvc.perform(get(path).session(session)).andExpect(status().isForbidden());
+    mvc.perform(
+            post(path)
+                .session(session)
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"body\":\"Help\"}"))
+        .andExpect(status().isForbidden());
+    enrollForQuestions(student);
+    mvc.perform(
+            post(path)
+                .session(session)
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"body\":\"  How does this work?  \"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.body").value("How does this work?"));
+    var draft = lesson(free, "Draft", 3, false);
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> questionService.list(draft.getLessonId(), 0, 10, actor(student)));
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> questionService.ask(draft.getLessonId(), "Help", actor(student)));
+    assertThrows(
+        ForbiddenException.class,
+        () -> questionService.list(first.getLessonId(), 0, 10, actor(outsider)));
+    var e =
+        enrollments
+            .findByStudent_UserIdAndCourse_CourseId(student.getUserId(), free.getCourseId())
+            .orElseThrow();
+    e.setStatus(EnrollmentStatus.DROPPED);
+    enrollments.saveAndFlush(e);
+    assertThrows(
+        ForbiddenException.class,
+        () -> questionService.list(first.getLessonId(), 0, 10, actor(student)));
+  }
+
+  @Test
+  void questionAnswersNotifyTheAuthorAndLinkToTheExactContext() {
+    enrollForQuestions(student);
+    var q =
+        questionService.ask(first.getLessonId(), "<img src=x onerror=alert(1)>", actor(student));
+    assertEquals(0, progress.count());
+    var teacherNotices = notifications.findByUser_UserIdOrderByCreatedAtDesc(teacher.getUserId());
+    assertEquals(1, teacherNotices.size());
+    assertEquals(
+        "/course-detail.html?id="
+            + free.getCourseId()
+            + "&lessonId="
+            + first.getLessonId()
+            + "&questionId="
+            + q.questionId(),
+        teacherNotices.getFirst().getTargetUrl());
+    assertThrows(
+        ForbiddenException.class,
+        () -> questionService.answer(q.questionId(), "No", actor(outsider)));
+    assertThrows(
+        ForbiddenException.class,
+        () -> questionService.answer(q.questionId(), "No", actor(student)));
+    var answer = questionService.answer(q.questionId(), "Read the example", actor(teacher));
+    assertEquals("Read the example", answer.answer());
+    assertEquals(teacher.getFullName(), answer.answeredByName());
+    assertNotNull(answer.answeredAt());
+    assertEquals(
+        1, notifications.findByUser_UserIdOrderByCreatedAtDesc(student.getUserId()).size());
+    questionService.answer(q.questionId(), "Updated explanation", actor(admin));
+    assertEquals(
+        "Updated explanation", questionService.get(q.questionId(), actor(student)).answer());
+    assertEquals(1, questions.count());
+  }
+
+  @Test
+  void hiddenQuestionsAreExcludedBeforeCountingAndCanBeRestored() throws Exception {
+    enrollForQuestions(student);
+    var q = questionService.ask(first.getLessonId(), "Help", actor(student));
+    assertThrows(
+        ForbiddenException.class,
+        () -> questionService.visibility(q.questionId(), true, actor(outsider)));
+    questionService.visibility(q.questionId(), true, actor(teacher));
+    assertEquals(
+        0, questionService.list(first.getLessonId(), 0, 10, actor(student)).totalElements());
+    var managerPage = questionService.list(first.getLessonId(), 0, 10, actor(teacher));
+    assertEquals(1, managerPage.totalElements());
+    assertTrue(managerPage.content().getFirst().hidden());
+    assertThrows(
+        ResourceNotFoundException.class, () -> questionService.get(q.questionId(), actor(student)));
+    mvc.perform(get("/api/questions/" + q.questionId()).session(login(student)))
+        .andExpect(status().isNotFound());
+    assertThrows(
+        BadRequestException.class,
+        () -> questionService.answer(q.questionId(), "Hidden", actor(teacher)));
+    questionService.visibility(q.questionId(), false, actor(admin));
+    assertEquals(
+        1, questionService.list(first.getLessonId(), 0, 10, actor(student)).totalElements());
+  }
+
+  @Test
+  void questionsPaginateByNewestIdWithoutLeakingOtherLessons() {
+    enrollForQuestions(student);
+    var one = questionService.ask(first.getLessonId(), "One", actor(student));
+    var two = questionService.ask(first.getLessonId(), "Two", actor(student));
+    questionService.ask(second.getLessonId(), "Other lesson", actor(student));
+    var page = questionService.list(first.getLessonId(), 0, 1, actor(student));
+    assertEquals(2, page.totalElements());
+    assertEquals(2, page.totalPages());
+    assertEquals(two.questionId(), page.content().getFirst().questionId());
+    assertEquals(
+        one.questionId(),
+        questionService
+            .list(first.getLessonId(), 1, 1, actor(student))
+            .content()
+            .getFirst()
+            .questionId());
+    assertTrue(questionService.list(first.getLessonId(), 2, 1, actor(student)).content().isEmpty());
+    assertThrows(
+        BadRequestException.class,
+        () -> questionService.list(first.getLessonId(), -1, 10, actor(student)));
+    assertThrows(
+        BadRequestException.class,
+        () -> questionService.list(first.getLessonId(), 0, 0, actor(student)));
+    assertThrows(
+        BadRequestException.class,
+        () -> questionService.list(first.getLessonId(), 0, 51, actor(student)));
+  }
+
+  @Test
+  void questionWritesValidateTextRolesAndCsrf() throws Exception {
+    enrollForQuestions(student);
+    var session = login(student);
+    var path = "/api/lessons/" + first.getLessonId() + "/questions";
+    mvc.perform(
+            post(path)
+                .session(session)
+                .contentType("application/json")
+                .content("{\"body\":\"Help\"}"))
+        .andExpect(status().isForbidden());
+    for (String body :
+        new String[] {"{}", "{\"body\":\"   \"}", "{\"body\":\"" + "a".repeat(5001) + "\"}"}) {
+      mvc.perform(
+              post(path)
+                  .session(session)
+                  .with(csrf())
+                  .contentType("application/json")
+                  .content(body))
+          .andExpect(status().isBadRequest());
+    }
+    mvc.perform(
+            post(path)
+                .session(login(teacher))
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"body\":\"Help\"}"))
+        .andExpect(status().isForbidden());
+    var q = questionService.ask(first.getLessonId(), "Help", actor(student));
+    mvc.perform(
+            put("/api/questions/" + q.questionId() + "/answer")
+                .session(session)
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"body\":\"Answer\"}"))
+        .andExpect(status().isForbidden());
+    var teacherSession = login(teacher);
+    mvc.perform(
+            put("/api/questions/" + q.questionId() + "/answer")
+                .session(teacherSession)
+                .contentType("application/json")
+                .content("{\"body\":\"Answer\"}"))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            put("/api/questions/" + q.questionId() + "/visibility")
+                .session(teacherSession)
+                .with(csrf())
+                .contentType("application/json")
+                .content("{}"))
+        .andExpect(status().isBadRequest());
+    assertNull(questionService.get(q.questionId(), actor(student)).answer());
+  }
+
+  @Test
+  void questionAndAnswerRollbackIfTheirNotificationFails() {
+    enrollForQuestions(student);
+    doThrow(new IllegalStateException("Notification failed"))
+        .when(notifications)
+        .save(any(Notification.class));
+    assertThrows(
+        IllegalStateException.class,
+        () -> questionService.ask(first.getLessonId(), "Help", actor(student)));
+    assertEquals(0, questions.count());
+    reset(notifications);
+    var q = questionService.ask(first.getLessonId(), "Help", actor(student));
+    doThrow(new IllegalStateException("Notification failed"))
+        .when(notifications)
+        .save(any(Notification.class));
+    assertThrows(
+        IllegalStateException.class,
+        () -> questionService.answer(q.questionId(), "Answer", actor(teacher)));
+    assertNull(questionService.get(q.questionId(), actor(student)).answer());
+  }
+
+  @Test
+  void removingLessonCascadesQuestionsAndDoesNotBreakProgress() {
+    enrollForQuestions(student);
+    questionService.ask(first.getLessonId(), "Help", actor(student));
+    lessonService.deleteLesson(first.getLessonId(), actor(teacher));
+    assertEquals(0, questions.count());
+    assertFalse(lessons.existsById(first.getLessonId()));
   }
 
   @Test
