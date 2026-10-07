@@ -88,7 +88,7 @@ public class DemoData implements CommandLineRunner {
                 + "1. Tóm tắt ba điều bạn vừa học.\n"
                 + "2. Tạo một ví dụ theo cách hiểu của bạn.\n"
                 + "3. Kiểm tra ví dụ với một trường hợp khác.\n\n"
-                + "Đây là nội dung mẫu của học viện để trình diễn luồng học tập.");
+                + "Đây là nội dung mẫu của Course Management để trình diễn luồng học tập.");
         lessons.save(l);
       }
     }

@@ -1,5 +1,5 @@
 {
-  "name": "hoc-vien-kiem-thu",
+  "name": "course-management-tests",
   "private": true,
   "scripts": {
     "test:e2e": "playwright test",
