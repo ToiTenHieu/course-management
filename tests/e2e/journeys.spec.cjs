@@ -37,8 +37,12 @@ async function login(page, username, secret = password) {
   await page.getByLabel("Mật khẩu", { exact: true }).fill(secret);
   await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
   await expect(page).toHaveURL(/dashboard\.html/);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Tổng quan",
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    username === "admin_demo"
+      ? "Trung tâm vận hành"
+      : username === "teacher_demo"
+        ? "Không gian giảng dạy"
+        : "Không gian học tập",
   );
 }
 async function course(page, title) {
