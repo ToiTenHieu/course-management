@@ -79,11 +79,11 @@ public class CourseServiceImpl implements CourseService {
 
   @Transactional(readOnly = true)
   public List<String> getCategories(Integer teacherId, CustomUserDetails actor) {
-    var u = actor.getUser();
+    var u = actor == null ? null : actor.getUser();
     return courses.findVisibleCategories(
-        u.getRole() == Role.ADMIN,
+        u != null && u.getRole() == Role.ADMIN,
         CourseStatus.PUBLISHED,
-        u.getRole() == Role.TEACHER ? u.getUserId() : -1,
+        u != null && u.getRole() == Role.TEACHER ? u.getUserId() : -1,
         teacherId);
   }
 
@@ -96,11 +96,11 @@ public class CourseServiceImpl implements CourseService {
       CustomUserDetails actor) {
     return (root, query, cb) -> {
       var predicates = new ArrayList<Predicate>();
-      var u = actor.getUser();
-      if (u.getRole() != Role.ADMIN) {
+      var u = actor == null ? null : actor.getUser();
+      if (u == null || u.getRole() != Role.ADMIN) {
         var published = cb.equal(root.get("status"), CourseStatus.PUBLISHED);
         predicates.add(
-            u.getRole() == Role.TEACHER
+            u != null && u.getRole() == Role.TEACHER
                 ? cb.or(published, cb.equal(root.get("teacher").get("userId"), u.getUserId()))
                 : published);
       }
@@ -159,6 +159,25 @@ public class CourseServiceImpl implements CourseService {
     return response;
   }
 
+  @Transactional(readOnly = true)
+  public CourseResponse getPublicCourse(Integer id) {
+    var course = find(id);
+    if (course.getStatus() != CourseStatus.PUBLISHED)
+      throw new ResourceNotFoundException("Không tìm thấy khóa học");
+    var response = toResponse(course);
+    response.setLessons(
+        lessons.findByCourse_CourseIdAndIsPublishedTrueOrderByOrderIndex(id).stream()
+            .map(
+                l ->
+                    LessonSummaryResponse.builder()
+                        .lessonId(l.getLessonId())
+                        .title(l.getTitle())
+                        .orderIndex(l.getOrderIndex())
+                        .build())
+            .toList());
+    return response;
+  }
+
   public CourseResponse createCourse(CreateCourseRequest r) {
     var c = new Course();
     c.setTeacher(teacher(r.getTeacherId()));
@@ -172,11 +191,16 @@ public class CourseServiceImpl implements CourseService {
     return toResponse(courses.save(c));
   }
 
-  public CourseResponse updateCourse(Integer id, UpdateCourseRequest r) {
+  public CourseResponse updateCourse(Integer id, UpdateCourseRequest r, CustomUserDetails actor) {
     var c =
         courses
             .findLockedById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học"));
+    policy.manager(c, actor);
+    if (actor.getUser().getRole() != Role.ADMIN
+        && (!c.getTeacher().getUserId().equals(r.getTeacherId())
+            || (r.getPrice() != null && r.getPrice().compareTo(c.getPrice()) != 0)))
+      throw new ForbiddenException("Chỉ quản trị viên có thể đổi giảng viên hoặc học phí");
     c.setTeacher(teacher(r.getTeacherId()));
     c.setTitle(r.getTitle().trim());
     c.setDescription(r.getDescription());

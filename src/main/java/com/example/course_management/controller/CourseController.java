@@ -71,13 +71,15 @@ public class CourseController {
     return ApiResponse.success("Tạo khóa học thành công", courseService.createCourse(request));
   }
 
-  // Endpoint 13: PUT /api/courses/{course_id} — ADMIN
+  // Teachers may edit metadata for their own course; pricing/assignment stay admin-only.
   @PutMapping("/{courseId}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
   public ApiResponse<CourseResponse> updateCourse(
-      @PathVariable Integer courseId, @Valid @RequestBody UpdateCourseRequest request) {
+      @PathVariable Integer courseId,
+      @Valid @RequestBody UpdateCourseRequest request,
+      @AuthenticationPrincipal CustomUserDetails actor) {
     return ApiResponse.success(
-        "Cập nhật khóa học thành công", courseService.updateCourse(courseId, request));
+        "Cập nhật khóa học thành công", courseService.updateCourse(courseId, request, actor));
   }
 
   // Endpoint 14: PUT /api/courses/{course_id}/status — ADMIN

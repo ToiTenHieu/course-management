@@ -71,6 +71,12 @@ public class AuthController {
     return ApiResponse.success("Lấy thông tin thành công", profile);
   }
 
+  @GetMapping("/session")
+  public ApiResponse<UserProfileResponse> session() {
+    return ApiResponse.success(
+        "OK", authService.verifySession() ? authService.getCurrentUser() : null);
+  }
+
   @PostMapping("/logout")
   public ApiResponse<Void> logout(HttpServletRequest request) {
     authService.logout(request);

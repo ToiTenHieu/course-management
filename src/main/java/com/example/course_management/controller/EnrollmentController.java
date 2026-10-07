@@ -1,9 +1,11 @@
 package com.example.course_management.controller;
 
 import com.example.course_management.dto.request.CreateEnrollmentRequest;
+import com.example.course_management.dto.request.SaveLessonNoteRequest;
 import com.example.course_management.dto.response.ApiResponse;
 import com.example.course_management.dto.response.EnrollmentDetailResponse;
 import com.example.course_management.dto.response.EnrollmentResponse;
+import com.example.course_management.dto.response.LessonNoteResponse;
 import com.example.course_management.security.CustomUserDetails;
 import com.example.course_management.service.EnrollmentService;
 import jakarta.validation.Valid;
@@ -55,5 +57,33 @@ public class EnrollmentController {
     return ApiResponse.success(
         "Đánh dấu hoàn thành thành công",
         enrollmentService.completeLesson(enrollmentId, lessonId, actor));
+  }
+
+  @GetMapping("/{enrollmentId}/notes/{lessonId}")
+  public ApiResponse<LessonNoteResponse> getNote(
+      @PathVariable Integer enrollmentId,
+      @PathVariable Integer lessonId,
+      @AuthenticationPrincipal CustomUserDetails actor) {
+    return ApiResponse.success("OK", enrollmentService.getNote(enrollmentId, lessonId, actor));
+  }
+
+  @PutMapping("/{enrollmentId}/notes/{lessonId}")
+  public ApiResponse<LessonNoteResponse> saveNote(
+      @PathVariable Integer enrollmentId,
+      @PathVariable Integer lessonId,
+      @Valid @RequestBody SaveLessonNoteRequest request,
+      @AuthenticationPrincipal CustomUserDetails actor) {
+    return ApiResponse.success(
+        "Đã lưu ghi chú",
+        enrollmentService.saveNote(enrollmentId, lessonId, request.note(), actor));
+  }
+
+  @PutMapping("/{enrollmentId}/access_lesson/{lessonId}")
+  public ApiResponse<Void> accessLesson(
+      @PathVariable Integer enrollmentId,
+      @PathVariable Integer lessonId,
+      @AuthenticationPrincipal CustomUserDetails actor) {
+    enrollmentService.accessLesson(enrollmentId, lessonId, actor);
+    return ApiResponse.success("OK", null);
   }
 }

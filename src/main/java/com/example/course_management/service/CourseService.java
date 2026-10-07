@@ -26,9 +26,12 @@ public interface CourseService {
 
   CourseResponse getCourseById(Integer courseId, CustomUserDetails actor);
 
+  CourseResponse getPublicCourse(Integer courseId);
+
   CourseResponse createCourse(CreateCourseRequest request);
 
-  CourseResponse updateCourse(Integer courseId, UpdateCourseRequest request);
+  CourseResponse updateCourse(
+      Integer courseId, UpdateCourseRequest request, CustomUserDetails actor);
 
   CourseResponse updateStatus(Integer courseId, UpdateCourseStatusRequest request);
 

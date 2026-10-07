@@ -38,4 +38,7 @@ public class LessonProgress {
 
   @Column(name = "last_accessed_at", nullable = false)
   private LocalDateTime lastAccessedAt = LocalDateTime.now();
+
+  @Column(name = "note", columnDefinition = "text")
+  private String note;
 }

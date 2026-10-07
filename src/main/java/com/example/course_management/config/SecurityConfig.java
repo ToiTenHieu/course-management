@@ -44,7 +44,10 @@ public class SecurityConfig {
                         "/api/auth/login",
                         "/api/auth/register",
                         "/api/auth/csrf",
+                        "/api/auth/session",
                         "/api/auth/config")
+                    .permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/discovery/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

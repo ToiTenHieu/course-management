@@ -13,6 +13,7 @@ public class EnrollmentDetailResponse {
   private String courseTitle;
   private String status;
   private BigDecimal progressPercentage;
+  private Integer lastLessonId;
   private List<LessonProgressItem> lessons;
 
   @Getter

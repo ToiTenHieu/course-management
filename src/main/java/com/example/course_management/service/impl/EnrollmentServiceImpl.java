@@ -2,6 +2,7 @@ package com.example.course_management.service.impl;
 
 import com.example.course_management.dto.response.EnrollmentDetailResponse;
 import com.example.course_management.dto.response.EnrollmentResponse;
+import com.example.course_management.dto.response.LessonNoteResponse;
 import com.example.course_management.entity.*;
 import com.example.course_management.exception.BadRequestException;
 import com.example.course_management.exception.ConflictException;
@@ -12,6 +13,7 @@ import com.example.course_management.security.CustomUserDetails;
 import com.example.course_management.service.EnrollmentService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -147,6 +149,74 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     calculator.recalculate(enrollment);
   }
 
+  @Transactional(readOnly = true)
+  public LessonNoteResponse getNote(
+      Integer enrollmentId, Integer lessonId, CustomUserDetails actor) {
+    var enrollment = findEnrollmentOrThrow(enrollmentId);
+    requireAccessibleLesson(enrollment, lessonId, actor);
+    return new LessonNoteResponse(
+        lessonId,
+        lessonProgressRepository
+            .findByEnrollment_EnrollmentIdAndLesson_LessonId(enrollmentId, lessonId)
+            .map(p -> p.getNote() == null ? "" : p.getNote())
+            .orElse(""));
+  }
+
+  public LessonNoteResponse saveNote(
+      Integer enrollmentId, Integer lessonId, String note, CustomUserDetails actor) {
+    if (note == null || note.length() > 10000)
+      throw new BadRequestException("Ghi chú tối đa 10000 ký tự");
+    var p = writableProgress(enrollmentId, lessonId, actor);
+    p.setNote(note);
+    lessonProgressRepository.save(p);
+    return new LessonNoteResponse(lessonId, note);
+  }
+
+  public void accessLesson(Integer enrollmentId, Integer lessonId, CustomUserDetails actor) {
+    var p = writableProgress(enrollmentId, lessonId, actor);
+    p.setLastAccessedAt(LocalDateTime.now());
+    lessonProgressRepository.save(p);
+  }
+
+  private LessonProgress writableProgress(
+      Integer enrollmentId, Integer lessonId, CustomUserDetails actor) {
+    var initial = findEnrollmentOrThrow(enrollmentId);
+    requireOwner(initial, actor);
+    // Same lock ordering as completion/publication protects against simultaneous progress writes.
+    courseRepository
+        .findLockedById(initial.getCourse().getCourseId())
+        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học"));
+    var enrollment =
+        enrollmentRepository
+            .findLockedById(enrollmentId)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lượt đăng ký"));
+    var lesson = requireAccessibleLesson(enrollment, lessonId, actor);
+    return lessonProgressRepository
+        .findByEnrollment_EnrollmentIdAndLesson_LessonId(enrollmentId, lessonId)
+        .orElseGet(
+            () -> {
+              var p = new LessonProgress();
+              p.setEnrollment(enrollment);
+              p.setLesson(lesson);
+              return p;
+            });
+  }
+
+  private Lesson requireAccessibleLesson(
+      Enrollment enrollment, Integer lessonId, CustomUserDetails actor) {
+    requireOwner(enrollment, actor);
+    if (enrollment.getStatus() == EnrollmentStatus.DROPPED)
+      throw new ForbiddenException("Lượt đăng ký không còn hiệu lực");
+    var lesson =
+        lessonRepository
+            .findById(lessonId)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài học"));
+    if (!lesson.getCourse().getCourseId().equals(enrollment.getCourse().getCourseId())
+        || !Boolean.TRUE.equals(lesson.getIsPublished()))
+      throw new ForbiddenException("Bài học không thuộc chương trình đã đăng ký");
+    return lesson;
+  }
+
   private void requireOwner(Enrollment enrollment, CustomUserDetails actor) {
     if (!enrollment.getStudent().getUserId().equals(actor.getUser().getUserId())) {
       throw new ForbiddenException("Bạn không có quyền truy cập lượt đăng ký này");
@@ -204,6 +274,15 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         .status(e.getStatus().name())
         .progressPercentage(e.getProgressPercentage())
         .lessons(items)
+        .lastLessonId(
+            progressList.stream()
+                .filter(
+                    p ->
+                        lessons.stream()
+                            .anyMatch(l -> l.getLessonId().equals(p.getLesson().getLessonId())))
+                .max(Comparator.comparing(LessonProgress::getLastAccessedAt))
+                .map(p -> p.getLesson().getLessonId())
+                .orElse(null))
         .build();
   }
 }

@@ -124,6 +124,247 @@ class BusinessFlowTests {
   }
 
   @Test
+  void guestsCanDiscoverPublishedCoursesWithoutReceivingLessonContent() throws Exception {
+    var draft = course("Secret draft", BigDecimal.ZERO);
+    draft.setStatus(CourseStatus.DRAFT);
+    draft.setCategory("Secret category");
+    courses.saveAndFlush(draft);
+    lesson(free, "Hidden draft lesson", 3, false);
+    mvc.perform(get("/api/discovery/catalog").param("size", "1").param("search", "Free"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.totalElements").value(1))
+        .andExpect(jsonPath("$.data.content[0].title").value("Free"));
+    mvc.perform(get("/api/discovery/categories"))
+        .andExpect(status().isOk())
+        .andExpect(
+            content()
+                .string(
+                    org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Secret category"))));
+    mvc.perform(get("/api/discovery/courses/" + free.getCourseId()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.lessons.length()").value(2))
+        .andExpect(jsonPath("$.data.lessons[0].textContent").doesNotExist())
+        .andExpect(jsonPath("$.data.lessons[0].contentUrl").doesNotExist())
+        .andExpect(
+            content()
+                .string(
+                    org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Private lesson body"))));
+    mvc.perform(get("/api/discovery/courses/" + draft.getCourseId()))
+        .andExpect(status().isNotFound());
+    mvc.perform(get("/api/discovery/courses/" + draft.getCourseId()).session(login(admin)))
+        .andExpect(status().isNotFound());
+    mvc.perform(get("/api/lessons/" + first.getLessonId())).andExpect(status().isUnauthorized());
+    mvc.perform(get("/api/discovery/catalog").param("size", "101"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void publicSessionReturnsOnlyTheCurrentActiveProfile() throws Exception {
+    mvc.perform(get("/api/auth/session"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").isEmpty());
+    var session = login(student);
+    mvc.perform(get("/api/auth/session").session(session))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.userId").value(student.getUserId()))
+        .andExpect(jsonPath("$.data.passwordHash").doesNotExist());
+    student.setIsActive(false);
+    users.saveAndFlush(student);
+    mvc.perform(get("/api/auth/session").session(session))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").isEmpty());
+  }
+
+  @Test
+  void teacherCanImproveOwnCourseMetadataButCannotChangeAssignmentOrPrice() throws Exception {
+    var session = login(teacher);
+    var body =
+        "{\"title\":\"Improved course\",\"teacherId\":%d,\"description\":\"Clear introduction\",\"learningOutcomes\":\"Build a small application\",\"price\":0}"
+            .formatted(teacher.getUserId());
+    mvc.perform(
+            put("/api/courses/" + free.getCourseId())
+                .session(session)
+                .with(csrf())
+                .contentType("application/json")
+                .content(body))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.learningOutcomes").value("Build a small application"));
+    mvc.perform(
+            put("/api/courses/" + free.getCourseId())
+                .session(session)
+                .with(csrf())
+                .contentType("application/json")
+                .content(body.replace("\"price\":0", "\"price\":100")))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            put("/api/courses/" + free.getCourseId())
+                .session(session)
+                .with(csrf())
+                .contentType("application/json")
+                .content(
+                    body.replace(
+                        "\"teacherId\":" + teacher.getUserId(),
+                        "\"teacherId\":" + outsider.getUserId())))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            put("/api/courses/" + free.getCourseId())
+                .session(login(outsider))
+                .with(csrf())
+                .contentType("application/json")
+                .content(body))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            put("/api/courses/" + free.getCourseId())
+                .session(login(student))
+                .with(csrf())
+                .contentType("application/json")
+                .content(body))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            put("/api/courses/" + free.getCourseId() + "/status")
+                .session(session)
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"status\":\"ARCHIVED\"}"))
+        .andExpect(status().isForbidden());
+    assertEquals(
+        BigDecimal.ZERO.setScale(2), courses.findById(free.getCourseId()).orElseThrow().getPrice());
+    assertEquals(
+        teacher.getUserId(),
+        courses.findById(free.getCourseId()).orElseThrow().getTeacher().getUserId());
+  }
+
+  @Test
+  void privateNotesPersistWithoutCompletingLessonsAndSurviveCompletion() throws Exception {
+    var e = enrollmentService.enroll(free.getCourseId(), actor(student));
+    var session = login(student);
+    var path = "/api/enrollments/" + e.getEnrollmentId() + "/notes/" + first.getLessonId();
+    mvc.perform(get(path).session(session))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.note").value(""));
+    mvc.perform(
+            put(path)
+                .session(session)
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"note\":\"<script>my own idea</script>\"}"))
+        .andExpect(status().isOk());
+    mvc.perform(get(path).session(session))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.note").value("<script>my own idea</script>"));
+    assertEquals(
+        0,
+        enrollmentService
+            .getEnrollmentDetail(e.getEnrollmentId(), actor(student))
+            .getProgressPercentage()
+            .intValue());
+    enrollmentService.completeLesson(e.getEnrollmentId(), first.getLessonId(), actor(student));
+    assertEquals(
+        "<script>my own idea</script>",
+        enrollmentService.getNote(e.getEnrollmentId(), first.getLessonId(), actor(student)).note());
+    enrollmentService.saveNote(e.getEnrollmentId(), first.getLessonId(), "", actor(student));
+    assertEquals(
+        "",
+        enrollmentService.getNote(e.getEnrollmentId(), first.getLessonId(), actor(student)).note());
+    assertEquals(1, progress.findByEnrollment_EnrollmentId(e.getEnrollmentId()).size());
+  }
+
+  @Test
+  void notesAndResumeRequireAnActiveOwnerAndPublishedLessonInTheirCourse() throws Exception {
+    var e = enrollmentService.enroll(free.getCourseId(), actor(student));
+    var other = user("another-student", Role.STUDENT);
+    var path = "/api/enrollments/" + e.getEnrollmentId() + "/notes/" + first.getLessonId();
+    mvc.perform(get(path)).andExpect(status().isUnauthorized());
+    mvc.perform(get(path).session(login(other))).andExpect(status().isForbidden());
+    mvc.perform(
+            put(path)
+                .session(login(other))
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"note\":\"other\"}"))
+        .andExpect(status().isForbidden());
+    mvc.perform(get(path).session(login(teacher))).andExpect(status().isForbidden());
+    var draft = lesson(free, "Draft", 3, false);
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            enrollmentService.saveNote(
+                e.getEnrollmentId(), draft.getLessonId(), "draft", actor(student)));
+    var paidLesson = lessons.findByCourse_CourseIdOrderByOrderIndex(paid.getCourseId()).getFirst();
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            enrollmentService.accessLesson(
+                e.getEnrollmentId(), paidLesson.getLessonId(), actor(student)));
+    var entity = enrollments.findById(e.getEnrollmentId()).orElseThrow();
+    entity.setStatus(EnrollmentStatus.DROPPED);
+    enrollments.saveAndFlush(entity);
+    assertThrows(
+        ForbiddenException.class,
+        () -> enrollmentService.getNote(e.getEnrollmentId(), first.getLessonId(), actor(student)));
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            enrollmentService.accessLesson(
+                e.getEnrollmentId(), first.getLessonId(), actor(student)));
+  }
+
+  @Test
+  void recentLessonIsRestoredAndHiddenLessonsAreExcludedFromResume() {
+    var e = enrollmentService.enroll(free.getCourseId(), actor(student));
+    enrollmentService.accessLesson(e.getEnrollmentId(), first.getLessonId(), actor(student));
+    enrollmentService.accessLesson(e.getEnrollmentId(), second.getLessonId(), actor(student));
+    assertEquals(
+        second.getLessonId(),
+        enrollmentService
+            .getEnrollmentDetail(e.getEnrollmentId(), actor(student))
+            .getLastLessonId());
+    assertEquals(
+        0,
+        enrollmentService
+            .getEnrollmentDetail(e.getEnrollmentId(), actor(student))
+            .getProgressPercentage()
+            .intValue());
+    second.setIsPublished(false);
+    lessons.saveAndFlush(second);
+    assertEquals(
+        first.getLessonId(),
+        enrollmentService
+            .getEnrollmentDetail(e.getEnrollmentId(), actor(student))
+            .getLastLessonId());
+  }
+
+  @Test
+  void notesValidateSizeAndCsrf() throws Exception {
+    var e = enrollmentService.enroll(free.getCourseId(), actor(student));
+    var session = login(student);
+    var path = "/api/enrollments/" + e.getEnrollmentId() + "/notes/" + first.getLessonId();
+    mvc.perform(
+            put(path)
+                .session(session)
+                .contentType("application/json")
+                .content("{\"note\":\"test\"}"))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            put(path)
+                .session(session)
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"note\":null}"))
+        .andExpect(status().isBadRequest());
+    mvc.perform(
+            put(path)
+                .session(session)
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"note\":\"" + "x".repeat(10001) + "\"}"))
+        .andExpect(status().isBadRequest());
+    assertTrue(progress.findByEnrollment_EnrollmentId(e.getEnrollmentId()).isEmpty());
+  }
+
+  @Test
   void unregisteredLessonListRedactsContent() {
     var list = lessonService.getLessonsByCourse(paid.getCourseId(), actor(student));
     assertEquals(1, list.size());
