@@ -46,6 +46,9 @@ class BusinessFlowTests {
   @Autowired ReviewRepository reviews;
   @Autowired LessonQuestionService questionService;
   @Autowired LessonQuestionRepository questions;
+  @Autowired LessonQuizService quizService;
+  @Autowired LessonQuizRepository quizzes;
+  @Autowired QuizAttemptRepository quizAttempts;
   @Autowired jakarta.persistence.EntityManagerFactory entityManagerFactory;
   @MockitoSpyBean NotificationRepository notifications;
   User admin, teacher, student, outsider;
@@ -57,6 +60,10 @@ class BusinessFlowTests {
     reset(notifications);
     for (String table :
         new String[] {
+          "quiz_answers",
+          "quiz_attempts",
+          "quiz_questions",
+          "lesson_quiz_versions",
           "lesson_questions",
           "notifications",
           "reviews",
@@ -131,6 +138,364 @@ class BusinessFlowTests {
     e.setStudent(u);
     e.setCourse(free);
     enrollments.saveAndFlush(e);
+  }
+
+  SaveQuizRequest quizRequest(int revision, boolean published) {
+    return new SaveQuizRequest(
+        revision,
+        "Practice quiz",
+        70,
+        published,
+        java.util.List.of(
+            new SaveQuizRequest.Question(
+                "First question", java.util.List.of("A", "B", "C", "D"), 0, "A is correct"),
+            new SaveQuizRequest.Question(
+                "Second question",
+                java.util.List.of("One", "Two", "Three", "Four"),
+                1,
+                "Two is correct")));
+  }
+
+  SubmitQuizRequest submission(
+      com.example.course_management.dto.response.QuizResponse quiz, Integer... answers) {
+    return new SubmitQuizRequest(
+        quiz.quizVersionId(), java.util.UUID.randomUUID().toString(), java.util.List.of(answers));
+  }
+
+  @Test
+  void quizDraftsAndAnswerKeysAreNotVisibleToLearnersBeforeSubmission() throws Exception {
+    enrollForQuestions(student);
+    quizService.save(first.getLessonId(), quizRequest(0, false), actor(teacher));
+    assertNull(quizService.get(first.getLessonId(), actor(student)));
+    assertNotNull(quizService.get(first.getLessonId(), actor(teacher)));
+    var quiz = quizService.save(first.getLessonId(), quizRequest(1, true), actor(teacher));
+    var learner = quizService.get(first.getLessonId(), actor(student));
+    assertNull(learner.questions().getFirst().correctIndex());
+    assertNull(learner.questions().getFirst().explanation());
+    assertEquals(0, quiz.questions().getFirst().correctIndex());
+    mvc.perform(get("/api/lessons/" + first.getLessonId() + "/quiz").session(login(student)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.questions[0].correctIndex").doesNotExist())
+        .andExpect(jsonPath("$.data.questions[0].explanation").doesNotExist());
+    mvc.perform(get("/api/lessons/" + first.getLessonId() + "/quiz"))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void quizSubmissionGradesOnServerAndKeepsProgressSeparate() {
+    enrollForQuestions(student);
+    var quiz = quizService.save(first.getLessonId(), quizRequest(0, true), actor(teacher));
+    var wrong = quizService.submit(first.getLessonId(), submission(quiz, 2, 1), actor(student));
+    assertEquals(50, wrong.summary().score());
+    assertEquals(1, wrong.summary().correctCount());
+    assertFalse(wrong.summary().passed());
+    assertFalse(wrong.feedback().getFirst().correct());
+    assertEquals("A is correct", wrong.feedback().getFirst().explanation());
+    var right = quizService.submit(first.getLessonId(), submission(quiz, 0, 1), actor(student));
+    assertEquals(100, right.summary().score());
+    assertTrue(right.summary().passed());
+    assertEquals(0, progress.count());
+    assertEquals(
+        BigDecimal.ZERO.setScale(2), enrollments.findAll().getFirst().getProgressPercentage());
+  }
+
+  @Test
+  void quizPassingUsesTheExactFractionAndDisplaysAnUnroundedScore() {
+    enrollForQuestions(student);
+    var questions =
+        java.util.List.of(
+            quizRequest(0, true).questions().getFirst(),
+            quizRequest(0, true).questions().getFirst(),
+            quizRequest(0, true).questions().getFirst());
+    var quiz =
+        quizService.save(
+            first.getLessonId(),
+            new SaveQuizRequest(0, "Boundary", 67, true, questions),
+            actor(teacher));
+    var result = quizService.submit(first.getLessonId(), submission(quiz, 0, 0, 1), actor(student));
+    assertEquals(66, result.summary().score());
+    assertFalse(result.summary().passed());
+    var next =
+        quizService.save(
+            first.getLessonId(),
+            new SaveQuizRequest(1, "Boundary", 66, true, questions),
+            actor(teacher));
+    assertTrue(
+        quizService
+            .submit(first.getLessonId(), submission(next, 0, 0, 1), actor(student))
+            .summary()
+            .passed());
+  }
+
+  @Test
+  void quizVersionsPreserveOldResultsAndRejectStaleEditorsAndSubmissions() {
+    enrollForQuestions(student);
+    var oldQuiz = quizService.save(first.getLessonId(), quizRequest(0, true), actor(teacher));
+    var oldSubmission = submission(oldQuiz, 0, 1);
+    var oldResult = quizService.submit(first.getLessonId(), oldSubmission, actor(student));
+    var edited =
+        new SaveQuizRequest(
+            1,
+            "New title",
+            100,
+            true,
+            java.util.List.of(
+                new SaveQuizRequest.Question(
+                    "Changed prompt",
+                    java.util.List.of("X", "Y", "Z", "W"),
+                    2,
+                    "New explanation")));
+    var newQuiz = quizService.save(first.getLessonId(), edited, actor(teacher));
+    assertEquals(2, newQuiz.revision());
+    var history = quizService.attempt(oldResult.summary().attemptId(), actor(student));
+    assertEquals("Practice quiz", history.summary().title());
+    assertEquals("First question", history.feedback().getFirst().prompt());
+    assertEquals("A is correct", history.feedback().getFirst().explanation());
+    assertThrows(
+        ConflictException.class,
+        () -> quizService.save(first.getLessonId(), quizRequest(1, true), actor(teacher)));
+    assertThrows(
+        ConflictException.class,
+        () -> quizService.submit(first.getLessonId(), submission(oldQuiz, 0, 1), actor(student)));
+    assertEquals(
+        oldResult.summary().attemptId(),
+        quizService
+            .submit(first.getLessonId(), oldSubmission, actor(student))
+            .summary()
+            .attemptId());
+    assertEquals(1, quizAttempts.count());
+    quizService.save(first.getLessonId(), quizRequest(2, false), actor(admin));
+    assertNull(quizService.get(first.getLessonId(), actor(student)));
+    assertEquals(1, quizService.history(first.getLessonId(), 0, 5, actor(student)).totalElements());
+  }
+
+  @Test
+  void quizHistoryIsPrivateAndRequiresAnActiveEnrollmentAndVisibleLesson() {
+    enrollForQuestions(student);
+    var quiz = quizService.save(first.getLessonId(), quizRequest(0, true), actor(teacher));
+    var result = quizService.submit(first.getLessonId(), submission(quiz, 0, 1), actor(student));
+    var another = user("other_student", Role.STUDENT);
+    enrollForQuestions(another);
+    assertThrows(
+        ForbiddenException.class,
+        () -> quizService.attempt(result.summary().attemptId(), actor(another)));
+    assertEquals(0, quizService.history(first.getLessonId(), 0, 5, actor(another)).totalElements());
+    assertThrows(
+        ForbiddenException.class, () -> quizService.get(first.getLessonId(), actor(outsider)));
+    assertThrows(
+        ForbiddenException.class,
+        () -> quizService.save(first.getLessonId(), quizRequest(1, true), actor(outsider)));
+    assertThrows(
+        ForbiddenException.class,
+        () -> quizService.statistics(first.getLessonId(), actor(outsider)));
+    assertNotNull(quizService.attempt(result.summary().attemptId(), actor(teacher)));
+    var e =
+        enrollments
+            .findByStudent_UserIdAndCourse_CourseId(student.getUserId(), free.getCourseId())
+            .orElseThrow();
+    e.setStatus(EnrollmentStatus.DROPPED);
+    enrollments.saveAndFlush(e);
+    assertThrows(
+        ForbiddenException.class,
+        () -> quizService.history(first.getLessonId(), 0, 5, actor(student)));
+    assertThrows(
+        ForbiddenException.class,
+        () -> quizService.submit(first.getLessonId(), submission(quiz, 0, 1), actor(student)));
+    first.setIsPublished(false);
+    lessons.saveAndFlush(first);
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> quizService.get(first.getLessonId(), actor(another)));
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> quizService.attempt(result.summary().attemptId(), actor(student)));
+  }
+
+  @Test
+  void quizStatisticsCountAttemptsAndWrongAnswersForCurrentVersionOnly() {
+    enrollForQuestions(student);
+    var quiz = quizService.save(first.getLessonId(), quizRequest(0, true), actor(teacher));
+    var empty = quizService.statistics(first.getLessonId(), actor(teacher));
+    assertEquals(0, empty.attempts());
+    assertNull(empty.averageScore());
+    quizService.submit(first.getLessonId(), submission(quiz, 0, 1), actor(student));
+    quizService.submit(first.getLessonId(), submission(quiz, 3, 1), actor(student));
+    var stats = quizService.statistics(first.getLessonId(), actor(teacher));
+    assertEquals(2, stats.attempts());
+    assertEquals(1, stats.students());
+    assertEquals(1, stats.passedAttempts());
+    assertEquals(75.0, stats.averageScore());
+    assertEquals(1, stats.questions().getFirst().incorrect());
+    assertEquals(2, stats.questions().getFirst().answered());
+    assertEquals(0, stats.questions().get(1).incorrect());
+    quizService.save(first.getLessonId(), quizRequest(1, true), actor(teacher));
+    assertEquals(0, quizService.statistics(first.getLessonId(), actor(admin)).attempts());
+    assertThrows(
+        ForbiddenException.class,
+        () -> quizService.statistics(first.getLessonId(), actor(student)));
+  }
+
+  @Test
+  void repeatedAndConcurrentQuizSubmissionsStoreExactlyOneAttempt() throws Exception {
+    enrollForQuestions(student);
+    var quiz = quizService.save(first.getLessonId(), quizRequest(0, true), actor(teacher));
+    var request = submission(quiz, 0, 1);
+    var ready = new CountDownLatch(2);
+    var start = new CountDownLatch(1);
+    var executor = Executors.newFixedThreadPool(2);
+    try {
+      Callable<Integer> work =
+          () -> {
+            ready.countDown();
+            assertTrue(start.await(10, TimeUnit.SECONDS));
+            return quizService
+                .submit(first.getLessonId(), request, actor(student))
+                .summary()
+                .attemptId();
+          };
+      var one = executor.submit(work);
+      var two = executor.submit(work);
+      assertTrue(ready.await(10, TimeUnit.SECONDS));
+      start.countDown();
+      assertEquals(one.get(15, TimeUnit.SECONDS), two.get(15, TimeUnit.SECONDS));
+    } finally {
+      start.countDown();
+      executor.shutdownNow();
+    }
+    assertEquals(1, quizAttempts.count());
+    assertThrows(
+        ConflictException.class,
+        () ->
+            quizService.submit(
+                first.getLessonId(),
+                new SubmitQuizRequest(
+                    quiz.quizVersionId(), request.submissionKey(), java.util.List.of(3, 1)),
+                actor(student)));
+  }
+
+  @Test
+  void quizHistoryPaginatesAndInvalidAnswersDoNotCreateAttempts() {
+    enrollForQuestions(student);
+    var quiz = quizService.save(first.getLessonId(), quizRequest(0, true), actor(teacher));
+    var one = quizService.submit(first.getLessonId(), submission(quiz, 0, 1), actor(student));
+    var two = quizService.submit(first.getLessonId(), submission(quiz, 1, 0), actor(student));
+    var page = quizService.history(first.getLessonId(), 0, 1, actor(student));
+    assertEquals(2, page.totalPages());
+    assertEquals(two.summary().attemptId(), page.content().getFirst().attemptId());
+    assertEquals(
+        one.summary().attemptId(),
+        quizService
+            .history(first.getLessonId(), 1, 1, actor(student))
+            .content()
+            .getFirst()
+            .attemptId());
+    assertThrows(
+        BadRequestException.class,
+        () -> quizService.submit(first.getLessonId(), submission(quiz, 0), actor(student)));
+    assertThrows(
+        BadRequestException.class,
+        () -> quizService.submit(first.getLessonId(), submission(quiz, 4, 1), actor(student)));
+    assertThrows(
+        BadRequestException.class,
+        () -> quizService.history(first.getLessonId(), -1, 5, actor(student)));
+    assertThrows(
+        BadRequestException.class,
+        () -> quizService.history(first.getLessonId(), 0, 51, actor(student)));
+    assertEquals(2, quizAttempts.count());
+  }
+
+  @Test
+  void quizEndpointsValidateNestedQuestionsRolesAndCsrf() throws Exception {
+    var teacherSession = login(teacher);
+    var path = "/api/lessons/" + first.getLessonId() + "/quiz";
+    var body =
+        """
+{"expectedRevision":0,"title":"Quiz","passPercentage":70,"published":true,
+"questions":[{"prompt":"Question","options":["A","B","C","D"],"correctIndex":0,"explanation":"Explanation"}]}
+""";
+    mvc.perform(put(path).session(teacherSession).contentType("application/json").content(body))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            put(path)
+                .session(login(student))
+                .with(csrf())
+                .contentType("application/json")
+                .content(body))
+        .andExpect(status().isForbidden());
+    for (var invalid :
+        new String[] {
+          body.replace("\"correctIndex\":0", "\"correctIndex\":4"),
+          body.replace("\"A\",\"B\",\"C\",\"D\"", "\"A\",\"B\""),
+          body.replace("Question", "  "),
+          body.replace("Explanation", "  "),
+          body.replace("\"B\"", "\"A\""),
+          body.replace("70", "101")
+        }) {
+      mvc.perform(
+              put(path)
+                  .session(teacherSession)
+                  .with(csrf())
+                  .contentType("application/json")
+                  .content(invalid))
+          .andExpect(status().isBadRequest());
+    }
+    mvc.perform(
+            put(path)
+                .session(teacherSession)
+                .with(csrf())
+                .contentType("application/json")
+                .content(body))
+        .andExpect(status().isOk());
+    assertEquals(1, quizzes.count());
+    enrollForQuestions(student);
+    var quiz = quizService.get(first.getLessonId(), actor(student));
+    var submit =
+        "{\"quizVersionId\":"
+            + quiz.quizVersionId()
+            + ",\"submissionKey\":\""
+            + java.util.UUID.randomUUID()
+            + "\",\"answers\":[0]}";
+    var studentSession = login(student);
+    mvc.perform(
+            post(path + "/attempts")
+                .session(studentSession)
+                .contentType("application/json")
+                .content(submit))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            post(path + "/attempts")
+                .session(studentSession)
+                .with(csrf())
+                .contentType("application/json")
+                .content(submit.replace("[0]", "[null]")))
+        .andExpect(status().isBadRequest());
+    mvc.perform(
+            post(path + "/attempts")
+                .session(studentSession)
+                .with(csrf())
+                .contentType("application/json")
+                .content(submit.replace("[0]", "[4]")))
+        .andExpect(status().isBadRequest());
+    mvc.perform(
+            post(path + "/attempts")
+                .session(studentSession)
+                .with(csrf())
+                .contentType("application/json")
+                .content(submit))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.summary.score").value(100));
+  }
+
+  @Test
+  void deletingLessonRemovesItsQuizzesAndAttemptsWithoutOrphans() {
+    enrollForQuestions(student);
+    var quiz = quizService.save(first.getLessonId(), quizRequest(0, true), actor(teacher));
+    quizService.submit(first.getLessonId(), submission(quiz, 0, 1), actor(student));
+    lessonService.deleteLesson(first.getLessonId(), actor(teacher));
+    assertEquals(0, quizzes.count());
+    assertEquals(0, quizAttempts.count());
+    assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM quiz_answers", Integer.class));
+    assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM quiz_questions", Integer.class));
   }
 
   @Test

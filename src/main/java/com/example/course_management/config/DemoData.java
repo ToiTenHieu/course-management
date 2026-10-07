@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@org.springframework.core.annotation.Order(0)
 @ConditionalOnProperty(name = "app.demo.enabled", havingValue = "true")
 public class DemoData implements CommandLineRunner {
   private final UserRepository users;
