@@ -40,8 +40,6 @@ Checklist là hướng dẫn chất lượng, không thay thế luật xuất b�
 
 | Ưu tiên | Hạng mục | Người hưởng lợi | Tiêu chí hoàn thành |
 |---|---|---|---|
-| P1 | Bài tập/quiz có phản hồi và lịch sử lần làm | Học viên, giảng viên | Lưu bài làm, chấm và phản hồi rõ ràng; phân biệt đọc xong với hiểu được; giảng viên xem phần học viên hay sai |
-| P1 | Câu hỏi theo bài và phản hồi giảng viên | Học viên, giảng viên | Hỏi ngay trong ngữ cảnh bài; có quyền đọc/trả lời/ẩn phù hợp; thông báo dẫn đúng câu hỏi |
 | P1 | Soạn nội dung có cấu trúc, video và tài liệu trong phòng học | Giảng viên, học viên | Preview trước xuất bản, phát media an toàn, nội dung dễ đọc và có mô tả hỗ trợ tiếp cận |
 | P1 | Tìm kiếm/phân trang các danh sách quản trị và việc học | Admin, giảng viên, học viên | Không tải toàn bộ dữ liệu; giữ bộ lọc và trang trong URL; tổng số chính xác theo quyền |
 | P2 | Hồ sơ giảng viên, yêu cầu đầu vào và đối tượng phù hợp | Khách, học viên | Người học hiểu khóa dành cho ai và phải chuẩn bị gì; thông tin do giảng viên cung cấp |
@@ -53,5 +51,23 @@ Checklist là hướng dẫn chất lượng, không thay thế luật xuất b�
 Trước khi triển khai rộng cần kiểm tra với người dùng thật ở ba vai trò, đo khả năng tìm đúng khóa, quay lại bài, hoàn thành bài tập và xử lý yêu cầu chờ. Tỷ lệ hoàn thành nội dung không tự chứng minh chất lượng học tập.
 
 ## Bằng chứng kiểm tra
+
+### Nâng cấp quiz theo bài — 07/10/2026
+
+Giảng viên chọn bài tại trang khóa học, soạn 1–20 câu với bốn lựa chọn, một đáp án đúng và giải thích bắt buộc. Có mức đạt, lưu nháp/xuất bản và thống kê câu hay sai. Mỗi lần lưu tạo phiên bản mới; editor kiểm tra revision để tránh ghi đè thầm lặng khi có người sửa đồng thời. Thống kê tính mọi lần làm của phiên bản hiện tại, ghi rõ số học viên duy nhất và số lần làm lại.
+
+Học viên làm quiz ngay trong phòng học hoặc trang khóa, nhận phản hồi từng câu và lịch sử từng phiên bản. Bài làm cũ giữ nguyên đề/đáp án/giải thích, không dùng đáp án đã được sửa để chấm lại. Điểm quiz tách khỏi đánh dấu đọc xong; mức đạt của quiz là mục tiêu luyện tập, chưa phải tiêu chí cấp chứng nhận. Bản này chưa hỗ trợ tự luận, nhiều đáp án đúng, giới hạn lượt hay lịch thi.
+
+Backend kiểm tra đăng ký, bài xuất bản, quyền quản lý và chủ bài làm; chỉ trả đáp án/giải thích cho học viên sau khi nộp. Gửi lại lần nộp cùng UUID và câu trả lời nhận lại kết quả đã có. Giao diện giữ câu trả lời và UUID khi lỗi mạng, kể cả tải lại trang trong cùng phiên trình duyệt; đổi đề lúc đang làm yêu cầu tải phiên bản mới. Bản soạn giảng viên và lựa chọn chưa nộp được giữ khi đổi bài trong phiên trang đang mở, chưa lưu trên máy chủ.
+
+Flyway V7 thêm bảng phiên bản, câu hỏi, lần làm và đáp án; giữ dữ liệu hiện có. Profile demo thêm quiz Java mẫu khi bài demo chưa có quiz. Xóa bài học xóa cả quiz/lần làm; ẩn bài giữ lịch sử và chặn học viên truy cập.
+
+### Nâng cấp hỏi đáp theo bài — 07/10/2026
+
+Học viên đặt câu hỏi trong phòng học hoặc chọn bài tại trang khóa học. Các học viên đã đăng ký có thể đọc câu hỏi công khai trong khóa. Giảng viên phụ trách/admin đọc, trả lời, cập nhật phản hồi và ẩn/hiện câu hỏi ở trang khóa học. Danh sách lấy từng trang 10 câu; backend loại câu hỏi ẩn trước khi tính tổng và phân trang cho học viên. Bản này hỗ trợ một phản hồi hiện tại cho mỗi câu hỏi; trao đổi nhiều tầng và lịch sử sửa phản hồi thuộc giai đoạn sau.
+
+Thông báo cho giảng viên khi có câu hỏi, cho tác giả khi có phản hồi; liên kết mang courseId, lessonId và questionId. Giao diện tải thêm câu hỏi được liên kết nếu nó không nằm ở trang đầu, rồi đưa người dùng tới đúng nội dung. Lỗi gửi giữ nguyên văn bản để thử lại, đổi bài giữ bản nháp trong phiên trang đang mở. Bản nháp chưa gửi không được lưu trên máy chủ.
+
+Quyền hỏi đáp dùng đăng ký còn hiệu lực và bài xuất bản; bài nháp và câu hỏi bị ẩn chỉ dành cho người quản lý khóa. Ghi chú riêng vẫn tách khỏi hỏi đáp công khai. Flyway V6 thêm bảng, không reset database. Lưu câu hỏi/phản hồi và tạo thông báo cùng transaction; lỗi thông báo rollback thay đổi.
 
 Các kiểm thử tự động, log và hành trình UI được ghi trong [kế hoạch kiểm thử](KE_HOACH_KIEM_THU.md). Ảnh desktop/mobile và kịch bản Playwright CLI trong thư mục bị Git bỏ qua `output/playwright`; log backend trong `target/local-demo`. Không dùng dữ liệu thật cho các thanh toán thử.

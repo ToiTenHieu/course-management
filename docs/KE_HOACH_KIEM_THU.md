@@ -65,7 +65,7 @@ $env:SPRING_DATASOURCE_DRIVER_CLASS_NAME = 'org.postgresql.Driver'
 .\mvnw.cmd -B -ntp test
 ```
 
-Mỗi ca backend dọn tám bảng trong database test trước khi tạo fixture. Không dùng database demo hoặc database thật. Xóa các biến `SPRING_DATASOURCE_*` trên sau khi test nếu tiếp tục chạy ứng dụng trong cùng terminal.
+Mỗi ca backend dọn 13 bảng (gồm hỏi đáp và bốn bảng quiz) trong database test trước khi tạo fixture. Không dùng database demo hoặc database thật. Xóa các biến `SPRING_DATASOURCE_*` trên sau khi test nếu tiếp tục chạy ứng dụng trong cùng terminal.
 
 Giao diện: làm theo mục Kiểm tra trong README. Chỉ trỏ E2E tới bản demo; các ca tạo tài khoản, enrollment, thanh toán giả và một khóa nháp mới.
 
@@ -99,3 +99,38 @@ Các log chạy tại máy và báo cáo nằm trong `target/local-demo` và `ou
 | `notesValidateSizeAndCsrf` | Chặn note null/quá 10.000 ký tự và request thiếu CSRF; không ghi dữ liệu lỗi |
 
 Giữ sáu hành trình E2E hiện có; cập nhật tiêu đề dashboard được kỳ vọng theo từng vai trò. Kiểm tra UI mới dùng Playwright CLI, không thay backend bằng mock. Riêng ca lỗi ghi chú chặn một request PUT để xác nhận hành vi thử lại; dữ liệu còn lại đi qua API và PostgreSQL thật.
+
+## Kiểm thử hỏi đáp theo bài — 07/10/2026
+
+| Ca backend bổ sung | Điều được bảo vệ |
+|---|---|
+| `questionsRequireEnrollmentAndStayInsidePublishedLessons` | Khách, người chưa đăng ký, giảng viên ngoài khóa, lượt dropped và bài nháp không có quyền tham gia |
+| `questionAnswersNotifyTheAuthorAndLinkToTheExactContext` | Giảng viên/admin trả lời; giảng viên khác/học viên bị chặn; thông báo chứa đúng khóa/bài/câu hỏi; hỏi đáp không tăng tiến độ |
+| `hiddenQuestionsAreExcludedBeforeCountingAndCanBeRestored` | Học viên không đọc trực tiếp hay nhận tổng số câu hỏi ẩn; quản lý thấy và hiện lại được; không trả lời câu hỏi đang ẩn |
+| `questionsPaginateByNewestIdWithoutLeakingOtherLessons` | Mới nhất trước, trang không trùng, không lẫn bài khác, chặn page/size sai |
+| `questionWritesValidateTextRolesAndCsrf` | Chặn nội dung trống/quá 5000 ký tự, vai trò sai, thiếu CSRF và hidden null |
+| `questionAndAnswerRollbackIfTheirNotificationFails` | Lỗi tạo thông báo rollback câu hỏi/phản hồi, giữ dữ liệu nhất quán |
+| `removingLessonCascadesQuestionsAndDoesNotBreakProgress` | Xóa bài không để câu hỏi mồ côi, nghiệp vụ xóa/tiến độ tiếp tục hoạt động |
+
+Kết quả: 55/55 backend đạt trên H2 và PostgreSQL, Flyway V6 chạy thành công; sáu hành trình E2E hiện có đạt. Cú pháp `api.js`, `app.js`, `questions.js` hợp lệ. Log mới ở `target/local-demo/questions-*`; báo cáo E2E ở `output/e2e-report`.
+
+Playwright CLI trên backend PostgreSQL demo đã kiểm tra học viên gửi → thông báo giảng viên → trả lời → thông báo học viên → đọc đúng câu hỏi, ẩn câu hỏi khỏi học viên, HTML hiển thị như văn bản, lỗi POST 503 giữ văn bản/thử lại thành công. Với 11 câu hỏi công khai, trang 2 hiển thị đúng; tải lại liên kết thông báo tải thêm câu hỏi cũ ở ngoài trang đầu. Kiểm tra 390 × 844 không tràn ngang; ảnh đã xem ở `output/playwright/questions-mobile.png` và `questions-teacher-desktop.png`. Script CLI phân trang ở `output/playwright/questions-pagination.js`. Các bằng chứng này bị Git bỏ qua; CI tự chạy bảy ca backend mới, sáu E2E hiện có và kiểm tra cú pháp module mới.
+
+## Kiểm thử quiz theo bài — 07/10/2026
+
+| Ca backend bổ sung | Điều được bảo vệ |
+|---|---|
+| `quizDraftsAndAnswerKeysAreNotVisibleToLearnersBeforeSubmission` | Quiz nháp/đáp án/giải thích không lộ cho học viên; khách bị chặn |
+| `quizSubmissionGradesOnServerAndKeepsProgressSeparate` | Chấm đúng/sai, mức đạt và phản hồi; không đổi tiến độ đọc |
+| `quizPassingUsesTheExactFractionAndDisplaysAnUnroundedScore` | 2/3 hiển thị 66%, đạt mức 66 nhưng chưa đạt mức 67 |
+| `quizVersionsPreserveOldResultsAndRejectStaleEditorsAndSubmissions` | Lịch sử giữ đề cũ; editor/đề nộp cũ trả 409; retry đã lưu vẫn trả đúng lần làm |
+| `quizHistoryIsPrivateAndRequiresAnActiveEnrollmentAndVisibleLesson` | Học viên khác không xem bài làm; giảng viên khác bị chặn; dropped/bài ẩn mất quyền |
+| `quizStatisticsCountAttemptsAndWrongAnswersForCurrentVersionOnly` | Thống kê số lần làm/học viên, điểm và câu sai đúng theo phiên bản |
+| `repeatedAndConcurrentQuizSubmissionsStoreExactlyOneAttempt` | Hai request đồng thời cùng UUID tạo một lần làm; UUID dùng cho nội dung khác bị chặn |
+| `quizHistoryPaginatesAndInvalidAnswersDoNotCreateAttempts` | Phân trang mới nhất trước, tham số/lựa chọn sai không tạo bản ghi |
+| `quizEndpointsValidateNestedQuestionsRolesAndCsrf` | Validate bốn lựa chọn khác nhau, giải thích, ngưỡng đạt, câu trả lời; vai trò/CSRF được bảo vệ |
+| `deletingLessonRemovesItsQuizzesAndAttemptsWithoutOrphans` | Xóa bài không để phiên bản, câu hỏi hay bài làm mồ côi |
+
+Kết quả chạy mới: Maven verify đạt 65/65 trên H2 và đóng gói JAR; PostgreSQL đạt 65/65 với Flyway V7; sáu E2E hiện có đạt. Kiểm tra cú pháp thêm `quiz.js` vào CI. Log ở `target/local-demo/quiz-verify.log`, `quiz-postgres.log`, `quiz-e2e.log`.
+
+Playwright CLI kiểm tra giảng viên soạn/lưu phiên bản, học viên làm 2/3 đạt 66% và làm đúng đạt 100%, đọc phản hồi và lịch sử, thống kê giảng viên ghi nhận đúng câu sai. Bài đạt 100% vẫn giữ tiến độ đọc 0%. Mô phỏng mất phản hồi sau khi backend thật đã lưu, tải lại vẫn giữ lựa chọn/UUID; thử nhận kết quả trả bài cũ và lịch sử chỉ có hai lần làm, không tạo lần thứ ba. Script ở `output/playwright/quiz-lost-response.js`. Hai editor mở cùng phiên bản: lưu từ tab thứ nhất thành công, tab thứ hai báo xung đột và giữ nội dung; học viên nộp đề cũ cũng báo tải đề mới. Mobile 390 × 844 không tràn ngang. Ảnh ở `output/playwright/quiz-student-mobile.png` và `quiz-teacher-desktop.png`.

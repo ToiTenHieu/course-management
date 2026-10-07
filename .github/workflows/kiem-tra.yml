@@ -27,6 +27,8 @@ jobs:
         run: |
           node --check src/main/resources/static/js/api.js
           node --check src/main/resources/static/js/app.js
+          node --check src/main/resources/static/js/questions.js
+          node --check src/main/resources/static/js/quiz.js
       - name: Kiểm thử backend trên PostgreSQL thật
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/course_management_test

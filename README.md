@@ -6,6 +6,8 @@ Nền tảng quản lý khóa học trực tuyến phục vụ đồ án/demo. B
 
 - Khách: tìm khóa từ trang chủ, khám phá chủ đề, xem kết quả học tập/chương trình/học phí trước khi đăng nhập; giữ khóa đã chọn qua đăng nhập.
 - Học viên: dashboard tiếp tục học, tìm/lọc khóa đã đăng ký, đăng ký và thanh toán, học từng bài với chế độ tập trung, lưu ghi chú riêng và vị trí học trên máy chủ, theo dõi tiến độ, đánh giá, thông báo và hồ sơ.
+- Hỏi đáp theo bài: học viên đã đăng ký đặt câu hỏi và đọc trao đổi trong khóa; giảng viên phụ trách/admin trả lời, cập nhật phản hồi, ẩn/hiện câu hỏi. Thông báo dẫn tới đúng bài và câu hỏi, kể cả câu hỏi nằm ngoài trang đầu.
+- Quiz theo bài: giảng viên soạn 1–20 câu trắc nghiệm bốn lựa chọn, đáp án và giải thích; lưu nháp/xuất bản, đặt mức đạt. Học viên nhận điểm và phản hồi từng câu, xem lịch sử phân trang; giảng viên xem thống kê câu hay sai của phiên bản hiện tại. Mỗi lần sửa giữ đề cũ để lịch sử luôn đúng.
 - Giảng viên: dashboard riêng và checklist chuẩn bị khóa, sửa thông tin/mục tiêu của khóa phụ trách, thêm/sửa/xóa bài học, xuất bản/ẩn bài học. Học phí/phân công và xuất bản khóa do admin quản lý.
 - Admin: quản lý người dùng và khóa học, xuất bản/lưu trữ, xác nhận/từ chối thanh toán, tạo thông báo và xem báo cáo.
 - Quyền học được kiểm tra ở backend; danh sách chương trình của người chưa đăng ký chỉ trả metadata, không trả nội dung hoặc URL tài liệu.
@@ -48,6 +50,8 @@ Tài khoản demo có cùng mật khẩu `Demo123!`:
 
 Profile `demo` tạo tài khoản và nội dung mẫu. Profile mặc định không tạo tài khoản mẫu. Dữ liệu mẫu được giữ qua các lần khởi động; không tự reset database.
 
+Demo có quiz **Java: chuẩn bị môi trường** ở bài **Bắt đầu và chuẩn bị môi trường** của khóa Java. Chỉ tạo khi bài mẫu chưa có quiz, giữ nguyên đề giảng viên đã sửa. Đăng nhập giảng viên để soạn tại trang khóa → Quiz; học viên đã đăng ký làm bài ngay trong phòng học.
+
 ## Cấu hình và database
 
 `application.properties` đọc `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `PORT`, `BANK_NAME`, `BANK_ACCOUNT`, `BANK_HOLDER` từ môi trường. `.env.example` chỉ minh họa biến; Spring Boot không tự đọc file `.env`. Hãy export biến hoặc dùng file cấu hình bên ngoài. Không đưa thông tin đăng nhập thật vào repo.
@@ -60,9 +64,11 @@ Flyway quản lý schema qua `src/main/resources/db/migration`, Hibernate chỉ 
 .\mvnw.cmd -B -ntp verify
 node --check src/main/resources/static/js/api.js
 node --check src/main/resources/static/js/app.js
+node --check src/main/resources/static/js/questions.js
+node --check src/main/resources/static/js/quiz.js
 ```
 
-Bộ backend có 48 kiểm thử (47 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 ở chế độ PostgreSQL và PostgreSQL 18 với migration thật. Bao gồm quyền khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, phân trang, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 65 kiểm thử (64 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 và PostgreSQL với migration thật. Bao gồm quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
 Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
 
@@ -111,4 +117,25 @@ Ví dụ: `/api/courses/catalog?page=0&size=9&freeOnly=true&sort=price`.
 
 ## Phạm vi bản nền
 
-Xem [đánh giá trải nghiệm theo từng vai trò và lộ trình sản phẩm](docs/PRODUCT_EXPERIENCE.md). Ưu tiên tiếp theo là bài tập có phản hồi, hỏi đáp theo bài, soạn nội dung/video và phân trang các danh sách còn lại. Khi triển khai rộng cần thêm email xác minh/quên mật khẩu, thanh toán qua cổng, lưu trữ file, audit log và quan sát vận hành. Bản hiện tại dùng chuyển khoản đối chiếu thủ công.
+Xem [đánh giá trải nghiệm theo từng vai trò và lộ trình sản phẩm](docs/PRODUCT_EXPERIENCE.md). Ưu tiên tiếp theo là soạn nội dung/video và phân trang các danh sách còn lại. Quiz hiện hỗ trợ một đáp án đúng trong bốn lựa chọn; bài tập tự luận, lịch thi và tiêu chí cấp chứng nhận thuộc giai đoạn sau. Khi triển khai rộng cần thêm email xác minh/quên mật khẩu, thanh toán qua cổng, lưu trữ file, audit log và quan sát vận hành. Bản hiện tại dùng chuyển khoản đối chiếu thủ công.
+
+## API quiz theo bài
+
+- `GET /api/lessons/{id}/quiz`: giảng viên phụ trách/admin đọc đề mới nhất gồm đáp án/giải thích; học viên đã đăng ký chỉ nhận đề xuất bản và các lựa chọn, đáp án/giải thích được bỏ khỏi JSON. Chưa có đề xuất bản trả `data: null`.
+- `PUT /api/lessons/{id}/quiz`: người quản lý khóa lưu `{ expectedRevision, title, passPercentage, published, questions }`. Đề đầu dùng `expectedRevision: 0`; mỗi câu có `prompt`, `options` gồm đúng bốn chuỗi khác nhau, `correctIndex` từ 0–3, `explanation`. Giới hạn 20 câu, prompt/giải thích 5000 ký tự, mỗi lựa chọn 1000 ký tự, tên đề 255 ký tự, mức đạt 1–100. Mỗi lần lưu tạo phiên bản mới; sửa đồng thời với revision cũ trả 409.
+- `POST /api/lessons/{id}/quiz/attempts`: học viên gửi `{ quizVersionId, submissionKey, answers }`; `submissionKey` là UUID, `answers` là danh sách chỉ số lựa chọn theo thứ tự câu. Backend tự chấm; không nhận điểm do client gửi. Gửi lại cùng UUID/nội dung trả lại kết quả đã lưu; tái sử dụng UUID cho nội dung khác trả 409. Nộp đề đã bị thay bằng phiên bản mới trả 409.
+- `GET /api/lessons/{id}/quiz/attempts?page=0&size=5`: lịch sử của chính học viên, mới nhất trước; size 1–50. Lịch sử gồm mọi phiên bản, kể cả khi đề hiện tại đang nháp.
+- `GET /api/quiz-attempts/{id}`: chủ bài làm hoặc người quản lý khóa xem điểm/giải thích theo đúng phiên bản đã làm; học viên khác bị chặn.
+- `GET /api/lessons/{id}/quiz/statistics`: người quản lý khóa xem tổng lần làm, học viên duy nhất, số lần đạt, điểm trung bình và số trả lời sai mỗi câu của phiên bản hiện tại. Làm lại được tính là lần làm mới; gửi lại cùng UUID không tăng thống kê.
+
+Chỉ học viên có đăng ký còn hiệu lực và bài xuất bản được làm/đọc lịch sử. Quiz đạt không tự hoàn thành bài hoặc thay tiến độ đọc; điểm phần trăm hiển thị bỏ phần thập phân, so mức đạt bằng tỷ lệ chính xác. Phản hồi được trả sau khi nộp; làm lại không giới hạn, phù hợp luyện tập. Phiên bản và bài làm lưu trên máy chủ; lần nộp đang chờ kết quả lưu trong sessionStorage để thử lại qua tải trang. Flyway V7 thêm bốn bảng; xóa bài học sẽ xóa quiz/lịch sử của bài như tiến độ và hỏi đáp. Không dùng thao tác xóa bài để lưu trữ nội dung cần giữ lịch sử.
+
+## API hỏi đáp theo bài
+
+- `GET /api/lessons/{lessonId}/questions?page=0&size=10`: phân trang từ 0, size 1–50, mới nhất trước. Học viên phải có đăng ký còn hiệu lực và bài đã xuất bản; người quản lý khóa xem được bài nháp. Câu hỏi bị ẩn không được tính vào tổng/trang của học viên.
+- `POST /api/lessons/{lessonId}/questions`: học viên gửi `{ "body": "Câu hỏi" }`, 1–5000 ký tự, không chấp nhận chỉ khoảng trắng; tạo thông báo cho giảng viên trong cùng transaction.
+- `GET /api/questions/{id}`: đọc một câu hỏi theo quyền, hỗ trợ liên kết thông báo. Câu hỏi bị ẩn trả 404 cho học viên.
+- `PUT /api/questions/{id}/answer`: giảng viên phụ trách/admin gửi `{ "body": "Phản hồi" }`; lưu phản hồi hiện tại, người trả lời và thời điểm, đồng thời thông báo cho tác giả. Cập nhật thay phản hồi cũ; chưa có lịch sử phiên bản hay trao đổi nhiều tầng.
+- `PUT /api/questions/{id}/visibility`: giảng viên phụ trách/admin gửi `{ "hidden": true }` để ẩn hoặc `false` để hiện lại. Phải hiện câu hỏi trước khi trả lời.
+
+Mọi thao tác ghi yêu cầu CSRF. Flyway V6 thêm bảng hỏi đáp, giữ dữ liệu hiện có. Xóa bài học sẽ xóa hỏi đáp của bài; ẩn bài giữ hỏi đáp nhưng chặn học viên đọc. Nội dung được hiển thị như văn bản, không thực thi HTML.
