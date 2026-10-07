@@ -1,0 +1,78 @@
+# Kế hoạch và kết quả kiểm thử bản làm lại
+
+Phạm vi: đồ án/demo quản lý khóa học, với ba vai trò, nội dung mẫu và thanh toán chuyển khoản do admin duyệt. Kiểm thử xác nhận nghiệp vụ và lỗi hồi quy; chưa dùng kết quả này để khẳng định khả năng chịu tải hay tích hợp ngân hàng thật.
+
+## Các tầng kiểm thử
+
+| Tầng | Công cụ và môi trường | Mục tiêu |
+|---|---|---|
+| Nghiệp vụ và API | JUnit, Spring Boot, MockMvc, repository thật | Phân quyền, HTTP, validation, session, transaction và ràng buộc dữ liệu |
+| Database | H2 PostgreSQL mode và PostgreSQL 18 | Chạy Flyway thật, kiểm tra unique index, rollback và khóa dữ liệu khi có request đồng thời |
+| Giao diện | Playwright + Chromium | Hành trình người dùng qua form, điều hướng, modal, lưu/tải lại dữ liệu và màn hình nhỏ |
+| CI | GitHub Actions | Chạy lại sau mỗi push/PR, lưu JUnit XML, báo cáo HTML, screenshot/trace khi thất bại |
+
+## Đối chiếu các lỗi đã sửa
+
+Các tên dưới đây nằm trong `src/test/java/com/example/course_management/BusinessFlowTests.java`.
+
+| Lỗi/rủi ro nghiệp vụ | Test tiêu biểu | Điều kiện đạt |
+|---|---|---|
+| Lộ nội dung/URL bài học cho người chưa đăng ký | `unregisteredLessonListRedactsContent`, `unrelatedTeacherCannotReadFullContent`, `registeredStudentCanReadContent` | Metadata không chứa nội dung; đọc đầy đủ chỉ khi có quyền |
+| Lộ khóa nháp; giảng viên không thấy bản nháp của mình | `draftCourseDoesNotLeakLessons`, `teacherCanFindOwnDraftButNotOthers` | Giảng viên thấy khóa của mình, người khác không thấy khóa nháp |
+| Đăng ký thẳng khóa có phí | `paidCourseCannotBeEnrolledDirectly` | Bị từ chối, không có enrollment |
+| Xác nhận thanh toán không cấp quyền một cách nguyên tử | `paymentConfirmationGrantsExactlyOneEnrollment`, `confirmationRollsBackIfDownstreamWriteFails` | Thanh toán, enrollment và thông báo commit cùng nhau; khi lỗi phải rollback |
+| Request đồng thời tạo bản ghi trùng | `concurrentPaymentRequestsCreateOnlyOne`, `concurrentEnrollmentsCreateOnlyOne`, `databaseRejectsDuplicateEnrollment` | Chỉ một bản ghi hợp lệ; có unique index bảo vệ |
+| Hai admin xử lý cùng thanh toán và đọc trạng thái cũ | `concurrentConfirmationsGrantAccessOnlyOnce`, `concurrentConfirmAndRejectHaveOneConsistentOutcome` | Chỉ một thao tác thành công, trạng thái cuối khớp quyền học |
+| Thanh toán bị từ chối vẫn cấp quyền | `rejectedPaymentDoesNotGrantAccessAndCanBeRequestedAgain` | Không cấp quyền; cho phép yêu cầu lại |
+| Phiên cũ tiếp tục dùng sau khóa/đổi quyền/đổi mật khẩu | `blockedAccountLosesExistingSession`, `roleChangeRevokesExistingSession`, `passwordChangeRevokesOldSessionAndOldPassword` | Phiên cũ trả 401; mật khẩu cũ không đăng nhập được |
+| Tiến độ sai khi chương trình thay đổi | `publicationChangesRecalculateProgressAndCompletion`, `deletingLessonRemovesProgressAndRecalculates`, `repeatedCompletionIsIdempotent` | Chỉ đếm bài published; không vượt 100%; không thêm bản ghi khi hoàn thành lặp |
+| Hoàn thành bài nháp, bài của khóa khác hoặc enrollment người khác | `unpublishedLessonCannotBeCompleted`, `lessonFromDifferentCourseCannotAffectProgress`, `enrollmentCannotBeReadOrCompletedByAnotherUser` | Bị từ chối và dữ liệu tiến độ giữ nguyên |
+| Nâng quyền, ghi thiếu CSRF, dữ liệu không hợp lệ | `registrationCannotEscalateRole`, `studentCannotConfirmPaymentEvenWithValidCsrf`, `authenticatedWriteWithoutCsrfDoesNotChangeData`, `negativeCoursePriceIsRejected`, `malformedRequestIsClientErrorAndAnonymousApiRequiresLogin` | Đúng HTTP 400/401/403 và không làm thay đổi dữ liệu |
+| Liên kết nguy hiểm và HTML trong hồ sơ | `dangerousContentLinkIsRejected` và E2E hồ sơ | Từ chối URL nguy hiểm; HTML hiển thị như văn bản và không sinh event handler |
+
+## Sáu hành trình giao diện
+
+Nguồn: `tests/e2e/journeys.spec.cjs`. Mỗi ca dùng tài khoản mới hoặc vai trò demo thích hợp. Playwright kiểm tra trạng thái hiển thị sau thao tác; không dùng sleep cố định để chờ dữ liệu.
+
+1. Nhập sai mật khẩu, thấy lỗi, sửa mật khẩu và đăng nhập thành công.
+2. Đăng ký qua form, đăng ký khóa miễn phí, hoàn thành bốn bài, đạt 100%, tải lại vẫn giữ tiến độ và trạng thái hoàn thành.
+3. Tạo yêu cầu khóa trả phí, chưa được vào phòng học; admin duyệt ở một phiên riêng, học viên tải lại và đọc được nội dung.
+4. Lưu tên chứa thẻ HTML/event handler, tải lại vẫn giữ văn bản và không chèn thẻ hoặc event handler vào DOM.
+5. Đăng nhập ở 390 × 844, mở menu và đi tới danh sách khóa học; không tràn ngang.
+6. Giảng viên vào khóa nháp được giao, thêm nội dung, xuất bản bài và tải lại để kiểm tra dữ liệu đã lưu.
+
+Mọi ca kiểm tra thêm rằng trang không phát sinh lỗi JavaScript chưa được xử lý. Ca lỗi tự lưu screenshot và trace để điều tra.
+
+## Chạy lại
+
+Backend H2, không cần PostgreSQL:
+
+```powershell
+.\mvnw.cmd -B -ntp verify
+```
+
+Backend PostgreSQL: tạo riêng database `course_management_test`, rồi đặt các biến sau (mật khẩu lấy từ môi trường của người chạy):
+
+```powershell
+$env:SPRING_DATASOURCE_URL = 'jdbc:postgresql://localhost:5432/course_management_test'
+$env:SPRING_DATASOURCE_USERNAME = 'postgres'
+$env:SPRING_DATASOURCE_PASSWORD = $env:DB_PASSWORD
+$env:SPRING_DATASOURCE_DRIVER_CLASS_NAME = 'org.postgresql.Driver'
+.\mvnw.cmd -B -ntp test
+```
+
+Mỗi ca backend dọn tám bảng trong database test trước khi tạo fixture. Không dùng database demo hoặc database thật. Xóa các biến `SPRING_DATASOURCE_*` trên sau khi test nếu tiếp tục chạy ứng dụng trong cùng terminal.
+
+Giao diện: làm theo mục Kiểm tra trong README. Chỉ trỏ E2E tới bản demo; các ca tạo tài khoản, enrollment, thanh toán giả và một khóa nháp mới.
+
+## Kết quả đã chạy tại máy ngày 07/10/2026
+
+| Kiểm tra | Kết quả |
+|---|---|
+| Maven verify, JDK 21 + H2 | 33 test, 0 failure, 0 error; đóng gói JAR thành công |
+| Maven test, JDK 21 + PostgreSQL 18 | 33 test, 0 failure, 0 error |
+| Playwright Chromium, backend thật trên PostgreSQL demo | 6/6 hành trình đạt |
+| Cú pháp module JavaScript | `api.js` và `app.js` hợp lệ |
+| Giao diện thủ công | Đã xem login, dashboard, phòng học desktop và mobile |
+
+Các log chạy tại máy và báo cáo nằm trong `target/local-demo` và `output`, không đưa vào Git. CI tạo bằng chứng độc lập trong mục Actions của repo. Các bài kiểm tra tải, nhiều trình duyệt và cổng thanh toán thật thuộc giai đoạn tiếp theo.

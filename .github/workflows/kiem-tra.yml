@@ -1,0 +1,62 @@
+name: Kiểm tra dự án
+on: [push, pull_request]
+jobs:
+  kiem-tra:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: course_management_demo
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-demo-password
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Kiểm tra và đóng gói
+        run: bash ./mvnw -B -ntp verify
+      - name: Kiểm tra cú pháp JavaScript
+        run: |
+          node --check src/main/resources/static/js/api.js
+          node --check src/main/resources/static/js/app.js
+      - name: Kiểm thử backend trên PostgreSQL thật
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/course_management_test
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: ci-demo-password
+          SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+        run: |
+          docker exec ${{ job.services.postgres.id }} psql -U postgres -c 'CREATE DATABASE course_management_test'
+          bash ./mvnw -B -ntp test
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Cài công cụ kiểm thử giao diện
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Kiểm thử hành trình người dùng
+        env:
+          DB_PASSWORD: ci-demo-password
+        run: npm run test:e2e
+      - name: Lưu báo cáo kiểm thử giao diện
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bao-cao-kiem-thu-giao-dien
+          path: output/e2e-*
+      - name: Lưu kết quả kiểm thử backend
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bao-cao-kiem-thu-backend
+          path: target/surefire-reports/
