@@ -1,0 +1,57 @@
+# Course Management — định hướng trải nghiệm sản phẩm
+
+Ngày rà soát: 07/10/2026. Bản nâng cấp này tập trung vào quyết định chọn khóa, tiếp tục học và công việc theo từng vai trò. Những mục ở phần “Tiếp theo” chưa được triển khai.
+
+## Cơ sở tham khảo
+
+- [Trang khóa học Coursera](https://www.coursera.org/learn/introduction-to-cloud): trình bày kết quả học tập và các module để người học đánh giá nội dung trước khi chọn khóa.
+- [Hướng dẫn quản lý khóa học Udemy](https://support.udemy.com/hc/en-us/articles/230048607-How-to-Navigate-the-Course-Management-Dashboard): hướng dẫn chuẩn bị mục tiêu, chương trình, thông tin giới thiệu và xuất bản theo từng bước.
+- [Tiến độ bài học trên Udemy](https://support.udemy.com/hc/en-us/articles/229607188-How-to-Mark-or-Unmark-Lectures-as-Complete-on-a-Browser): hiển thị trạng thái hoàn thành ngay trong chương trình khóa học.
+
+Áp dụng các nguyên tắc đó vào quy mô và nghiệp vụ hiện tại: thông tin để quyết định phải có trước đăng ký; phòng học phải giữ được vị trí và suy nghĩ của học viên; bảng tổng quan phải giúp từng vai trò làm việc tiếp theo. Course Management dùng thiết kế và nội dung riêng, không sao chép giao diện hay đưa ra các cam kết chưa có cơ sở.
+
+## Đi qua hệ thống theo từng vai trò
+
+| Vai trò và mục tiêu | Vướng mắc trước đây | Đã nâng cấp | Cách nghiệm thu |
+|---|---|---|---|
+| Khách: tìm khóa phù hợp trước khi tạo tài khoản | Trang chủ chỉ có thông điệp; mở danh mục bị chuyển sang đăng nhập | Tìm kiếm ngay trang chủ, chủ đề và khóa mới lấy từ dữ liệu thật; danh mục và chương trình công khai | Tìm Java từ trang chủ; xem chi tiết và học phí khi chưa đăng nhập; không nhận nội dung/URL bài học |
+| Khách: đăng ký khóa vừa chọn | Đăng nhập xong về dashboard, mất ngữ cảnh | Giữ URL khóa qua đăng nhập và chuyển qua lại đăng ký/đăng nhập | Chọn khóa → đăng nhập → quay về đúng khóa; chỉ cho phép các trang nội bộ đã định danh |
+| Học viên: tiếp tục học nhanh | Dashboard chung, chưa lưu bài vừa xem | Thẻ tiếp tục học, tiến độ, cảnh báo thanh toán; máy chủ nhớ bài gần nhất | Mở bài 2, rời phòng học rồi mở lại không có lessonId; vẫn ở bài 2 |
+| Học viên: ghi lại điều học được | Không có ghi chú riêng | Ghi chú mỗi bài lưu trên máy chủ; lưu trước đổi bài/rời trang; thông báo chưa lưu và thử lại | Ghi chú giữ qua tải lại; lỗi lưu không đổi bài/mất văn bản; học viên khác và giảng viên không đọc được |
+| Học viên: tìm/ôn lại khóa đã học | Danh sách không có tìm kiếm hoặc lọc | Tìm khóa đã đăng ký, lọc đang học/hoàn thành, sắp xếp tiến độ; CTA ôn lại | Lọc khóa hoàn thành; mở lại nội dung; trạng thái và phần trăm giữ nguyên |
+| Học viên: đọc bài trên điện thoại | Chương trình dài đứng trước bài học; nhiều điều hướng gây phân tán | Chương trình thu gọn trên mobile, bài trước/sau, chế độ tập trung, thông báo hoàn thành khóa | Chiều rộng 390 px không tràn; mở chương trình và chuyển bài; có thể trở lại điều hướng |
+| Giảng viên: chuẩn bị một khóa tốt | Chỉ sửa bài, không sửa được giới thiệu/mục tiêu; chưa biết thiếu gì | Dashboard riêng, checklist giới thiệu/mục tiêu/bài xuất bản/nội dung, sửa metadata của khóa được giao | Giảng viên sửa khóa mình phụ trách; không sửa khóa người khác, đổi học phí/phân công hay trạng thái khóa |
+| Admin: xử lý việc chờ | Dashboard chủ yếu là lời chào và thẻ khám phá | Trung tâm vận hành với yêu cầu chờ theo thời gian, khóa nháp cần kiểm tra, lối vào quản lý và báo cáo | Mở nhóm chờ duyệt từ dashboard; bộ lọc PENDING đã được chọn; duyệt vẫn cấp quyền học trong transaction |
+
+Checklist là hướng dẫn chất lượng, không thay thế luật xuất bản: backend vẫn yêu cầu ít nhất một bài xuất bản trước khi mở khóa học. Không hiển thị kết quả học tập tự bịa khi giảng viên chưa nhập.
+
+## Thay đổi dữ liệu và quyền
+
+- `/api/discovery/catalog`, `/api/discovery/categories`, `/api/discovery/courses/{id}` chỉ đọc metadata của khóa PUBLISHED. Khóa nháp/lưu trữ trả 404 kể cả khi gọi discovery bằng phiên admin. Nội dung bài, thanh toán và tiến độ tiếp tục yêu cầu đăng nhập và quyền thích hợp.
+- `/api/auth/session` trả hồ sơ của chính phiên hiện tại hoặc `null` cho khách; không trả mật khẩu. Phiên bị khóa/hết hiệu lực được loại bỏ bởi bộ lọc phiên như trước.
+- `PUT /api/courses/{id}` cho admin và giảng viên phụ trách. Giảng viên được sửa thông tin mô tả, tên, chủ đề, trình độ, thời lượng và mục tiêu; học phí/phân công giảng viên giữ nguyên. Xuất bản khóa vẫn là quyền admin.
+- `GET/PUT /api/enrollments/{id}/notes/{lessonId}` quản lý ghi chú riêng, tối đa 10.000 ký tự. Chuỗi rỗng xóa nội dung ghi chú; ghi chú được hiển thị như văn bản.
+- `PUT /api/enrollments/{id}/access_lesson/{lessonId}` lưu vị trí vừa đọc. Cả ghi chú và vị trí chỉ chấp nhận bài đã xuất bản trong khóa của lượt đăng ký còn hiệu lực, thuộc học viên đang đăng nhập.
+- Ghi chú và vị trí dùng bản ghi `lesson_progress`, không tự hoàn thành bài. Các thao tác ghi khóa course rồi enrollment theo thứ tự thống nhất, tránh tạo trùng với thao tác hoàn thành bài.
+- Flyway V4 bổ sung cột note, V5 chỉ đổi đúng câu nhận diện thương hiệu trong nội dung demo. Giữ dữ liệu còn lại. Không reset database.
+- Tên sản phẩm, tiêu đề trang, nhận diện SVG và cấu hình đã đổi thành Course Management.
+
+## Tiếp theo, theo giá trị với người dùng
+
+| Ưu tiên | Hạng mục | Người hưởng lợi | Tiêu chí hoàn thành |
+|---|---|---|---|
+| P1 | Bài tập/quiz có phản hồi và lịch sử lần làm | Học viên, giảng viên | Lưu bài làm, chấm và phản hồi rõ ràng; phân biệt đọc xong với hiểu được; giảng viên xem phần học viên hay sai |
+| P1 | Câu hỏi theo bài và phản hồi giảng viên | Học viên, giảng viên | Hỏi ngay trong ngữ cảnh bài; có quyền đọc/trả lời/ẩn phù hợp; thông báo dẫn đúng câu hỏi |
+| P1 | Soạn nội dung có cấu trúc, video và tài liệu trong phòng học | Giảng viên, học viên | Preview trước xuất bản, phát media an toàn, nội dung dễ đọc và có mô tả hỗ trợ tiếp cận |
+| P1 | Tìm kiếm/phân trang các danh sách quản trị và việc học | Admin, giảng viên, học viên | Không tải toàn bộ dữ liệu; giữ bộ lọc và trang trong URL; tổng số chính xác theo quyền |
+| P2 | Hồ sơ giảng viên, yêu cầu đầu vào và đối tượng phù hợp | Khách, học viên | Người học hiểu khóa dành cho ai và phải chuẩn bị gì; thông tin do giảng viên cung cấp |
+| P2 | Lưu khóa quan tâm và đề xuất dựa trên chủ đề đã chọn | Khách, học viên | Lưu giữa thiết bị, gỡ lưu được; đề xuất giải thích được, không gắn nhãn “phổ biến” bằng dữ liệu giả |
+| P2 | Mục tiêu học theo tuần và nhắc học tùy chọn | Học viên | Học viên chủ động chọn mục tiêu và bật/tắt nhắc; không tạo streak khi chưa có hoạt động học |
+| P2 | Báo cáo nội dung, kiểm duyệt đánh giá và lịch sử thao tác | Admin | Theo dõi người thực hiện, lý do, trạng thái xử lý; giữ lịch sử và quyền học |
+| P3 | Chứng nhận có xác minh | Học viên | Chỉ cấp khi có tiêu chí đánh giá năng lực đủ rõ; mã xác minh và khả năng thu hồi hợp lệ |
+
+Trước khi triển khai rộng cần kiểm tra với người dùng thật ở ba vai trò, đo khả năng tìm đúng khóa, quay lại bài, hoàn thành bài tập và xử lý yêu cầu chờ. Tỷ lệ hoàn thành nội dung không tự chứng minh chất lượng học tập.
+
+## Bằng chứng kiểm tra
+
+Các kiểm thử tự động, log và hành trình UI được ghi trong [kế hoạch kiểm thử](KE_HOACH_KIEM_THU.md). Ảnh desktop/mobile và kịch bản Playwright CLI trong thư mục bị Git bỏ qua `output/playwright`; log backend trong `target/local-demo`. Không dùng dữ liệu thật cho các thanh toán thử.

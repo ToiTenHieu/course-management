@@ -1,11 +1,12 @@
-# Học viện — Học để tiến xa
+# Course Management — Học để tiến xa
 
 Nền tảng quản lý khóa học trực tuyến phục vụ đồ án/demo. Backend Spring Boot, Java 21, PostgreSQL; giao diện HTML/CSS/JavaScript có bố cục chung, hỗ trợ màn hình nhỏ. Thanh toán chuyển khoản được admin đối chiếu và duyệt thủ công.
 
 ## Chức năng
 
-- Học viên: đăng ký tài khoản, tìm/lọc khóa học, đăng ký khóa miễn phí, tạo yêu cầu thanh toán, học từng bài, theo dõi tiến độ, đánh giá, thông báo và hồ sơ.
-- Giảng viên: xem các khóa phụ trách kể cả bản nháp, thêm/sửa/xóa bài học, xuất bản/ẩn bài học.
+- Khách: tìm khóa từ trang chủ, khám phá chủ đề, xem kết quả học tập/chương trình/học phí trước khi đăng nhập; giữ khóa đã chọn qua đăng nhập.
+- Học viên: dashboard tiếp tục học, tìm/lọc khóa đã đăng ký, đăng ký và thanh toán, học từng bài với chế độ tập trung, lưu ghi chú riêng và vị trí học trên máy chủ, theo dõi tiến độ, đánh giá, thông báo và hồ sơ.
+- Giảng viên: dashboard riêng và checklist chuẩn bị khóa, sửa thông tin/mục tiêu của khóa phụ trách, thêm/sửa/xóa bài học, xuất bản/ẩn bài học. Học phí/phân công và xuất bản khóa do admin quản lý.
 - Admin: quản lý người dùng và khóa học, xuất bản/lưu trữ, xác nhận/từ chối thanh toán, tạo thông báo và xem báo cáo.
 - Quyền học được kiểm tra ở backend; danh sách chương trình của người chưa đăng ký chỉ trả metadata, không trả nội dung hoặc URL tài liệu.
 - Danh mục khóa học phân trang ở máy chủ, tìm theo tên/mô tả/giảng viên, lọc chủ đề, học phí và trạng thái; bộ lọc và trang hiện tại được lưu trong URL.
@@ -61,7 +62,7 @@ node --check src/main/resources/static/js/api.js
 node --check src/main/resources/static/js/app.js
 ```
 
-Bộ backend có 41 kiểm thử (40 ca nghiệp vụ/API và một ca khởi động), đã chạy trên H2 ở chế độ PostgreSQL và PostgreSQL 18 với migration thật. Có kiểm thử quyền xem danh mục, kết hợp bộ lọc, phân trang, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 48 kiểm thử (47 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 ở chế độ PostgreSQL và PostgreSQL 18 với migration thật. Bao gồm quyền khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, phân trang, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
 Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
 
@@ -88,6 +89,8 @@ GitHub Actions chạy backend trên cả H2 và PostgreSQL, kiểm tra cú pháp
 
 ## API danh mục khóa học
 
+Khách dùng `GET /api/discovery/catalog` với `search`, `category`, `freeOnly`, `sort`, `page`, `size`; `GET /api/discovery/categories`; và `GET /api/discovery/courses/{id}`. Các API này luôn chỉ trả khóa PUBLISHED cùng metadata chương trình, không trả nội dung/URL bài học. `GET /api/auth/session` trả hồ sơ phiên hiện tại hoặc `null` cho khách.
+
 `GET /api/courses/catalog` yêu cầu đăng nhập, trả `data` gồm `content`, `page`, `size`, `totalElements`, `totalPages`. API đánh số trang từ **0**; URL giao diện đánh số từ **1**.
 
 | Tham số | Mặc định | Ý nghĩa |
@@ -108,4 +111,4 @@ Ví dụ: `/api/courses/catalog?page=0&size=9&freeOnly=true&sort=price`.
 
 ## Phạm vi bản nền
 
-Đây là bản demo hoàn chỉnh của các nghiệp vụ hiện có, chưa tích hợp cổng thanh toán tự động, upload/stream video, quiz hay chứng chỉ. Danh mục khóa học đã phân trang phía server; các danh sách khác vẫn dùng hợp đồng trả list. Phân trang các màn hình quản trị còn lại và tìm kiếm toàn văn là các hướng phát triển tiếp theo.
+Xem [đánh giá trải nghiệm theo từng vai trò và lộ trình sản phẩm](docs/PRODUCT_EXPERIENCE.md). Ưu tiên tiếp theo là bài tập có phản hồi, hỏi đáp theo bài, soạn nội dung/video và phân trang các danh sách còn lại. Khi triển khai rộng cần thêm email xác minh/quên mật khẩu, thanh toán qua cổng, lưu trữ file, audit log và quan sát vận hành. Bản hiện tại dùng chuyển khoản đối chiếu thủ công.

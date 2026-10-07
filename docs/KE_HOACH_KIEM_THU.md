@@ -73,12 +73,29 @@ Giao diện: làm theo mục Kiểm tra trong README. Chỉ trỏ E2E tới bả
 
 | Kiểm tra | Kết quả |
 |---|---|
-| Maven verify, JDK 21 + H2 | 41 test, 0 failure, 0 error; Flyway V3 đạt, đóng gói JAR thành công |
-| Maven test, JDK 21 + PostgreSQL 18 | 41 test, 0 failure, 0 error; Flyway V3 đạt |
+| Maven verify, JDK 21 + H2 | 48 test, 0 failure, 0 error; Flyway V5 đạt, đóng gói JAR thành công |
+| Maven test, JDK 21 + PostgreSQL 18 | 48 test, 0 failure, 0 error; Flyway V5 đạt |
 | Playwright Chromium, backend thật trên PostgreSQL demo | 6/6 hành trình đạt |
 | Cú pháp module JavaScript | `api.js` và `app.js` hợp lệ |
 | Giao diện thủ công | Đã xem login, dashboard, phòng học desktop và mobile |
+| Playwright CLI, trải nghiệm sản phẩm | Khách tìm Java từ trang chủ, xem chương trình công khai, đăng nhập về đúng khóa; giảng viên sửa giới thiệu/mục tiêu của khóa được giao và tải lại thấy checklist 4/4; dashboard ba vai trò và mobile 390 px |
+| Playwright CLI, ghi chú và phòng học | Ghi chú giữ khi đổi bài/tải lại; mô phỏng lỗi lưu giữ nguyên văn bản và bài; HTML trong ghi chú không thực thi; quay lại bài gần nhất không có lessonId; chế độ tập trung; không tạo liên kết /null |
 | Playwright CLI, danh mục mới | Chuyển trang 1/2, tải lại giữ trang; tìm giảng viên + lọc miễn phí + sắp xếp; quay lại khôi phục bộ lọc; chặn request tạo lỗi và thử lại thành công; phản hồi Java đến sau SQL không ghi đè kết quả |
 | Danh mục trên điện thoại | 390 × 844, không tràn ngang; đã xem ảnh chụp desktop/mobile trong `output/playwright` |
 
 Các log chạy tại máy và báo cáo nằm trong `target/local-demo` và `output`, không đưa vào Git. CI tạo bằng chứng độc lập trong mục Actions của repo. Các bài kiểm tra tải, nhiều trình duyệt và cổng thanh toán thật thuộc giai đoạn tiếp theo.
+
+
+## Kiểm thử bổ sung cho trải nghiệm theo vai trò
+
+| Ca backend | Điều được bảo vệ |
+|---|---|
+| `guestsCanDiscoverPublishedCoursesWithoutReceivingLessonContent` | Guest chỉ xem khóa published; metadata chương trình không chứa textContent/contentUrl; khóa draft trả 404 cả với phiên admin |
+| `publicSessionReturnsOnlyTheCurrentActiveProfile` | Guest nhận null; phiên hợp lệ chỉ nhận hồ sơ của chính mình; khóa tài khoản vô hiệu hóa phiên |
+| `teacherCanImproveOwnCourseMetadataButCannotChangeAssignmentOrPrice` | Giảng viên sửa mục tiêu của khóa phụ trách; không đổi học phí/phân công/trạng thái; người khác và học viên bị chặn |
+| `privateNotesPersistWithoutCompletingLessonsAndSurviveCompletion` | Ghi chú lưu/đọc/xóa bằng chuỗi rỗng; không tăng tiến độ; hoàn thành bài giữ ghi chú và không tạo progress trùng |
+| `notesAndResumeRequireAnActiveOwnerAndPublishedLessonInTheirCourse` | Không đọc/ghi ghi chú người khác; không ghi lên bài draft hoặc khóa khác; lượt dropped không còn quyền |
+| `recentLessonIsRestoredAndHiddenLessonsAreExcludedFromResume` | Nhớ bài vừa đọc; bài bị ẩn không được dùng làm vị trí quay lại; đọc bài không tự hoàn thành |
+| `notesValidateSizeAndCsrf` | Chặn note null/quá 10.000 ký tự và request thiếu CSRF; không ghi dữ liệu lỗi |
+
+Giữ sáu hành trình E2E hiện có; cập nhật tiêu đề dashboard được kỳ vọng theo từng vai trò. Kiểm tra UI mới dùng Playwright CLI, không thay backend bằng mock. Riêng ca lỗi ghi chú chặn một request PUT để xác nhận hành vi thử lại; dữ liệu còn lại đi qua API và PostgreSQL thật.
