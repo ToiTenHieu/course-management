@@ -129,7 +129,9 @@ public class LessonServiceImpl implements LessonService {
         .title(l.getTitle())
         .orderIndex(l.getOrderIndex())
         .preview(text.length() > 150 ? text.substring(0, 150) + "…" : text)
-        .hasVideoOrDocument(l.getContentUrl() != null && !l.getContentUrl().isBlank())
+        .hasVideoOrDocument(
+            (l.getContentUrl() != null && !l.getContentUrl().isBlank())
+                || (l.getVideoUrl() != null && !l.getVideoUrl().isBlank()))
         .build();
   }
 

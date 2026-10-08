@@ -1854,6 +1854,7 @@ class BusinessFlowTests {
     var saved = lessonService.getLessonById(first.getLessonId(), actor(teacher));
     assertEquals("MARKDOWN", saved.getContentFormat());
     assertEquals(request.getVideoUrl(), saved.getVideoUrl());
+    assertTrue(lessonService.getContentPreview(first.getLessonId(), actor(teacher)).getHasVideoOrDocument());
     var metadata = lessonService.getLessonsByCourse(free.getCourseId(), actor(student)).getFirst();
     assertNull(metadata.getVideoUrl()); assertNull(metadata.getTextContent());
     request.setVideoUrl("javascript:alert(1)");

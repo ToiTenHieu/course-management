@@ -301,7 +301,7 @@ function readiness(c, lessons = null) {
     checks.push([
       "Nội dung cho mọi bài học",
       lessons.length > 0 &&
-        lessons.every((l) => l.textContent?.trim() || l.contentUrl),
+        lessons.every((l) => l.textContent?.trim() || l.contentUrl || l.videoUrl),
       "curriculum",
     ]);
   return `<section class="panel readiness"><div class="section-heading"><div><span class="eyebrow">CHUẨN BỊ KHÓA HỌC</span><h2>Sẵn sàng cho học viên</h2><p>${checks.filter((x) => x[1]).length}/${checks.length} mục đã chuẩn bị${lessons ? ` · ${lessons.filter((l) => !l.isPublished).length} bài còn ở bản nháp` : ""}</p></div>${badge(c.status)}</div><div class="readiness-items">${checks.map(([text, done, anchor]) => `<a href="${lessons ? "#" + anchor : "/course-detail.html?id=" + c.courseId + "#" + anchor}" class="readiness-item ${done ? "done" : ""}">${icon(done ? "check" : "clock")}<span>${text}</span><small>${done ? "Đã có" : "Cần bổ sung"}</small></a>`).join("")}</div><p class="hint">Kiểm tra nội dung, kết quả học tập và bài xuất bản trước khi mở khóa. Quản trị viên quyết định trạng thái xuất bản khóa học.</p></section>`;
@@ -959,7 +959,7 @@ async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
     if (showPreview) {
       const text = form.elements.textContent.value;
       const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-      $("#lessonPreviewPanel").innerHTML = `<div class="preview-caption"><span class="badge muted">Xem trước · Chưa lưu</span><span>${words.toLocaleString("vi-VN")} từ${words ? " · Khoảng " + Math.ceil(words / 200) + " phút đọc" : ""}</span></div><h2>${esc(form.elements.title.value || "Tiêu đề bài học")}</h2>${text.trim() || resourceInput.value ? lessonBody(text, resourceInput.value, form.elements.contentFormat.value, form.elements.videoUrl.value) : '<div class="empty"><h3>Chưa có nội dung để xem trước</h3><p>Quay lại soạn nội dung hoặc thêm liên kết tài liệu.</p></div>'}<p class="hint">Bản xem trước dùng cùng cách hiển thị với phòng học. Lưu thay đổi để cập nhật bài.</p>`;
+      $("#lessonPreviewPanel").innerHTML = `<div class="preview-caption"><span class="badge muted">Xem trước · Chưa lưu</span><span>${words.toLocaleString("vi-VN")} từ${words ? " · Khoảng " + Math.ceil(words / 200) + " phút đọc" : ""}</span></div><h2>${esc(form.elements.title.value || "Tiêu đề bài học")}</h2>${text.trim() || resourceInput.value || form.elements.videoUrl.value ? lessonBody(text, resourceInput.value, form.elements.contentFormat.value, form.elements.videoUrl.value) : '<div class="empty"><h3>Chưa có nội dung để xem trước</h3><p>Quay lại soạn nội dung hoặc thêm liên kết tài liệu.</p></div>'}<p class="hint">Bản xem trước dùng cùng cách hiển thị với phòng học. Lưu thay đổi để cập nhật bài.</p>`;
     }
     $("#lessonEditPanel").hidden = showPreview;
     $("#lessonPreviewPanel").hidden = !showPreview;

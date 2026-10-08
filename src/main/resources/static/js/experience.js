@@ -166,7 +166,7 @@ export function lessonBody(text, resource, format = "TEXT", videoUrl = "") {
     const parsed = new URL(resource);
     if (["https:", "http:"].includes(parsed.protocol)) url = parsed;
   } catch { /* Empty or invalid links are not rendered. */ }
-  return `${video(videoUrl)}<div class="lesson-text ${format === "MARKDOWN" ? "structured-content" : ""}">${format === "MARKDOWN" ? markdown(text) : escapeText(text || "Bài học sử dụng tài liệu hoặc video bên dưới.")}</div>${url
+  return `${video(videoUrl)}<div class="lesson-text ${format === "MARKDOWN" ? "structured-content" : ""}">${format === "MARKDOWN" ? markdown(text) : escapeText(text || "Bài học sử dụng tài liệu hoặc video đi kèm.")}</div>${url
     ? `<div class="lesson-resource"><span class="resource-symbol" aria-hidden="true">↗</span><div><strong>Tài liệu / video của bài học</strong><small>${escapeText(url.hostname)} · Mở trong thẻ mới</small></div><a class="btn secondary compact resource-link" href="${escapeText(url.href)}" target="_blank" rel="noopener noreferrer">Mở tài liệu ↗</a></div>`
     : ""}`;
 }

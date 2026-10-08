@@ -193,3 +193,7 @@ Log: `target/local-demo/ux-detail-verify.log` (74 test đạt, bước đóng g�
 - 4 kiểm thử renderer Node đạt; cú pháp các module mới hợp lệ. JAR đóng gói thành công.
 - Sáu hành trình E2E hiện có đạt. Browser kiểm tra báo cáo 27 học viên, lọc/tìm/trang/thứ tự, liên kết câu hỏi và giảng viên phụ trách; viewport 390×844 không tràn ngang.
 - Ảnh `output/playwright/course-students-desktop.png`, `course-students-mobile.png`; log H2 `target/local-demo/student-report-verify.log`, PostgreSQL `drafts-postgres.log`, E2E `upgrades-e2e.log` (các thư mục bằng chứng được Git bỏ qua).
+
+### Bài chỉ có video (08/10/2026)
+- Sửa điều kiện preview/mức sẵn sàng để nhận video khi không có văn bản hay liên kết tài liệu; API preview báo có video.
+- Kiểm thử backend liên quan và đóng gói JAR đạt; bốn kiểm thử renderer/cú pháp module đạt. Chromium tạo bài chỉ có video, xem trước iframe và kiểm tra mục nội dung đã có đạt.
