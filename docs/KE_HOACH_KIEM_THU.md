@@ -206,3 +206,15 @@ Log: `target/local-demo/ux-detail-verify.log` (74 test đạt, bước đóng g�
 - Mô phỏng lỗi lưu ghi chú: giữ nguyên bài và văn bản đang sửa. Hoàn nguyên nội dung trong ô trước khi tiếp tục để không đổi ghi chú demo.
 - Cú pháp toàn bộ module JavaScript và 4 kiểm thử renderer đạt; đóng gói JAR thành công sau khi dừng demo. Sáu E2E đạt trong lần chạy này. Không chạy lại bộ backend vì chỉ thay đổi frontend.
 - Script QA `output/playwright/ui-regression.js`, `learning-ui-regression.js`; ảnh `guest-tabs-fixed-mobile.png`, `editor-fixed-mobile.png`, `editor-fixed-landscape.png`, `learning-fixed-mobile.png`, `learning-fixed-desktop.png`. Log `target/local-demo/ui-fixes-build.log`, `ui-fixes-e2e.log`, `ui-fixes-learning-qa.log`. Các thư mục bằng chứng được Git bỏ qua; T33–T36 bổ sung cách kiểm tra vào tài liệu demo.
+
+### Rà soát lỗi nghiệp vụ, mạng và trạng thái giao diện — 08/10/2026
+
+- 90/90 backend trên H2 và PostgreSQL 18 thật đạt (89 ca nghiệp vụ/API, một ca khởi động). Bốn ca mới kiểm tra lưu hồ sơ/vai trò đồng thời, quyền/CSRF/phiên cũ; URL thông báo có hash/query mã hóa và giới hạn trường; tài khoản đăng ký/admin dùng chung giới hạn; bài trùng thứ tự vẫn sắp theo ID ổn định.
+- 8/8 kiểm thử Node đạt. Bốn ca API mới kiểm tra phản hồi HTML giữ mã HTTP, envelope/CSRF hỏng không gửi ghi, và làm mới token sau HTTP 403. Toàn bộ module hợp lệ; package khai báo ES module, cấu hình/helper E2E dùng `.cjs`.
+- 6/6 E2E đạt trên bản JAR mới. Playwright CLI đi qua 26 trang với khách/học viên/giảng viên/admin ở 1280×900, 390×844, 320×640 và 844×390; không phát hiện tràn ngang hoặc lỗi JavaScript chưa bắt trong lượt duyệt này.
+- QA mô phỏng lỗi lưu nháp khi đóng: giữ dialog/văn bản, thử lại mới đóng. Bỏ nội dung bài mới giữ thứ tự kế tiếp; lỗi tải bài live không xóa bản nháp máy chủ. Các request ghi của tình huống này được mock, không thay bài hoặc nháp demo.
+- QA quiz: sessionStorage hỏng được bỏ; phản hồi kết quả cũ trả sau không ghi đè kết quả mới; xem lịch sử sau nộp giữ nút Làm lại. Lưu đề mới khi thống kê cũ chờ giữ thống kê phiên bản mới; lỗi tải đề sau HTTP 409 giữ bản soạn và nút thử lại.
+- QA luồng: khách đổi tab rồi đăng nhập quay lại đúng hash; trạng thái DROPPED hiển thị hướng dẫn thay vì nút đăng ký trùng; ghi thành công rồi tải danh mục HTTP 503 hiển thị đã lưu, đóng dialog và chỉ gửi một request ghi.
+- Script demo kiểm tra cổng bị chiếm trước khi build; database hỏng không báo sẵn sàng, dọn tiến trình/PID riêng. Gọi lại khi sẵn sàng không tạo tiến trình trùng. Kiểm tra cổng khác và quay về 8080; `DB_URL` cũng được nhận ở profile demo.
+
+Log: `target/local-demo/full-polish-h2.log`, `full-polish-postgres.log`, `full-polish-final-package.log`, `full-polish-e2e.log`, `full-polish-browser-smoke.log`, `full-polish-fault-qa.log`, `full-polish-flow-qa.log`. Script QA `output/playwright/full-project-smoke.js`, `polish-fault-qa.js`, `polish-flow-qa.js`; fixture startup riêng ở `output/startup-qa`. Các bằng chứng được Git bỏ qua. T37–T45 bổ sung cách tái hiện vào tài liệu demo; lỗi mạng/độ trễ dùng mock có chủ đích, kiểm tra backend thật dùng database test riêng.

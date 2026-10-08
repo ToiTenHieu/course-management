@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserResponse updateRole(Integer userId, UpdateRoleRequest req) {
-    User user = findUserOrThrow(userId);
+    User user = lockedUserOrThrow(userId);
 
     // Luật nghiệp vụ endpoint 7: ADMIN không được đổi role của một ADMIN khác
     if (user.getRole() == Role.ADMIN) {
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserResponse updateStatus(Integer userId, UpdateStatusRequest req) {
-    User user = findUserOrThrow(userId);
+    User user = lockedUserOrThrow(userId);
     user.setIsActive(req.getIsActive());
     user.setAuthVersion(user.getAuthVersion() + 1);
     user.setUpdatedAt(LocalDateTime.now());
@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserResponse updateProfile(Integer userId, UpdateUserRequest req) {
-    User user = findUserOrThrow(userId);
+    User user = lockedUserOrThrow(userId);
     if (!user.getEmail().equals(req.getEmail()) && userRepository.existsByEmail(req.getEmail())) {
       throw new com.example.course_management.exception.ConflictException("Email đã tồn tại");
     }
@@ -103,12 +103,25 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public UserResponse manageUser(Integer userId, ManageUserRequest req) {
+    var user = lockedUserOrThrow(userId);
+    // Profile and role must succeed together, including the rule protecting administrators.
+    if (user.getRole() == Role.ADMIN && req.getRole() != Role.ADMIN)
+      throw new ForbiddenException("Không được phép thay đổi vai trò của quản trị viên");
+    updateProfile(userId, req);
+    if (user.getRole() != req.getRole()) {
+      var role = new UpdateRoleRequest();
+      role.setRole(req.getRole());
+      return updateRole(userId, role);
+    }
+    return toResponse(user);
+  }
+
+  @Override
   public void changePassword(Integer userId, ChangePasswordRequest req, CustomUserDetails actor) {
-    User user = findUserOrThrow(userId);
+    User user = lockedUserOrThrow(userId);
 
     boolean isSelf = actor.getUser().getUserId().equals(userId);
-    boolean isAdmin = actor.getUser().getRole() == Role.ADMIN;
-
     // Nếu tự đổi mật khẩu của chính mình (không phải admin đổi hộ) → bắt buộc xác nhận mật khẩu cũ
     if (isSelf) {
       if (req.getOldPassword() == null
@@ -127,6 +140,11 @@ public class UserServiceImpl implements UserService {
     return userRepository
         .findById(userId)
         .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user id=" + userId));
+  }
+
+  private User lockedUserOrThrow(Integer userId) {
+    return userRepository.findLockedById(userId)
+        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
   }
 
   private UserResponse toResponse(User u) {

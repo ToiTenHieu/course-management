@@ -5,6 +5,19 @@ export class ApiError extends Error {
     this.status = status;
   }
 }
+async function readResponse(response) {
+  let data;
+  try { data = await response.json(); }
+  catch {
+    throw new ApiError(
+      response.status === 413 ? "Tài liệu vượt quá giới hạn dung lượng cho phép."
+        : response.status === 401 ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+        : "Máy chủ chưa trả được kết quả hợp lệ. Vui lòng thử lại.", response.status);
+  }
+  if (!data || typeof data !== "object" || typeof data.success !== "boolean")
+    throw new ApiError("Máy chủ chưa trả được kết quả hợp lệ. Vui lòng thử lại.", response.status);
+  return data;
+}
 export async function api(path, method = "GET", body) {
   try {
     const options = { method, credentials: "same-origin", headers: {} };
@@ -16,7 +29,12 @@ export async function api(path, method = "GET", body) {
             "Không thể tạo phiên bảo vệ. Vui lòng tải lại trang.",
             r.status,
           );
-        csrf = (await r.json()).data;
+        const result = await readResponse(r);
+        const token = result.data;
+        if (!result.success || !token || typeof token.headerName !== "string" || !token.headerName
+            || typeof token.token !== "string" || !token.token)
+          throw new ApiError("Không thể tạo phiên bảo vệ. Vui lòng tải lại trang.", r.status);
+        csrf = token;
       }
       options.headers[csrf.headerName] = csrf.token;
     }
@@ -28,7 +46,8 @@ export async function api(path, method = "GET", body) {
       }
     }
     const response = await fetch("/api" + path, options);
-    const data = await response.json();
+    if (response.status === 401 || response.status === 403) csrf = null;
+    const data = await readResponse(response);
     if (!response.ok || !data.success) {
       if (response.status === 401 || response.status === 403) csrf = null;
       throw new ApiError(

@@ -84,6 +84,14 @@ public class UserController {
         "Cập nhật hồ sơ thành công", userService.updateProfile(userId, request));
   }
 
+  // Save administrative profile/role edits in one transaction.
+  @PutMapping("/{userId}/management")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<UserResponse> manageUser(
+      @PathVariable Integer userId, @Valid @RequestBody ManageUserRequest request) {
+    return ApiResponse.success("Đã cập nhật thông tin và vai trò", userService.manageUser(userId, request));
+  }
+
   // Endpoint 27: PUT /api/users/{user_id}/password — OWNER hoặc ADMIN
   @PutMapping("/{userId}/password")
   @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.user.userId")

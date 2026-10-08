@@ -111,3 +111,9 @@ Nghiệm thu Chromium bằng khóa mẫu 27 học viên: phân trang, tìm tài 
 Khách mở lại được chi tiết khóa và các tab chương trình/cách học. Lỗi mở trang có nút tải lại giữ đúng mã khóa và tab. Trình soạn cho xem trước ngay khi tài liệu còn đang tải; trên màn hình thấp, nội dung cuộn trong hộp và các nút Lưu/Hủy vẫn hiển thị.
 
 Phòng học đặt tài liệu ngay sau nội dung, trước nút hoàn thành; hướng dẫn xem/tải tài liệu dành cho học viên, còn giới hạn upload chỉ dành cho người soạn. Chuyển bài đưa focus và vị trí cuộn về tiêu đề để người học bắt đầu đọc, thay vì giữ ở cuối bài cũ. Lỗi lưu ghi chú vẫn giữ văn bản và ngăn chuyển bài; lỗi tải tài liệu có thể thử lại. Bốn renderer, sáu E2E và kiểm tra Chromium desktop/mobile/màn hình ngang đạt trong đợt này.
+
+### Rà soát lỗi còn lại — 08/10/2026
+
+Đóng trình soạn bài chờ lưu bản nháp; lỗi mạng giữ dialog và văn bản. Dùng nội dung hiện tại chỉ bỏ nháp sau khi tải bài gốc thành công; bài mới giữ thứ tự mặc định. Admin lưu hồ sơ và vai trò trong một thao tác, tránh thành công một phần. Sau khi ghi đã thành công, lỗi tải màn hình được thông báo riêng với nút tải lại.
+
+Đăng nhập quay về cả tab vừa chọn. Lượt đã ngừng học có hướng dẫn liên hệ quản trị viên. Quiz bỏ bản nộp hỏng trong phiên, giữ kết quả/thống kê mới khi phản hồi cũ về chậm, giữ nút làm lại sau xem lịch sử và cho thử tải đề khi lỗi. Form quiz/hỏi đáp dùng cùng kiểm tra sát ô nhập. API giữ mã HTTP khi nhận trang HTML lỗi, giúp xử lý phiên hết hạn và tệp quá lớn đúng nghĩa.

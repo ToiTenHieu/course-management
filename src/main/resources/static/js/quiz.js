@@ -1,4 +1,5 @@
 import { api } from "./api.js";
+import { enhanceForms } from "./experience.js";
 
 const esc = (value) =>
   String(value ?? "").replace(
@@ -24,12 +25,27 @@ export function mountQuiz(root, lessonId, manager, userId) {
   const pendingKey = `cm-quiz-pending:${draftKey}`;
   let quiz = null,
     revision = 0,
+    resultRevision = 0,
+    statisticsRevision = 0,
     historyPage = 0,
     busy = false;
   const active = () => root.isConnected;
   function pending() {
     try {
-      return JSON.parse(sessionStorage.getItem(pendingKey) || "null");
+      const saved = JSON.parse(sessionStorage.getItem(pendingKey) || "null");
+      if (!saved) return null;
+      if (!saved.quiz || !Array.isArray(saved.quiz.questions)
+          || !saved.quiz.questions.length
+          || !saved.quiz.questions.every(q => Array.isArray(q.options) && q.options.length === 4)
+          || !saved.payload || !Array.isArray(saved.payload.answers)
+          || saved.payload.answers.length !== saved.quiz.questions.length
+          || !saved.payload.answers.every(answer => Number.isInteger(answer) && answer >= 0 && answer < 4)
+          || saved.payload.quizVersionId !== saved.quiz.quizVersionId
+          || typeof saved.payload.submissionKey !== "string") {
+        sessionStorage.removeItem(pendingKey);
+        return null;
+      }
+      return saved;
     } catch {
       return null;
     }
@@ -45,10 +61,12 @@ export function mountQuiz(root, lessonId, manager, userId) {
   const header = `<div class="section-heading"><div><span class="eyebrow">THỰC HÀNH SAU BÀI HỌC</span><h3>Kiểm tra kiến thức</h3><p>${manager ? "Soạn quiz trắc nghiệm và xem câu hỏi học viên hay sai." : "Làm bài, nhận giải thích và xem lại các lần làm. Điểm quiz được theo dõi riêng với tiến độ đọc bài."}</p></div></div>`;
   async function load() {
     const request = ++revision;
+    ++resultRevision;
     root.innerHTML = header + '<p role="status">Đang tải quiz…</p>';
     try {
-      quiz = await api(`/lessons/${lessonId}/quiz`);
+      const loaded = await api(`/lessons/${lessonId}/quiz`);
       if (!active() || request !== revision) return;
+      quiz = loaded;
       if (manager) renderManager();
       else renderStudent();
     } catch (error) {
@@ -93,6 +111,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
         event.preventDefault();
         if (busy) return;
         busy = true;
+        ++resultRevision;
         if (!inFlight) {
           inFlight = {
             quiz: shown,
@@ -137,7 +156,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
               ? " — Hãy tải đề mới; câu trả lời đã chọn được giữ trong phiên này."
               : " — Câu trả lời được giữ. Thử nhận kết quả lại để tránh tạo lần làm trùng.");
           form.querySelector("button").textContent = "Thử nhận kết quả";
-          if (error.status === 409 || error.status === 404) {
+          if ([400, 404, 409].includes(error.status)) {
             const button = document.createElement("button");
             button.className = "btn secondary compact";
             button.textContent = "Tải đề hiện tại";
@@ -166,7 +185,11 @@ export function mountQuiz(root, lessonId, manager, userId) {
       const data = await api(
         `/lessons/${lessonId}/quiz/attempts?page=${historyPage}&size=5`,
       );
-      if (!active() || request !== historyRevision) return;
+      if (!active() || !container.isConnected || request !== historyRevision) return;
+      if (historyPage > 0 && historyPage >= data.totalPages) {
+        historyPage = Math.max(0, data.totalPages - 1);
+        return loadHistory();
+      }
       container.innerHTML =
         data.content
           .map(
@@ -190,18 +213,26 @@ export function mountQuiz(root, lessonId, manager, userId) {
       container.querySelectorAll("[data-attempt]").forEach(
         (button) =>
           (button.onclick = async () => {
+            if (busy) return;
+            const request = ++resultRevision;
+            const resultContainer = root.querySelector(".quiz-result");
             button.disabled = true;
             try {
               const result = await api(
                 `/quiz-attempts/${button.dataset.attempt}`,
               );
-              if (!active()) return;
-              root.querySelector(".quiz-result").innerHTML = feedback(result);
-              root
-                .querySelector(".quiz-result")
-                .scrollIntoView({ block: "start" });
+              if (!active() || !resultContainer.isConnected || request !== resultRevision) return;
+              resultContainer.innerHTML = feedback(result);
+              if (!root.querySelector(".quiz-form")) {
+                const again = document.createElement("button");
+                again.className = "btn secondary compact";
+                again.textContent = "Làm lại quiz";
+                again.onclick = load;
+                resultContainer.append(again);
+              }
+              resultContainer.scrollIntoView({ block: "start" });
             } catch (error) {
-              if (active())
+              if (active() && request === resultRevision && resultContainer.isConnected)
                 root.querySelector(".quiz-status").textContent = error.message;
             } finally {
               button.disabled = false;
@@ -209,7 +240,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
           }),
       );
     } catch (error) {
-      if (!active() || request !== historyRevision) return;
+      if (!active() || !container.isConnected || request !== historyRevision) return;
       container.innerHTML = `<p role="alert">${esc(error.message)}</p><button class="btn secondary compact" data-retry-history>Thử lại lịch sử</button>`;
       container.querySelector("[data-retry-history]").onclick = loadHistory;
     }
@@ -224,12 +255,13 @@ export function mountQuiz(root, lessonId, manager, userId) {
   }
   async function loadStatistics() {
     const container = root.querySelector(".quiz-statistics");
+    const request = ++statisticsRevision;
     try {
       const data = await api(`/lessons/${lessonId}/quiz/statistics`);
-      if (!active()) return;
+      if (!active() || !container.isConnected || request !== statisticsRevision) return;
       container.innerHTML = `<h4>Kết quả phiên bản ${data.revision}</h4><p>${data.attempts} lần làm · ${data.students} học viên · ${data.passedAttempts} lần đạt · Điểm trung bình ${data.averageScore === null ? "—" : data.averageScore.toFixed(1) + "%"}</p><p class="hint">Thống kê tính tất cả lần làm của phiên bản hiện tại, gồm cả các lần làm lại.</p>${data.questions.map((q, i) => `<div class="quiz-stat-row"><strong>Câu ${i + 1}: ${esc(q.prompt)}</strong><span>${q.incorrect}/${q.answered} lần trả lời sai</span></div>`).join("")}`;
     } catch (error) {
-      if (!active()) return;
+      if (!active() || !container.isConnected || request !== statisticsRevision) return;
       container.innerHTML = `<p role="alert">${esc(error.message)}</p><button class="btn secondary compact" data-retry-stats>Thử lại thống kê</button>`;
       container.querySelector("[data-retry-stats]").onclick = loadStatistics;
     }
@@ -248,6 +280,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
     };
     container.innerHTML = `<p class="hint">1–20 câu, mỗi câu có bốn lựa chọn và một đáp án đúng. Giải thích giúp học viên hiểu vì sao. Mỗi lần lưu tạo phiên bản mới và giữ lịch sử cũ. Bỏ xuất bản sẽ ẩn đề hiện tại với học viên.</p><form class="quiz-editor-form"><label>Tên quiz<input name="title" required maxlength="255" value="${esc(model.title)}"></label><label>Mức đạt (%)<input name="passPercentage" type="number" required min="1" max="100" value="${model.passPercentage}"></label><label class="quiz-option"><input type="checkbox" name="published" ${model.published ? "checked" : ""}><span>Xuất bản quiz cho học viên</span></label><div class="quiz-editor-questions">${model.questions.map((q, i) => `<fieldset data-question-index="${i}"><legend>Câu ${i + 1}</legend><label>Nội dung câu ${i + 1}<textarea name="prompt${i}" required rows="3" maxlength="5000">${esc(q.prompt)}</textarea></label>${q.options.map((o, j) => `<label>Lựa chọn ${letters[j]} của câu ${i + 1}<input name="option${i}_${j}" required maxlength="1000" value="${esc(o)}"></label>`).join("")}<label>Đáp án đúng của câu ${i + 1}<select name="correct${i}">${letters.map((letter, j) => `<option value="${j}" ${q.correctIndex === j ? "selected" : ""}>${letter}</option>`).join("")}</select></label><label>Giải thích câu ${i + 1}<textarea name="explanation${i}" required maxlength="5000" rows="3">${esc(q.explanation)}</textarea></label>${model.questions.length > 1 ? `<button type="button" class="text-link danger" data-remove="${i}">Bỏ câu ${i + 1}</button>` : ""}</fieldset>`).join("")}</div><div class="quiz-editor-actions"><button type="button" class="btn secondary compact" data-add ${model.questions.length >= 20 ? "disabled" : ""}>Thêm câu hỏi</button><button type="submit" class="btn compact">Lưu quiz</button><button type="button" class="text-link" data-cancel>Đóng trình soạn</button></div><p class="quiz-editor-status" role="status" aria-live="polite"></p></form>`;
     const form = container.querySelector("form");
+    enhanceForms(container);
     function collect() {
       const data = new FormData(form);
       return {
@@ -309,10 +342,18 @@ export function mountQuiz(root, lessonId, manager, userId) {
             '<br><button type="button" class="btn secondary compact" data-reload-quiz>Tải đề mới nhất</button>',
           );
           status.querySelector("[data-reload-quiz]").onclick = async () => {
-            const latest = await api(`/lessons/${lessonId}/quiz`).catch(
-              () => null,
-            );
-            if (!active() || !latest) return;
+            let latest;
+            const reload = status.querySelector("[data-reload-quiz]");
+            reload.disabled = true;
+            try { latest = await api(`/lessons/${lessonId}/quiz`); }
+            catch (error) {
+              if (active() && status.isConnected) {
+                status.firstChild.textContent = error.message + '. Bản soạn vẫn được giữ; hãy thử tải lại.';
+                reload.disabled = false;
+              }
+              return;
+            }
+            if (!active() || !status.isConnected || !latest) return;
             quiz = latest;
             status.textContent = `Đề mới là phiên bản ${latest.revision}. Bản soạn của bạn vẫn được giữ; dùng nút dưới nếu muốn lưu đè thành phiên bản kế tiếp.`;
             const button = document.createElement("button");

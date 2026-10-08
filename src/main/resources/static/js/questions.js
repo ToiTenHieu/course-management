@@ -1,4 +1,5 @@
 import { api } from "./api.js";
+import { enhanceForms } from "./experience.js";
 
 const escape = (value) =>
   String(value ?? "").replace(
@@ -103,6 +104,7 @@ export function mountQuestions(root, lessonId, manager, questionId = null) {
               "Đã cập nhật hiển thị câu hỏi.",
             );
       });
+      enhanceForms(list);
       if (questionId)
         list
           .querySelector(".question-target")
@@ -148,6 +150,7 @@ export function mountQuestions(root, lessonId, manager, questionId = null) {
     }
   }
   const form = root.querySelector(".question-form");
+  enhanceForms(root);
   if (form) {
     form.elements.body.oninput = () =>
       drafts.set(draftKey, form.elements.body.value);

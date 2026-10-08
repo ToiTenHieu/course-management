@@ -20,7 +20,7 @@ public class RegisterRequest {
 
   @NotBlank
   @Email
-  @Size(max = 255)
+  @Size(max = 100, message = "Email tối đa 100 ký tự")
   private String email;
 
   @NotBlank

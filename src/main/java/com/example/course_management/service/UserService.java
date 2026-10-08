@@ -21,5 +21,7 @@ public interface UserService {
 
   UserResponse updateProfile(Integer userId, UpdateUserRequest request);
 
+  UserResponse manageUser(Integer userId, ManageUserRequest request);
+
   void changePassword(Integer userId, ChangePasswordRequest request, CustomUserDetails actor);
 }

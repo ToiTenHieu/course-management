@@ -91,6 +91,79 @@ class BusinessFlowTests {
     lesson(paid, "Paid lesson", 1, true);
   }
 
+  @Test
+  void administrativeProfileAndRoleSaveTogetherAndInvalidateOldSessions() throws Exception {
+    var adminSession = login(admin);
+    var studentSession = login(student);
+    String path = "/api/users/" + student.getUserId() + "/management";
+    String body = """
+        {"fullName":"Updated learner","email":"updated@example.invalid","role":"TEACHER"}
+        """;
+    mvc.perform(put(path).session(studentSession).with(csrf()).contentType("application/json").content(body))
+        .andExpect(status().isForbidden());
+    mvc.perform(put(path).session(adminSession).contentType("application/json").content(body))
+        .andExpect(status().isForbidden());
+    mvc.perform(put(path).session(adminSession).with(csrf()).contentType("application/json")
+        .content("""
+          {"fullName":"Must not save","email":"admin@example.invalid","role":"TEACHER"}
+          """))
+        .andExpect(status().isConflict());
+    var unchanged = users.findById(student.getUserId()).orElseThrow();
+    assertEquals("student", unchanged.getFullName());
+    assertEquals(Role.STUDENT, unchanged.getRole());
+    assertEquals(0, unchanged.getAuthVersion());
+    mvc.perform(put("/api/users/" + admin.getUserId() + "/management").session(adminSession).with(csrf())
+        .contentType("application/json").content(body))
+        .andExpect(status().isForbidden());
+    assertEquals("admin", users.findById(admin.getUserId()).orElseThrow().getFullName());
+    mvc.perform(put(path).session(adminSession).with(csrf()).contentType("application/json").content(body))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.fullName").value("Updated learner"))
+        .andExpect(jsonPath("$.data.role").value("TEACHER"));
+    assertEquals(1, users.findById(student.getUserId()).orElseThrow().getAuthVersion());
+    mvc.perform(get("/api/auth/me").session(studentSession)).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void notificationLinksAcceptTabsAndEncodedSearchButRejectExternalTargets() throws Exception {
+    var session = login(admin);
+    String target = "/course-detail.html?id=" + free.getCourseId() + "&lessonId=" + first.getLessonId() + "#questions";
+    mvc.perform(post("/api/notifications").session(session).with(csrf()).contentType("application/json")
+        .content("{\"userId\":" + student.getUserId() + ",\"message\":\"Open discussion\",\"targetUrl\":\"" + target + "\"}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.targetUrl").value(target));
+    var policy = new ContentPolicy(enrollments);
+    assertDoesNotThrow(() -> policy.targetUrl("/courses.html?search=Java%20c%C6%A1%20b%E1%BA%A3n"));
+    for (String invalid : new String[]{"//evil.example/courses.html", "https://evil.example/courses.html", "/courses.html#<script>", "/courses.html\n", "/../courses.html"})
+      assertThrows(BadRequestException.class, () -> policy.targetUrl(invalid));
+    mvc.perform(post("/api/notifications").session(session).with(csrf()).contentType("application/json")
+        .content("{\"userId\":" + student.getUserId() + ",\"message\":\"Test\",\"type\":\"" + "x".repeat(51) + "\"}"))
+        .andExpect(status().isBadRequest());
+    assertEquals(1, notifications.count());
+  }
+
+  @Test
+  void registrationAndAdminCreationShareAccountFieldLimits() throws Exception {
+    String longEmail = "a".repeat(60) + "@" + "b".repeat(50) + ".invalid";
+    mvc.perform(post("/api/auth/register").with(csrf()).contentType("application/json")
+        .content("{\"username\":\"new_user\",\"fullName\":\"User\",\"password\":\"Password123!\",\"email\":\"" + longEmail + "\"}"))
+        .andExpect(status().isBadRequest());
+    mvc.perform(post("/api/users").session(login(admin)).with(csrf()).contentType("application/json")
+        .content("""
+          {"username":"invalid username","fullName":"User","password":"Password123!","email":"user@example.invalid","role":"STUDENT"}
+          """))
+        .andExpect(status().isBadRequest());
+    assertEquals(4, users.count());
+  }
+
+  @Test
+  void equalLessonPositionsKeepAStableProgramOrder() {
+    var third = lesson(free, "Same position", 1, true);
+    var draft = lesson(free, "Draft in same position", 1, false);
+    assertEquals(java.util.List.of(first.getLessonId(), third.getLessonId(), second.getLessonId()),
+        lessons.findByCourse_CourseIdAndIsPublishedTrueOrderByOrderIndex(free.getCourseId()).stream().map(Lesson::getLessonId).toList());
+    assertEquals(java.util.List.of(first.getLessonId(), third.getLessonId(), draft.getLessonId(), second.getLessonId()),
+        lessons.findByCourse_CourseIdOrderByOrderIndex(free.getCourseId()).stream().map(Lesson::getLessonId).toList());
+  }
+
   User user(String name, Role role) {
     var u = new User();
     u.setUsername(name);

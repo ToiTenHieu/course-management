@@ -4,9 +4,10 @@ const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp
 
 export function mountLessonDraft(form, courseId, lesson, draft) {
   const path = `/courses/${courseId}/lesson-drafts/${lesson?.lessonId || 0}`;
+  const initialContent = Object.fromEntries(fields.map(key => [key, form.elements[key].value]));
   let revision = draft?.revision || 0;
   let baseRevision = draft?.content ? draft.baseRevision : lesson?.contentRevision ?? null;
-  let timer, pending = Promise.resolve(), blocked = false, stopped = false;
+  let timer, pending = Promise.resolve(), blocked = false, stopped = false, resetting = false;
   const box = document.createElement('section');
   box.className = 'draft-status';
   box.innerHTML = '<p role="status" aria-live="polite"></p><div class="row-actions"><button type="button" class="text-link" data-retry hidden>Thử lưu nháp lại</button><button type="button" class="text-link" data-current>Dùng nội dung hiện tại</button></div>';
@@ -46,7 +47,7 @@ export function mountLessonDraft(form, courseId, lesson, draft) {
     return pending;
   }
   function changed(event) {
-    if (stopped || !fields.includes(event.target.name)) return;
+    if (stopped || resetting || !fields.includes(event.target.name)) return;
     clearTimeout(timer);
     status.textContent = 'Có thay đổi đang chờ lưu nháp…';
     timer = setTimeout(() => enqueue().catch(() => {}), 900);
@@ -56,18 +57,23 @@ export function mountLessonDraft(form, courseId, lesson, draft) {
   retry.onclick = () => enqueue().catch(() => {});
   box.querySelector('[data-current]').onclick = async () => {
     if (!confirm('Bỏ nội dung trong trình soạn và bản nháp của bạn để dùng bài hiện tại?')) return;
+    if (resetting) return;
+    resetting = true;
+    const controls = [...form.querySelectorAll('input,textarea,select,button')].filter(input => !input.disabled);
+    controls.forEach(input => { input.disabled = true; });
     clearTimeout(timer);
     try {
       await pending.catch(() => {});
       const current = await api(path);
+      // Fetch the live content before removing a draft; network failure must not destroy it.
+      const live = lesson ? await api('/lessons/' + lesson.lessonId) : initialContent;
       if (current?.content) await api(path + '?revision=' + current.revision, 'DELETE');
-      const empty = await api(path);
-      revision = empty?.revision || 0;
-      const live = lesson ? await api('/lessons/' + lesson.lessonId) : {title:'',orderIndex:1,contentFormat:'MARKDOWN'};
+      revision = current?.content ? current.revision + 1 : current?.revision || 0;
       baseRevision = live.contentRevision ?? null; blocked = false;
       apply(live); saved = JSON.stringify(collect()); retry.hidden = true;
       status.textContent = 'Đã dùng nội dung hiện tại. Bản nháp cũ đã được bỏ.';
-    } catch (error) { status.textContent = error.message; }
+    } catch (error) { status.textContent = error.message + ' Nội dung đang soạn vẫn được giữ.'; }
+    finally { resetting = false; controls.forEach(input => { input.disabled = false; }); }
   };
   if (lesson) {
     const history = document.createElement('details'); history.className = 'lesson-history';
@@ -96,7 +102,13 @@ export function mountLessonDraft(form, courseId, lesson, draft) {
     enqueue().catch(() => {});
   }, {once:true});
   return {
+    async flush() {
+      if (resetting) throw new Error('Đang tải nội dung hiện tại. Hãy chờ trước khi đóng.');
+      clearTimeout(timer);
+      await enqueue();
+    },
     async prepare(data) {
+      if (resetting) throw new Error('Đang tải nội dung hiện tại. Hãy chờ trước khi lưu.');
       clearTimeout(timer);
       await enqueue();
       data.expectedRevision = baseRevision;

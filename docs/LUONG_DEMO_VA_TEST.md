@@ -192,6 +192,15 @@ Ghi mỗi ca: người chạy, thời điểm, dữ liệu, Pass/Fail và screen
 | T34 | HTTP 503 khi mở trang khóa, sau đó bấm Thử lại khi máy chủ hoạt động | Tải lại đúng mã khóa và tab đang mở, không mất tham số URL |
 | T35 | Tải tài liệu chậm trong trình soạn; chuyển tab Xem trước; xoay màn hình 844×390 | Preview hoạt động khi tài liệu còn tải; nội dung cuộn và nút Lưu/Hủy vẫn nhìn thấy |
 | T36 | Phòng học: lỗi lưu ghi chú, lỗi tải tài liệu và chuyển bài trên mobile | Lỗi lưu giữ bài/ghi chú; tài liệu có nút thử lại, nằm trước hoàn thành; chuyển bài đưa focus và cuộn về tiêu đề |
+| T37 | Đổi tab khóa khi là khách rồi đăng nhập từ nút đăng ký | Quay về đúng khóa, query và tab vừa chọn |
+| T38 | Đóng trình soạn khi lưu nháp lỗi, sau đó thử lại | Giữ dialog/văn bản đến khi lưu nháp thành công; khóa thao tác trong lúc đóng |
+| T39 | Bỏ nháp bài mới có thứ tự lớn hơn 1; tải bài gốc lỗi khi bỏ nháp bài cũ | Giữ thứ tự mặc định của bài mới; lỗi tải bài gốc không xóa nháp máy chủ |
+| T40 | Admin sửa hồ sơ/vai trò với email trùng hoặc đổi vai trò admin | Không lưu một phần; đổi vai trò hợp lệ làm phiên cũ hết hiệu lực |
+| T41 | Máy chủ nhận thao tác ghi nhưng tải lại màn hình trả HTTP 503 | Báo thao tác đã lưu, đóng hộp soạn và cho tải lại; không gợi ý gửi trùng |
+| T42 | Mở hai kết quả quiz liên tiếp, giữ phản hồi cũ chậm; xem lịch sử sau nộp | Kết quả mới nhất được giữ; nút Làm lại quiz vẫn có sau xem lịch sử |
+| T43 | Bản nộp quiz trong sessionStorage hỏng; tải thống kê cũ chậm khi lưu đề mới; lỗi tải đề sau 409 | Bỏ bản hỏng và cho làm bài; giữ thống kê phiên bản mới; lỗi tải đề giữ bản soạn và nút thử lại |
+| T44 | Khóa đã ngừng học; thông báo có hash/query mã hóa; username/email quá giới hạn | Giải thích trạng thái ngừng học, không cho đăng ký trùng; nhận link nội bộ hợp lệ, chặn dữ liệu quá giới hạn |
+| T45 | Khởi động demo khi cổng bị chiếm/database hỏng; chạy lại script khi demo sẵn sàng | Lỗi có hướng dẫn; không báo sẵn sàng giả, dọn tiến trình/PID khi thất bại; chạy lại không tạo tiến trình trùng |
 
 T05/T06/T10/T20/T30 nên kiểm tra thêm bằng API hoặc bộ test tự động, vì chỉ bấm UI không chứng minh được tình huống đồng thời/CSRF/idempotency. Bộ lọc tab Học viên giữ trong phiên trang; không yêu cầu giữ qua reload như danh mục khóa học.
 
@@ -215,7 +224,7 @@ $env:E2E_BASE_URL = 'http://127.0.0.1:8080'
 npm run test:e2e
 ```
 
-Chỉ khởi động demo nếu Maven thành công. Lần kiểm tra gần nhất: 86 backend trên H2/PostgreSQL, 4 renderer Node và 6 E2E đạt; sửa bài chỉ có video có kiểm thử liên quan và kiểm tra browser bổ sung. Đây là kết quả đã ghi nhận, không phải lần chạy mới từ tài liệu này.
+Chỉ khởi động demo nếu Maven thành công. Lần kiểm tra gần nhất: 90 backend trên H2/PostgreSQL, 8 kiểm thử Node và 6 E2E đạt. Playwright CLI kiểm tra 26 trang ở bốn kích thước, cùng các tình huống lỗi bản nháp, tải lại sau ghi và phản hồi quiz về sai thứ tự. Đây là kết quả đã ghi nhận, không phải lần chạy mới từ tài liệu này.
 
 Maven mặc định dùng H2 profile test. Để chạy PostgreSQL thật, tạo database kiểm thử riêng `course_management_test`, rồi cấu hình `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, `SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver` trước khi chạy Maven test. Backend test xóa dữ liệu trước mỗi ca, không trỏ vào database demo. Khi quay lại H2, gỡ các biến `SPRING_DATASOURCE_*` đã đặt.
 

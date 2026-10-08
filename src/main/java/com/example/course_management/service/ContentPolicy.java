@@ -51,7 +51,15 @@ public class ContentPolicy {
 
   public void targetUrl(String value) {
     if (value == null || value.isBlank()) return;
-    if (!value.matches("/[a-zA-Z0-9_.-]+\\.html(?:\\?[a-zA-Z0-9_=&.-]*)?"))
+    try {
+      var uri = URI.create(value);
+      if (uri.isAbsolute() || uri.getRawAuthority() != null
+          || !uri.getRawPath().matches("/[a-zA-Z0-9_.-]+\\.html")
+          || value.contains("\\") || value.chars().anyMatch(Character::isISOControl)
+          || (uri.getRawFragment() != null && !uri.getRawFragment().matches("[a-zA-Z0-9_-]+")))
+        throw new IllegalArgumentException();
+    } catch (IllegalArgumentException ex) {
       throw new BadRequestException("Liên kết thông báo phải trỏ tới một trang trong hệ thống");
+    }
   }
 }

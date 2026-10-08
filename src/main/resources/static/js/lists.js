@@ -336,6 +336,13 @@ export function wireDetailTabs(initial = "outcomes") {
       practice.hidden = !["#quiz", "#questions"].includes(
         current.getAttribute("href"),
       );
+    for (const link of document.querySelectorAll('.enroll-panel a[href]')) {
+      const url = new URL(link.href);
+      if (url.origin === location.origin && url.searchParams.has("next")) {
+        url.searchParams.set("next", location.pathname + location.search + location.hash);
+        link.href = url.pathname + url.search;
+      }
+    }
   }
   window.onhashchange = select;
   for (const tab of tabs)

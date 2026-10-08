@@ -174,19 +174,49 @@ async function action(fn, button) {
     setPending(button, false);
   }
 }
+async function refreshAfterWrite(render) {
+  try {
+    await render();
+  } catch (error) {
+    // The mutation already succeeded. A refresh failure must not invite a second submission.
+    const notice = document.createElement("div");
+    notice.className = "notice error";
+    notice.setAttribute("role", "alert");
+    notice.innerHTML = `<span>Thao tác đã được lưu, nhưng chưa tải được dữ liệu mới: ${esc(error.message)}</span><button class="btn secondary compact" type="button">Tải lại trang</button>`;
+    notice.querySelector("button").onclick = () => location.reload();
+    $("#main").prepend(notice);
+  }
+}
 function showDialog(title, body, onSubmit, submit = "Lưu thay đổi") {
   modal.innerHTML = `<form id="dialogForm"><div class="dialog-head"><h2 id="dialogTitle">${esc(title)}</h2><button type="button" class="icon-button" id="closeModal" aria-label="Đóng">${icon("close")}</button></div><div class="dialog-body">${body}<div id="dialogError" role="alert"></div></div><div class="discard-prompt" id="discardPrompt" hidden><p id="discardMessage">Bạn có thay đổi chưa lưu. Bỏ thay đổi và đóng?</p><div class="row-actions"><button type="button" class="btn secondary compact" id="keepEditing">Tiếp tục chỉnh sửa</button><button type="button" class="btn secondary compact danger" id="discardChanges">Bỏ thay đổi</button></div></div><div class="dialog-footer"><span id="dialogStatus" class="hint" role="status"></span><button type="button" class="btn secondary" id="cancelModal">Hủy</button><button class="btn" id="saveModal">${esc(submit)}</button></div></form>`;
   modal.setAttribute("aria-labelledby", "dialogTitle");
   const form = $("#dialogForm"), button = $("#saveModal"), status = $("#dialogStatus");
   const snapshot = () => JSON.stringify([...new FormData(form)]);
-  let initial = snapshot(), saving = false, closeOrigin;
+  let initial = snapshot(), saving = false, closing = false, closeOrigin, prepareClose;
   const dirty = () => snapshot() !== initial;
   const update = () => { status.textContent = dirty() ? "Có thay đổi chưa lưu" : ""; };
   form.addEventListener("input", update);
   form.addEventListener("change", update);
+  const finishClose = async () => {
+    if (saving || closing) return;
+    closing = true;
+    const controls = [...form.querySelectorAll("input,textarea,select,button")].filter(input => !input.disabled);
+    controls.forEach(input => { input.disabled = true; });
+    status.textContent = prepareClose ? "Đang lưu bản nháp trước khi đóng…" : "";
+    try {
+      await prepareClose?.();
+      modal.close();
+    } catch (error) {
+      $("#dialogError").innerHTML = errorBox(error);
+      status.textContent = "Chưa đóng: nội dung đang soạn vẫn được giữ. Hãy thử lưu nháp lại.";
+    } finally {
+      closing = false;
+      controls.forEach(input => { input.disabled = false; });
+    }
+  };
   const close = () => {
-    if (saving) return;
-    if (!dirty()) { modal.close(); return; }
+    if (saving || closing) return;
+    if (!dirty()) { finishClose(); return; }
     closeOrigin = document.activeElement;
     $("#discardPrompt").hidden = false;
     $("#keepEditing").focus();
@@ -195,7 +225,7 @@ function showDialog(title, body, onSubmit, submit = "Lưu thay đổi") {
     $("#discardPrompt").hidden = true;
     if (closeOrigin?.isConnected) closeOrigin.focus();
   };
-  $("#discardChanges").onclick = () => { if (!saving) modal.close(); };
+  $("#discardChanges").onclick = finishClose;
   $("#closeModal").onclick = $("#cancelModal").onclick = close;
   modal.oncancel = (event) => { event.preventDefault(); close(); };
   const beforeUnload = (event) => {
@@ -206,7 +236,7 @@ function showDialog(title, body, onSubmit, submit = "Lưu thay đổi") {
   modal.onclose = () => window.removeEventListener("beforeunload", beforeUnload);
   form.onsubmit = async (e) => {
     e.preventDefault();
-    if (saving) return;
+    if (saving || closing) return;
     saving = true;
     setPending(button, true, "Đang lưu…");
     $("#closeModal").disabled = $("#cancelModal").disabled = true;
@@ -233,6 +263,7 @@ function showDialog(title, body, onSubmit, submit = "Lưu thay đổi") {
   modal.showModal();
   (form.querySelector('input:not([type="hidden"]):not([readonly]), textarea, select') || $("#cancelModal"))
     .focus({ preventScroll: true });
+  return { beforeClose(callback) { prepareClose = callback; } };
 }
 function confirmAction(title, text, fn) {
   showDialog(title, `<p>${esc(text)}</p>`, fn, "Xác nhận");
@@ -278,7 +309,7 @@ function authDestination(register = false) {
     "/login.html?" +
     new URLSearchParams({
       ...(register ? { register: "1" } : {}),
-      next: location.pathname + location.search,
+      next: location.pathname + location.search + location.hash,
     })
   );
 }
@@ -446,7 +477,7 @@ async function login() {
           const next = params.get("next");
           location.href =
             next &&
-            /^\/(?:course-detail|courses|my-courses|learn)\.html(?:\?[^#]*)?$/.test(
+            /^\/(?:course-detail|courses|my-courses|learn)\.html(?:\?[^#]*)?(?:#[a-zA-Z0-9_-]+)?$/.test(
               next,
             )
               ? next
@@ -630,7 +661,7 @@ async function courseEditor(course, done) {
         d,
       );
       toast("Đã lưu khóa học");
-      await done();
+      await refreshAfterWrite(done);
     },
   );
   if (user.role === "ADMIN") {
@@ -905,7 +936,7 @@ async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
   if (lesson) lesson = await api("/lessons/" + lesson.lessonId);
   const draft = await api(`/courses/${courseId}/lesson-drafts/${lesson?.lessonId || 0}`);
   let draftEditor;
-  showDialog(
+  const dialog = showDialog(
     lesson ? "Chỉnh sửa bài học" : "Thêm bài học",
     `<div class="editor-intro"><span class="eyebrow">CHĂM CHÚT TỪNG BÀI HỌC</span><p>${lesson?.isPublished ? "Bài đang xuất bản. Thay đổi được lưu sẽ cập nhật nội dung học viên đọc." : "Lưu nội dung trước, sau đó xuất bản từ chương trình khóa học."}</p></div><div class="editor-tabs" role="tablist" aria-label="Soạn bài học"><button type="button" id="editLessonTab" role="tab" aria-selected="true" aria-controls="lessonEditPanel">1. Soạn nội dung</button><button type="button" id="previewLessonTab" role="tab" aria-selected="false" aria-controls="lessonPreviewPanel" tabindex="-1">2. Xem trước</button></div><section id="lessonEditPanel" role="tabpanel" aria-labelledby="editLessonTab">${field("Tiêu đề bài học", "title", lesson?.title || "", "text", true, 'maxlength="255" placeholder="Ví dụ: Tạo ứng dụng đầu tiên"')}${field("Thứ tự", "orderIndex", lesson?.orderIndex || nextOrder, "number", true, 'min="1"')}${field("Liên kết tài liệu hoặc video", "contentUrl", lesson?.contentUrl || "", "url", false, 'maxlength="500" placeholder="https://…" aria-describedby="resourceHint"')}<p class="hint" id="resourceHint">Dùng liên kết HTTP/HTTPS. Học viên mở tài liệu hoặc video trong thẻ mới.</p>${select("Định dạng nội dung", "contentFormat", [["TEXT", "Văn bản thường"], ["MARKDOWN", "Nội dung có cấu trúc"]], lesson?.contentFormat || "MARKDOWN")}${field("Video trong phòng học", "videoUrl", lesson?.videoUrl || "", "url", false, 'maxlength="500" placeholder="YouTube hoặc liên kết MP4/WebM"')}<div class="content-toolbar" aria-label="Công cụ soạn nội dung"><button type="button" data-insert="heading">Tiêu đề</button><button type="button" data-insert="bold">In đậm</button><button type="button" data-insert="list">Danh sách</button><button type="button" data-insert="code">Đoạn mã</button><button type="button" data-insert="link">Liên kết</button><button type="button" data-insert="image">Ảnh</button></div>${textarea("Nội dung bài học", "textContent", lesson?.textContent || "", 'rows="10" maxlength="100000" aria-describedby="contentHint"')}<p class="hint" id="contentHint">Gợi ý: mục tiêu bài → giải thích → ví dụ → bài thực hành. Chế độ có cấu trúc hỗ trợ # tiêu đề, **in đậm**, danh sách, đoạn mã và ảnh. HTML được hiển thị như văn bản.</p></section><section id="lessonPreviewPanel" class="lesson-preview" role="tabpanel" aria-labelledby="previewLessonTab" hidden tabindex="0"></section>`,
     async (d) => {
@@ -921,14 +952,15 @@ async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
         d,
       );
       toast("Đã lưu bài học");
-      await done();
+      await refreshAfterWrite(done);
     },
   );
   modal.classList.add("lesson-editor-dialog");
   modal.addEventListener("close", () => modal.classList.remove("lesson-editor-dialog"), { once: true });
   const form = $("#dialogForm"), edit = $("#editLessonTab"), preview = $("#previewLessonTab");
   draftEditor = mountLessonDraft(form, courseId, lesson, draft);
-  $("#discardMessage").textContent = "Đóng trình soạn? Thay đổi sẽ được giữ trong bản nháp trên máy chủ nếu lưu thành công.";
+  dialog.beforeClose(() => draftEditor.flush());
+  $("#discardMessage").textContent = "Đóng trình soạn? Hệ thống sẽ lưu bản nháp trước khi đóng. Bài học chỉ cập nhật khi chọn Lưu thay đổi.";
   $("#discardChanges").textContent = "Đóng, giữ bản nháp";
   const resourceInput = form.elements.contentUrl;
   const textInput = form.elements.textContent;
@@ -1011,7 +1043,7 @@ async function paymentInfo(payment) {
 }
 async function detail() {
   const id = Number(params.get("id") || params.get("courseId"));
-  if (!id) throw new ApiError("Liên kết khóa học không hợp lệ.", 400);
+  if (!Number.isSafeInteger(id) || id < 1) throw new ApiError("Liên kết khóa học không hợp lệ.", 400);
   const [c, lessons] = await Promise.all([
     api("/courses/" + id),
     api("/courses/" + id + "/lessons"),
@@ -1020,11 +1052,13 @@ async function detail() {
     user.role === "ADMIN" ||
     (user.role === "TEACHER" && c.teacherId === user.userId);
   let enrollment = null,
-    pending = null;
+    pending = null,
+    dropped = false;
   if (user.role === "STUDENT") {
     const state = await api("/lists/course-state/" + id);
     enrollment =
       state.enrollment?.status === "DROPPED" ? null : state.enrollment;
+    dropped = state.enrollment?.status === "DROPPED";
     pending = state.payment;
   }
   const ownReview =
@@ -1032,7 +1066,7 @@ async function detail() {
   shell(
     c.title,
     "Một kỹ năng mới, từng bước rõ ràng.",
-    `<a class="back-link" href="/courses.html">← Trở lại khóa học</a><div class="detail-grid"><div>${manager ? readiness(c, lessons) : ""}<section class="course-overview" id="overview"><div class="chips"><span class="chip">${esc(c.category)}</span><span class="chip">${esc(c.level)}</span>${manager ? badge(c.status) : ""}</div><h2>${esc(c.title)}</h2><p>${esc(c.description || "Khám phá kiến thức qua các bài học và thực hành.")}</p><div class="instructor"><span class="avatar">${esc(initials(c.teacherName))}</span><span>Giảng viên<strong>${esc(c.teacherName)}</strong></span></div><div class="course-meta"><span>${icon("clock")}${c.durationHours || "—"} giờ học</span><span>${icon("book")}${lessons.length} bài học</span><span>${icon("users")}${c.enrollmentCount || 0} lượt đăng ký</span></div></section><nav class="detail-tabs" aria-label="Thông tin khóa học"><a href="#outcomes">Kết quả học tập</a><a href="#curriculum">Chương trình</a><a href="#reviews">Đánh giá</a></nav><section class="panel" id="outcomes"><h2>Bạn sẽ học được gì?</h2>${outcomes(c)}</section><section class="panel" id="curriculum"><div class="section-heading"><div><h2>Chương trình học</h2><p>${lessons.filter((l) => l.isPublished).length} bài đã xuất bản${manager ? ` · ${lessons.filter((l) => !l.isPublished).length} bài nháp` : ""}</p></div>${manager ? '<button class="btn secondary compact" id="addLesson">' + icon("plus") + " Thêm bài</button>" : ""}</div><div class="syllabus">${lessons.map((l) => `<div class="syllabus-row"><span class="lesson-number">${String(l.orderIndex).padStart(2, "0")}</span><div><strong>${esc(l.title)}</strong><small>${l.isPublished ? "Đã xuất bản" : "Bản nháp"}</small></div>${manager ? `<div class="row-actions"><button class="text-link" data-edit-lesson="${l.lessonId}">Sửa</button><button class="text-link" data-publish="${l.lessonId}">${l.isPublished ? "Ẩn" : "Xuất bản"}</button><button class="text-link danger" data-delete-lesson="${l.lessonId}">Xóa</button></div>` : `<button class="icon-button" data-preview="${l.lessonId}" aria-label="Xem trước ${esc(l.title)}">${icon(enrollment ? "play" : "lock")}</button>`}</div>`).join("") || '<p class="muted-text">Giảng viên đang chuẩn bị chương trình.</p>'}</div></section><section class="panel" id="reviews"><div class="section-heading"><h2>Đánh giá của học viên</h2>${enrollment ? `<button class="btn secondary compact" id="writeReview">${ownReview ? "Sửa đánh giá" : "Viết đánh giá"}</button>` : ""}</div><p id="reviewCount" class="result-count" role="status" aria-live="polite"></p><div id="reviewRows"></div><nav id="reviewPager" class="pagination" aria-label="Phân trang đánh giá"></nav></section></div><aside class="enroll-panel">${art(c, true)}<div class="enroll-body"><span class="mini-label">ĐẦU TƯ CHO KIẾN THỨC</span><div class="price">${money(c.price)}</div>${enrollment ? `${badge(enrollment.status)}${progress(enrollment.progressPercentage)}${link("Vào phòng học " + icon("arrow"), "/learn.html?enrollmentId=" + enrollment.enrollmentId, "btn full")}` : user.role === "STUDENT" ? `<button class="btn full" id="enrollButton">${pending ? "Xem hướng dẫn chuyển khoản" : Number(c.price) > 0 ? "Đăng ký & thanh toán" : "Đăng ký miễn phí"} ${icon("arrow")}</button>` : '<p class="hint">Bạn đang xem khóa học với vai trò ' + role(user.role) + ".</p>"}<ul class="included"><li>${icon("check")} Học theo tốc độ của bạn</li><li>${icon("check")} Theo dõi tiến độ từng bài</li><li>${icon("check")} Tài liệu trong chương trình</li></ul>${manager ? `<div class="manager-tools"><h3>Quản lý khóa học</h3>${user.role === "ADMIN" ? `<button class="btn secondary full" id="editCourse">Chỉnh sửa khóa học</button><label>Trạng thái xuất bản<select id="courseStatus">${["DRAFT", "PUBLISHED", "ARCHIVED"].map((v) => `<option value="${v}" ${v === c.status ? "selected" : ""}>${labels[v]}</option>`).join("")}</select></label><button class="btn secondary full" id="saveStatus">Lưu trạng thái</button><button class="text-link danger" id="deleteCourse">Xóa khóa học</button>` : '<button class="btn secondary full" id="editCourse">Chỉnh sửa thông tin khóa</button><p class="hint">Bạn có thể sửa giới thiệu, mục tiêu và soạn bài. Quản trị viên xuất bản khóa học.</p>'}</div>` : ""}</div></aside></div>`,
+    `<a class="back-link" href="/courses.html">← Trở lại khóa học</a><div class="detail-grid"><div>${manager ? readiness(c, lessons) : ""}<section class="course-overview" id="overview"><div class="chips"><span class="chip">${esc(c.category)}</span><span class="chip">${esc(c.level)}</span>${manager ? badge(c.status) : ""}</div><h2>${esc(c.title)}</h2><p>${esc(c.description || "Khám phá kiến thức qua các bài học và thực hành.")}</p><div class="instructor"><span class="avatar">${esc(initials(c.teacherName))}</span><span>Giảng viên<strong>${esc(c.teacherName)}</strong></span></div><div class="course-meta"><span>${icon("clock")}${c.durationHours || "—"} giờ học</span><span>${icon("book")}${lessons.length} bài học</span><span>${icon("users")}${c.enrollmentCount || 0} lượt đăng ký</span></div></section><nav class="detail-tabs" aria-label="Thông tin khóa học"><a href="#outcomes">Kết quả học tập</a><a href="#curriculum">Chương trình</a><a href="#reviews">Đánh giá</a></nav><section class="panel" id="outcomes"><h2>Bạn sẽ học được gì?</h2>${outcomes(c)}</section><section class="panel" id="curriculum"><div class="section-heading"><div><h2>Chương trình học</h2><p>${lessons.filter((l) => l.isPublished).length} bài đã xuất bản${manager ? ` · ${lessons.filter((l) => !l.isPublished).length} bài nháp` : ""}</p></div>${manager ? '<button class="btn secondary compact" id="addLesson">' + icon("plus") + " Thêm bài</button>" : ""}</div><div class="syllabus">${lessons.map((l) => `<div class="syllabus-row"><span class="lesson-number">${String(l.orderIndex).padStart(2, "0")}</span><div><strong>${esc(l.title)}</strong><small>${l.isPublished ? "Đã xuất bản" : "Bản nháp"}</small></div>${manager ? `<div class="row-actions"><button class="text-link" data-edit-lesson="${l.lessonId}">Sửa</button><button class="text-link" data-publish="${l.lessonId}">${l.isPublished ? "Ẩn" : "Xuất bản"}</button><button class="text-link danger" data-delete-lesson="${l.lessonId}">Xóa</button></div>` : `<button class="icon-button" data-preview="${l.lessonId}" aria-label="Xem trước ${esc(l.title)}">${icon(enrollment ? "play" : "lock")}</button>`}</div>`).join("") || '<p class="muted-text">Giảng viên đang chuẩn bị chương trình.</p>'}</div></section><section class="panel" id="reviews"><div class="section-heading"><h2>Đánh giá của học viên</h2>${enrollment ? `<button class="btn secondary compact" id="writeReview">${ownReview ? "Sửa đánh giá" : "Viết đánh giá"}</button>` : ""}</div><p id="reviewCount" class="result-count" role="status" aria-live="polite"></p><div id="reviewRows"></div><nav id="reviewPager" class="pagination" aria-label="Phân trang đánh giá"></nav></section></div><aside class="enroll-panel">${art(c, true)}<div class="enroll-body"><span class="mini-label">ĐẦU TƯ CHO KIẾN THỨC</span><div class="price">${money(c.price)}</div>${enrollment ? `${badge(enrollment.status)}${progress(enrollment.progressPercentage)}${link("Vào phòng học " + icon("arrow"), "/learn.html?enrollmentId=" + enrollment.enrollmentId, "btn full")}` : dropped ? '<div class="notice"><div><strong>Lượt đăng ký đã ngừng học</strong><p>Quyền học hiện không còn hiệu lực. Liên hệ quản trị viên nếu cần hỗ trợ.</p></div></div>' : user.role === "STUDENT" ? `<button class="btn full" id="enrollButton">${pending ? "Xem hướng dẫn chuyển khoản" : Number(c.price) > 0 ? "Đăng ký & thanh toán" : "Đăng ký miễn phí"} ${icon("arrow")}</button>` : '<p class="hint">Bạn đang xem khóa học với vai trò ' + role(user.role) + ".</p>"}<ul class="included"><li>${icon("check")} Học theo tốc độ của bạn</li><li>${icon("check")} Theo dõi tiến độ từng bài</li><li>${icon("check")} Tài liệu trong chương trình</li></ul>${manager ? `<div class="manager-tools"><h3>Quản lý khóa học</h3>${user.role === "ADMIN" ? `<button class="btn secondary full" id="editCourse">Chỉnh sửa khóa học</button><label>Trạng thái xuất bản<select id="courseStatus">${["DRAFT", "PUBLISHED", "ARCHIVED"].map((v) => `<option value="${v}" ${v === c.status ? "selected" : ""}>${labels[v]}</option>`).join("")}</select></label><button class="btn secondary full" id="saveStatus">Lưu trạng thái</button><button class="text-link danger" id="deleteCourse">Xóa khóa học</button>` : '<button class="btn secondary full" id="editCourse">Chỉnh sửa thông tin khóa</button><p class="hint">Bạn có thể sửa giới thiệu, mục tiêu và soạn bài. Quản trị viên xuất bản khóa học.</p>'}</div>` : ""}</div></aside></div>`,
   );
   if ($("#enrollButton"))
     $("#enrollButton").onclick = (e) =>
@@ -1040,12 +1074,12 @@ async function detail() {
         if (pending) return paymentInfo(pending);
         if (Number(c.price) > 0) {
           const p = await api("/payments", "POST", { courseId: id });
-          await detail();
+          await refreshAfterWrite(detail);
           await paymentInfo(p);
         } else {
           await api("/enrollments", "POST", { courseId: id });
           toast("Đăng ký thành công. Bắt đầu học ngay!");
-          await detail();
+          await refreshAfterWrite(detail);
         }
       }, e.currentTarget);
   if ((manager || enrollment) && lessons.length) {
@@ -1125,7 +1159,7 @@ async function detail() {
               isPublished: !l.isPublished,
             });
             toast("Đã cập nhật xuất bản và tiến độ học viên");
-            await detail();
+            await refreshAfterWrite(detail);
           }, b)),
     );
     document.querySelectorAll("[data-delete-lesson]").forEach(
@@ -1136,7 +1170,7 @@ async function detail() {
             "Bài học, tiến độ, hỏi đáp và lịch sử quiz của bài sẽ được xóa. Tiến độ khóa học sẽ được tính lại.",
             async () => {
               await api("/lessons/" + b.dataset.deleteLesson, "DELETE");
-              await detail();
+              await refreshAfterWrite(detail);
             },
           )),
     );
@@ -1150,7 +1184,7 @@ async function detail() {
           status: $("#courseStatus").value,
         });
         toast("Đã cập nhật trạng thái");
-        await detail();
+        await refreshAfterWrite(detail);
       }, e.currentTarget);
     $("#deleteCourse").onclick = () =>
       confirmAction(
@@ -1205,7 +1239,7 @@ async function detail() {
             d,
           );
           toast("Đã lưu đánh giá");
-          await detail();
+          await refreshAfterWrite(detail);
         },
       );
   if (manager) mountCourseStudents(id);
@@ -1235,7 +1269,7 @@ async function detail() {
             "Bạn muốn xóa đánh giá này?",
             async () => {
               await api("/reviews/" + b.dataset.deleteReview, "DELETE");
-              await detail();
+              await refreshAfterWrite(detail);
             },
           );
       });
@@ -1567,16 +1601,13 @@ async function users() {
                   )
             }`,
             async (d) => {
-              await api("/users/" + u.userId, "PUT", {
+              await api("/users/" + u.userId + "/management", "PUT", {
                 fullName: d.fullName,
                 email: d.email,
+                role: d.role || u.role,
               });
-              if (d.role && d.role !== u.role)
-                await api("/users/" + u.userId + "/role", "PUT", {
-                  role: d.role,
-                });
               toast("Đã cập nhật tài khoản");
-              await users();
+              await refreshAfterWrite(users);
             },
           );
         }),
@@ -1594,7 +1625,7 @@ async function users() {
               await api("/users/" + u.userId + "/status", "PUT", {
                 isActive: !u.isActive,
               });
-              await users();
+              await refreshAfterWrite(users);
             },
           );
         }),
@@ -1607,7 +1638,7 @@ async function users() {
             "Chỉ có thể xóa tài khoản chưa có dữ liệu liên quan. Hãy dùng chức năng khóa nếu cần giữ lịch sử.",
             async () => {
               await api("/users/" + b.dataset.removeUser, "DELETE");
-              await users();
+              await refreshAfterWrite(users);
             },
           )),
     );
@@ -1624,7 +1655,7 @@ async function users() {
       async (d) => {
         await api("/users", "POST", d);
         toast("Đã tạo tài khoản");
-        await users();
+        await refreshAfterWrite(users);
       },
       "Tạo tài khoản",
     );
@@ -1691,7 +1722,7 @@ async function payments() {
             async () => {
               await api("/payments/" + b.dataset.confirm + "/confirm", "PUT");
               toast("Đã xác nhận và cấp quyền học");
-              await payments();
+              await refreshAfterWrite(payments);
             },
           )),
     );
@@ -1703,7 +1734,7 @@ async function payments() {
             "Học viên có thể tạo yêu cầu mới sau khi yêu cầu này bị từ chối.",
             async () => {
               await api("/payments/" + b.dataset.reject + "/reject", "PUT");
-              await payments();
+              await refreshAfterWrite(payments);
             },
           )),
     );
@@ -1762,20 +1793,20 @@ async function notifications() {
     $("#readAll").onclick = (e) =>
       action(async () => {
         await api("/lists/notifications/read-all", "PUT");
-        await notifications();
+        await refreshAfterWrite(notifications);
       }, e.currentTarget);
   if ($("#newNotification"))
     $("#newNotification").onclick = () =>
       action(async () => {
         showDialog(
           "Tạo thông báo",
-          `${select("Người nhận", "userId", [["", "Chọn tài khoản"]], "")}${textarea("Nội dung", "message", "", "required")}${field("Liên kết trong Course Management", "targetUrl", "", "text", false, 'placeholder="/courses.html"')}`,
+          `${select("Người nhận", "userId", [["", "Chọn tài khoản"]], "")}${textarea("Nội dung", "message", "", 'required maxlength="5000"')}${field("Liên kết trong Course Management", "targetUrl", "", "text", false, 'maxlength="500" placeholder="/course-detail.html?id=5#curriculum"')}`,
           async (d) => {
             d.userId = Number(d.userId);
             d.type = "GENERAL";
             await api("/notifications", "POST", d);
             toast("Đã tạo thông báo");
-            await notifications();
+            await refreshAfterWrite(notifications);
           },
         );
         const selector = modal.querySelector("[name=userId]");
@@ -1802,7 +1833,7 @@ async function notifications() {
         b.onclick = () =>
           action(async () => {
             await api("/notifications/" + b.dataset.read + "/read", "PUT");
-            await notifications();
+            await refreshAfterWrite(notifications);
           }, b);
       });
       document.querySelectorAll("[data-delete-notification]").forEach((b) => {
@@ -1815,7 +1846,7 @@ async function notifications() {
                 "/notifications/" + b.dataset.deleteNotification,
                 "DELETE",
               );
-              await notifications();
+              await refreshAfterWrite(notifications);
             },
           );
       });
