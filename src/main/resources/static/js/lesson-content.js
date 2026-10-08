@@ -50,15 +50,29 @@ export function markdown(text) {
   if (code !== null) html += `<pre><code>${esc(code.join("\n"))}</code></pre>`;
   return html;
 }
+function videoStart(url) {
+  const value = url.searchParams.get("start") ?? url.searchParams.get("t") ?? (url.hash.startsWith("#t=") ? url.hash.slice(3) : "");
+  let seconds = 0;
+  if (/^\d+s?$/.test(value)) seconds = Number(value.replace(/s$/, ""));
+  else {
+    const parts = value.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/);
+    if (parts) seconds = Number(parts[1] || 0) * 3600 + Number(parts[2] || 0) * 60 + Number(parts[3] || 0);
+  }
+  return Number.isSafeInteger(seconds) && seconds > 0 && seconds <= 604800 ? seconds : 0;
+}
 export function video(value) {
   const url = safe(value);
   if (!url) return "";
   let id;
-  if (["www.youtube.com", "youtube.com", "m.youtube.com"].includes(url.hostname)) {
+  if (["www.youtube.com", "youtube.com", "m.youtube.com", "www.youtube-nocookie.com", "youtube-nocookie.com"].includes(url.hostname)) {
     id = url.pathname === "/watch" ? url.searchParams.get("v") : url.pathname.match(/^\/(?:embed|shorts)\/([^/]+)$/)?.[1];
   } else if (url.hostname === "youtu.be") id = url.pathname.slice(1);
-  if (/^[a-zA-Z0-9_-]{11}$/.test(id || ""))
-    return `<div class="lesson-video"><iframe title="Video bài học" src="https://www.youtube-nocookie.com/embed/${id}" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
+  if (/^[a-zA-Z0-9_-]{11}$/.test(id || "")) {
+    const start = videoStart(url);
+    const embed = `https://www.youtube-nocookie.com/embed/${id}${start ? `?start=${start}` : ""}`;
+    const original = `https://www.youtube.com/watch?v=${id}${start ? `&amp;t=${start}s` : ""}`;
+    return `<div class="lesson-video"><iframe title="Video bài học" src="${embed}" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="fullscreen; picture-in-picture" allowfullscreen></iframe></div><p class="hint">Nguồn video: YouTube · Nếu video không phát tại đây, <a href="${original}" target="_blank" rel="noopener noreferrer">mở trên YouTube ↗</a>.</p>`;
+  }
   if (/\.(mp4|webm)$/i.test(url.pathname))
     return `<video class="lesson-player" controls preload="metadata" aria-label="Video bài học" src="${esc(url.href)}"></video><p class="hint">Nội dung văn bản của bài học có thể dùng để ôn lại video.</p>`;
   return `<p><a href="${esc(url.href)}" target="_blank" rel="noopener noreferrer">Mở video của bài học ↗</a></p>`;

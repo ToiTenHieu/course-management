@@ -50,6 +50,8 @@ Thứ tự gợi ý: khám phá → học miễn phí → thanh toán → soạn
 
 **Mong đợi:** tiến độ lần lượt 25%, 50%, 75%, 100%; cuối cùng trạng thái Hoàn thành. Reload giữ dữ liệu; ghi chú chỉ thuộc học viên hiện tại. Bài nháp không được tính vào tiến độ.
 
+**Nhánh video YouTube:** tìm “Demo YouTube” và chọn **HTML nhập môn · Demo YouTube** hoặc **JavaScript nhập môn · Demo YouTube**. Đăng ký miễn phí, vào phòng học, bấm phát video; chuyển bài thứ hai để kiểm tra video mở đúng mốc. Xem nguồn freeCodeCamp.org/tác giả trong nội dung và thử link **mở trên YouTube** dưới player. Các bài dùng chung một video dài, học viên tự dừng ở cuối phần được hướng dẫn. Hoàn thành 5 bài để thấy tiến độ 20% → 40% → 60% → 80% → 100%; bài cuối có quiz ôn tập. Video tiếng Anh, cần kết nối Internet; ứng dụng chỉ lưu URL. Giảng viên có thể sửa URL như bài học thông thường nếu nguồn không còn khả dụng. Khởi động lại demo không tạo trùng hoặc ghi đè các bài đã sửa.
+
 ### D03. Thanh toán và mở quyền học — 3 phút
 
 1. Học viên mới mở khóa Thiết kế giao diện; chọn **Đăng ký & thanh toán**.

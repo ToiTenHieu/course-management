@@ -194,6 +194,12 @@ Log: `target/local-demo/ux-detail-verify.log` (74 test đạt, bước đóng g�
 - Sáu hành trình E2E hiện có đạt. Browser kiểm tra báo cáo 27 học viên, lọc/tìm/trang/thứ tự, liên kết câu hỏi và giảng viên phụ trách; viewport 390×844 không tràn ngang.
 - Ảnh `output/playwright/course-students-desktop.png`, `course-students-mobile.png`; log H2 `target/local-demo/student-report-verify.log`, PostgreSQL `drafts-postgres.log`, E2E `upgrades-e2e.log` (các thư mục bằng chứng được Git bỏ qua).
 
+### Khóa demo dùng YouTube (08/10/2026)
+- Hai khóa miễn phí HTML/JavaScript, mỗi khóa 5 bài Markdown, ghi nguồn freeCodeCamp.org/tác giả và một quiz ôn tập. Profile demo tạo dữ liệu một lần qua `demo_seed_runs`; giữ các khóa cũ, URL đã sửa và bài đã xóa.
+- 91 kiểm thử backend trên H2 và 9 kiểm thử Node đạt. Kiểm thử mới xác nhận quyền xem video sau đăng ký, tiến độ 20%, không tạo thanh toán, không seed trùng; renderer giữ timestamp và link dự phòng, bỏ timestamp không hợp lệ.
+- Đóng gói JAR thành công sau khi dừng tiến trình demo đang giữ file trên Windows; khởi động lại trên PostgreSQL và thấy đúng hai khóa mới trong danh mục.
+- Playwright CLI/Chromium: đăng ký miễn phí, phát thật cả video HTML và JavaScript, đánh dấu bài HTML đầu để đạt 20%, chuyển bài HTML thứ hai với `start=1742` và link dự phòng `t=1742s`, xem quiz JavaScript ở bài cuối. Màn hình 390×844 không tràn ngang; ảnh đã xem tại `output/playwright/youtube-demo-mobile-player.png`. Không tự động theo dõi thời lượng xem; khả năng phát phụ thuộc YouTube và kết nối Internet.
+
 ### Bài chỉ có video (08/10/2026)
 - Sửa điều kiện preview/mức sẵn sàng để nhận video khi không có văn bản hay liên kết tài liệu; API preview báo có video.
 - Kiểm thử backend liên quan và đóng gói JAR đạt; bốn kiểm thử renderer/cú pháp module đạt. Chromium tạo bài chỉ có video, xem trước iframe và kiểm tra mục nội dung đã có đạt.

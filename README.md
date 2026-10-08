@@ -74,7 +74,7 @@ node --check src/main/resources/static/js/questions.js
 node --check src/main/resources/static/js/quiz.js
 ```
 
-Bộ backend có 90 kiểm thử (89 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 và PostgreSQL với migration thật. Bao gồm lưu hồ sơ/vai trò đồng thời, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 91 kiểm thử (90 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 và PostgreSQL với migration thật. Bao gồm lưu hồ sơ/vai trò đồng thời, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
 Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
 
@@ -138,6 +138,12 @@ Xem [đánh giá trải nghiệm theo từng vai trò và lộ trình sản ph�
 
 ## Nội dung, video và tài liệu bài học
 
+Bản demo có thêm hai khóa miễn phí **HTML nhập môn · Demo YouTube** và **JavaScript nhập môn · Demo YouTube**, mỗi khóa 5 bài xuất bản và một quiz ôn tập ở bài cuối. Video tiếng Anh từ kênh freeCodeCamp.org (HTML: Dave Gray; JavaScript: Beau Carnes) được nhúng tạm cho đồ án phi thương mại; nguồn và tác giả được ghi trong từng bài. Mỗi khóa dùng một video dài, mở tại mốc thời gian của bài và có hướng dẫn thực hành bằng tiếng Việt. Học viên tự dừng khi hết phần được hướng dẫn, rồi dùng nút **Đánh dấu hoàn thành**; ứng dụng không đo thời lượng xem.
+
+Hai khóa được tạo một lần khi chạy profile `demo`, ghi nhận bằng khóa `youtube-demo-courses-v1` trong `demo_seed_runs`; áp dụng cả database demo đang có. Khởi động lại không tạo trùng, không ghi đè chỉnh sửa hoặc khôi phục bài đã xóa. Profile thông thường không tự tạo các khóa này. Tìm “Demo YouTube” trong danh mục để bắt đầu, đăng ký miễn phí rồi vào phòng học.
+
+Bộ mẫu sử dụng [video HTML](https://www.youtube.com/watch?v=kUMe1FH4CHE) và [video JavaScript](https://www.youtube.com/watch?v=PkZNo7MFNFg). Chỉ lưu URL trong database, video phát trực tiếp từ YouTube; không tải, sao chép hoặc proxy video qua máy chủ. Cần Internet; video có thể không còn khả dụng hoặc bị tắt nhúng. Link **mở trên YouTube** dưới player giữ mốc thời gian của bài. Nếu nguồn bị xóa, giảng viên thay URL trong trình soạn; không cần YouTube API key hay dịch vụ lưu trữ video.
+
 Bài cũ giữ định dạng `TEXT`. Giảng viên chọn `MARKDOWN` để soạn tiêu đề (`#`–`###`), danh sách, chữ đậm, mã inline/fenced, liên kết và ảnh có mô tả. HTML luôn được escape. Preview và phòng học dùng cùng bộ hiển thị. `videoUrl` hỗ trợ YouTube qua youtube-nocookie, MP4/WebM bằng player gốc; nguồn khác hiện liên kết ngoài. Không tự phát video hoặc tải URL từ backend.
 
 Lưu bài nháp trước để tải file từ trình soạn. Mỗi bài tối đa 20 file, 5 MB/file, nhận PDF, TXT UTF-8, PNG/JPG/WebP và kiểm tra chữ ký/định dạng. File được lưu trong PostgreSQL qua V10; sao lưu database bao gồm tài liệu. Giới hạn này phù hợp demo, cần cân nhắc object storage khi có nhiều nội dung. Tải/xóa file có hiệu lực ngay; xóa ảnh đã chèn làm liên kết ảnh không còn tồn tại.
@@ -145,7 +151,7 @@ Lưu bài nháp trước để tải file từ trình soạn. Mỗi bài tối �
 - `GET/POST /api/lessons/{id}/resources`: danh sách metadata hoặc upload multipart `file`; upload chỉ dành cho admin/giảng viên phụ trách và yêu cầu CSRF.
 - `GET /api/lesson-resources/{id}/content`: chỉ người quản lý hoặc học viên còn đăng ký và bài published. PDF/TXT tải xuống, ảnh được hiển thị inline; response không cache và có nosniff/sandbox.
 - `DELETE /api/lesson-resources/{id}`: người quản lý khóa, yêu cầu CSRF. Xóa bài xóa tài liệu của bài qua khóa ngoại.
-- `node --test tests/unit/*.test.mjs`: tám kiểm thử bộ hiển thị/URL và API; giữ mã HTTP khi máy chủ trả HTML, kiểm tra CSRF trước khi gửi dữ liệu và làm mới token sau lỗi quyền.
+- `node --test tests/unit/*.test.mjs`: chín kiểm thử bộ hiển thị/URL và API; giữ mã HTTP khi máy chủ trả HTML, kiểm tra CSRF trước khi gửi dữ liệu và làm mới token sau lỗi quyền; giữ mốc thời gian YouTube trong player và link dự phòng.
 
 ## Hồ sơ quản trị và thông báo
 

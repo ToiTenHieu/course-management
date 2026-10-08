@@ -25,3 +25,22 @@ test("video player embeds only known video hosts and direct formats", () => {
   assert.doesNotMatch(video("https://youtube.com.evil.example/watch?v=abcdefghijk"), /iframe/);
   assert.equal(video("javascript:alert(1)"), "");
 });
+
+test("YouTube chapters preserve their timestamp in the player and fallback link", () => {
+  for (const link of [
+    "https://www.youtube.com/watch?v=abcdefghijk&t=1h2m3s",
+    "https://youtu.be/abcdefghijk?t=3723",
+    "https://www.youtube-nocookie.com/embed/abcdefghijk?start=3723",
+    "https://www.youtube.com/shorts/abcdefghijk#t=62m3s"
+  ]) {
+    const html = video(link);
+    assert.match(html, /src="https:\/\/www.youtube-nocookie.com\/embed\/abcdefghijk\?start=3723"/);
+    assert.match(html, /href="https:\/\/www.youtube.com\/watch\?v=abcdefghijk&amp;t=3723s"/);
+    assert.match(html, /mở trên YouTube/);
+    assert.doesNotMatch(html, /autoplay/);
+  }
+  for (const value of ["-1", "Infinity", "90bad", "999999999999999999", "0"]) {
+    assert.doesNotMatch(video(`https://youtu.be/abcdefghijk?t=${value}`), /\?start=/);
+  }
+  assert.doesNotMatch(video("https://youtube-nocookie.com.evil.example/embed/abcdefghijk"), /iframe/);
+});

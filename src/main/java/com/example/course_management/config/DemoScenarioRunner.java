@@ -10,13 +10,16 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "app.demo.enabled", havingValue = "true")
 public class DemoScenarioRunner implements CommandLineRunner {
   private final DemoScenarioSeeder seeder;
+  private final DemoYouTubeSeeder youtube;
 
-  public DemoScenarioRunner(DemoScenarioSeeder seeder) {
+  public DemoScenarioRunner(DemoScenarioSeeder seeder, DemoYouTubeSeeder youtube) {
     this.seeder = seeder;
+    this.youtube = youtube;
   }
 
   @Override
   public void run(String... args) {
     seeder.seed();
+    youtube.seed();
   }
 }

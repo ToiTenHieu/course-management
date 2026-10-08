@@ -50,6 +50,7 @@ class BusinessFlowTests {
   @Autowired LessonQuizRepository quizzes;
   @Autowired QuizAttemptRepository quizAttempts;
   @Autowired com.example.course_management.config.DemoScenarioSeeder demoScenarios;
+  @Autowired com.example.course_management.config.DemoYouTubeSeeder demoYouTube;
   @Autowired PagedListService pagedLists;
   @Autowired jakarta.persistence.EntityManagerFactory entityManagerFactory;
   @MockitoSpyBean NotificationRepository notifications;
@@ -242,6 +243,53 @@ class BusinessFlowTests {
     assertEquals(paymentCount, payments.count());
     assertEquals(
         "Tên đã được chỉnh sửa", courses.findById(edited.getCourseId()).orElseThrow().getTitle());
+  }
+
+  @Test
+  void youtubeDemoCoursesPreserveExistingDataAndUseNormalLearningAccess() {
+    demoYouTube.seed(); // Missing demo teacher must not record a completed seed.
+    assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM demo_seed_runs", Integer.class));
+    user("teacher_demo", Role.TEACHER);
+    long existingCourses = courses.count(), existingLessons = lessons.count();
+    demoYouTube.seed();
+    assertEquals(existingCourses + 2, courses.count());
+    assertEquals(existingLessons + 10, lessons.count());
+    assertEquals(2, quizzes.count());
+    assertEquals(0, payments.count());
+    var samples = courses.findAll().stream().filter(c -> c.getTitle().endsWith("· Demo YouTube")).toList();
+    for (var sample : samples) {
+      assertEquals(CourseStatus.PUBLISHED, sample.getStatus());
+      assertEquals(0, sample.getPrice().signum());
+      var program = lessons.findByCourse_CourseIdAndIsPublishedTrueOrderByOrderIndex(sample.getCourseId());
+      assertEquals(5, program.size());
+      for (int i = 0; i < program.size(); i++) {
+        var lesson = program.get(i);
+        assertEquals(i + 1, lesson.getOrderIndex());
+        assertEquals("MARKDOWN", lesson.getContentFormat());
+        assertTrue(lesson.getVideoUrl().matches("https://www\\.youtube\\.com/watch\\?v=[a-zA-Z0-9_-]{11}&t=\\d+s"));
+        assertTrue(lesson.getTextContent().contains("freeCodeCamp.org"));
+      }
+      var firstVideo = program.getFirst();
+      assertNull(lessonService.getLessonsByCourse(sample.getCourseId(), actor(student)).getFirst().getVideoUrl());
+      assertThrows(ForbiddenException.class, () -> lessonService.getLessonById(firstVideo.getLessonId(), actor(student)));
+      var enrolled = enrollmentService.enroll(sample.getCourseId(), actor(student));
+      assertEquals(firstVideo.getVideoUrl(), lessonService.getLessonById(firstVideo.getLessonId(), actor(student)).getVideoUrl());
+      var completed = enrollmentService.completeLesson(enrolled.getEnrollmentId(), firstVideo.getLessonId(), actor(student));
+      assertEquals(0, new BigDecimal("20").compareTo(completed.getProgressPercentage()));
+      assertEquals(2, quizService.get(program.getLast().getLessonId(), actor(student)).questions().size());
+    }
+    var edited = lessons.findByCourse_CourseIdOrderByOrderIndex(samples.getFirst().getCourseId()).getFirst();
+    edited.setVideoUrl("https://youtu.be/abcdefghijk");
+    lessons.saveAndFlush(edited);
+    var deleted = lessons.findByCourse_CourseIdOrderByOrderIndex(samples.getFirst().getCourseId()).get(1);
+    lessons.delete(deleted);
+    lessons.flush();
+    demoYouTube.seed();
+    assertEquals(existingCourses + 2, courses.count());
+    assertEquals(existingLessons + 9, lessons.count());
+    assertEquals("https://youtu.be/abcdefghijk", lessons.findById(edited.getLessonId()).orElseThrow().getVideoUrl());
+    assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM demo_seed_runs", Integer.class));
+    assertEquals("Free", courses.findById(free.getCourseId()).orElseThrow().getTitle());
   }
 
   @Test
