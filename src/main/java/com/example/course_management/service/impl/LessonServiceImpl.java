@@ -20,18 +20,20 @@ public class LessonServiceImpl implements LessonService {
   private final LessonProgressRepository progress;
   private final ContentPolicy policy;
   private final ProgressCalculator calculator;
+  private final LessonDraftService drafts;
 
   public LessonServiceImpl(
       LessonRepository lessons,
       CourseRepository courses,
       LessonProgressRepository progress,
       ContentPolicy policy,
-      ProgressCalculator calculator) {
+      ProgressCalculator calculator, LessonDraftService drafts) {
     this.lessons = lessons;
     this.courses = courses;
     this.progress = progress;
     this.policy = policy;
     this.calculator = calculator;
+    this.drafts = drafts;
   }
 
   public List<LessonResponse> getLessonsByCourse(Integer id, CustomUserDetails actor) {
@@ -68,13 +70,20 @@ public class LessonServiceImpl implements LessonService {
     if (r.getContentFormat() != null) l.setContentFormat(r.getContentFormat());
     l.setVideoUrl(r.getVideoUrl());
     l.setOrderIndex(r.getOrderIndex());
+    drafts.consume(courseId, 0, r.getDraftRevision(), actor);
     return response(lessons.save(l), true);
   }
 
   public LessonResponse updateLesson(Integer id, UpdateLessonRequest r, CustomUserDetails actor) {
+    var courseId = lessons.findCourseId(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài học"));
+    var c = lockedCourse(courseId);
+    policy.manager(c, actor);
     var l = lesson(id);
-    lockedCourse(l.getCourse().getCourseId());
-    policy.manager(l.getCourse(), actor);
+    if (r.getExpectedRevision() != null && !r.getExpectedRevision().equals(l.getContentRevision()))
+      throw new ConflictException("Bài học đã được cập nhật. Dùng nội dung hiện tại hoặc mở lại trình soạn trước khi lưu; bản nháp của bạn vẫn được giữ.");
+    drafts.consume(courseId, id, r.getDraftRevision(), actor);
+    drafts.snapshot(l, actor);
+    l.setContentRevision(l.getContentRevision() + 1);
     policy.contentUrl(r.getContentUrl());
     policy.contentUrl(r.getVideoUrl());
     l.setTitle(r.getTitle().trim());
@@ -89,9 +98,10 @@ public class LessonServiceImpl implements LessonService {
 
   public LessonResponse updatePublishStatus(
       Integer id, UpdateLessonPublishRequest r, CustomUserDetails actor) {
+    var courseId = lessons.findCourseId(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài học"));
+    var c = lockedCourse(courseId);
+    policy.manager(c, actor);
     var l = lesson(id);
-    lockedCourse(l.getCourse().getCourseId());
-    policy.manager(l.getCourse(), actor);
     l.setIsPublished(r.getIsPublished());
     l.setUpdatedAt(LocalDateTime.now());
     lessons.saveAndFlush(l);
@@ -157,6 +167,7 @@ public class LessonServiceImpl implements LessonService {
         .contentFormat(full ? l.getContentFormat() : null)
         .videoUrl(full ? l.getVideoUrl() : null)
         .orderIndex(l.getOrderIndex())
+        .contentRevision(full ? l.getContentRevision() : null)
         .isPublished(l.getIsPublished())
         .build();
   }

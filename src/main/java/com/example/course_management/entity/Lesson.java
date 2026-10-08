@@ -36,6 +36,9 @@ public class Lesson {
   @Column(name = "content_format", nullable = false, length = 20)
   private String contentFormat = "TEXT";
 
+  @Column(name = "content_revision", nullable = false)
+  private Integer contentRevision = 0;
+
   @Column(name = "video_url", length = 500)
   private String videoUrl;
 

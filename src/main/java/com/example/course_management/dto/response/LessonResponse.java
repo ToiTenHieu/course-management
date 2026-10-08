@@ -15,4 +15,5 @@ public class LessonResponse {
   private String videoUrl;
   private Integer orderIndex;
   private Boolean isPublished;
+  private Integer contentRevision;
 }

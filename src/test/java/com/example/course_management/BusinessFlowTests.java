@@ -73,6 +73,8 @@ class BusinessFlowTests {
           "lesson_progress",
           "payments",
           "enrollments",
+          "lesson_drafts",
+          "lesson_content_versions",
           "lesson_resources",
           "lessons",
           "courses",
@@ -1891,5 +1893,87 @@ class BusinessFlowTests {
     mvc.perform(multipart("/api/lessons/" + first.getLessonId() + "/resources").file(file).session(session))
         .andExpect(status().isForbidden());
     assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM lesson_resources", Integer.class));
+  }
+
+  @Autowired LessonDraftService lessonDrafts;
+
+  SaveLessonDraftRequest draftRequest(int expected, Integer base, String text) {
+    var r = new SaveLessonDraftRequest();
+    r.setExpectedRevision(expected); r.setBaseRevision(base);
+    r.setTitle("Draft title"); r.setOrderIndex(1); r.setTextContent(text);
+    r.setContentFormat("MARKDOWN");
+    return r;
+  }
+
+  UpdateLessonRequest contentRequest(int expected, Integer draftRevision) {
+    var r = new UpdateLessonRequest();
+    r.setTitle("Updated"); r.setOrderIndex(1); r.setTextContent("New live body");
+    r.setContentFormat("MARKDOWN"); r.setExpectedRevision(expected); r.setDraftRevision(draftRevision);
+    return r;
+  }
+
+  @Test
+  void lessonDraftIsPrivateAndDoesNotChangePublishedContent() throws Exception {
+    var d = lessonDrafts.save(free.getCourseId(), first.getLessonId(), draftRequest(0,0,"Unpublished draft"), actor(teacher));
+    assertEquals(1, d.revision());
+    assertEquals("Private lesson body", lessonService.getLessonById(first.getLessonId(),actor(teacher)).getTextContent());
+    assertNull(lessonDrafts.get(free.getCourseId(),first.getLessonId(),actor(admin)));
+    assertThrows(ForbiddenException.class, () -> lessonDrafts.get(free.getCourseId(),first.getLessonId(),actor(outsider)));
+    assertThrows(ResourceNotFoundException.class, () -> lessonDrafts.get(paid.getCourseId(),first.getLessonId(),actor(teacher)));
+    mvc.perform(get("/api/courses/"+free.getCourseId()+"/lesson-drafts/"+first.getLessonId()).session(login(student)))
+        .andExpect(status().isForbidden());
+    mvc.perform(put("/api/courses/"+free.getCourseId()+"/lesson-drafts/0").session(login(teacher))
+        .contentType("application/json").content("{\"expectedRevision\":0}"))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void draftRevisionsRejectOtherTabsAndStayMonotonicAfterDiscard() {
+    var d = lessonDrafts.save(free.getCourseId(),0,draftRequest(0,null,"First tab"),actor(teacher));
+    assertThrows(ConflictException.class, () -> lessonDrafts.save(free.getCourseId(),0,draftRequest(0,null,"Second tab"),actor(teacher)));
+    lessonDrafts.delete(free.getCourseId(),0,d.revision(),actor(teacher));
+    var empty = lessonDrafts.get(free.getCourseId(),0,actor(teacher));
+    assertNull(empty.content()); assertEquals(2,empty.revision());
+    assertThrows(ConflictException.class, () -> lessonDrafts.save(free.getCourseId(),0,draftRequest(1,null,"Stale"),actor(teacher)));
+    assertEquals(3,lessonDrafts.save(free.getCourseId(),0,draftRequest(2,null,"New"),actor(teacher)).revision());
+  }
+
+  @Test
+  void savingLessonConsumesDraftAndCreatesRestorableHistory() {
+    var d = lessonDrafts.save(free.getCourseId(),first.getLessonId(),draftRequest(0,0,"Draft"),actor(teacher));
+    var live = lessonService.updateLesson(first.getLessonId(),contentRequest(0,d.revision()),actor(teacher));
+    assertEquals(1,live.getContentRevision());
+    assertNull(lessonDrafts.get(free.getCourseId(),first.getLessonId(),actor(teacher)).content());
+    var history = lessonDrafts.history(first.getLessonId(),actor(teacher));
+    assertEquals(1,history.size()); assertEquals("Private lesson body",history.getFirst().content().textContent());
+    var restored = lessonDrafts.save(free.getCourseId(),first.getLessonId(),draftRequest(2,1,history.getFirst().content().textContent()),actor(teacher));
+    assertEquals("Private lesson body", restored.content().textContent());
+    assertEquals("New live body",lessonService.getLessonById(first.getLessonId(),actor(teacher)).getTextContent());
+  }
+
+  @Test
+  void staleLessonSavePreservesDraftAndCurrentLesson() {
+    var d = lessonDrafts.save(free.getCourseId(),first.getLessonId(),draftRequest(0,0,"Keep my draft"),actor(teacher));
+    lessonService.updateLesson(first.getLessonId(),contentRequest(0,null),actor(admin));
+    assertThrows(ConflictException.class, () -> lessonService.updateLesson(first.getLessonId(),contentRequest(0,d.revision()),actor(teacher)));
+    assertEquals("Keep my draft",lessonDrafts.get(free.getCourseId(),first.getLessonId(),actor(teacher)).content().textContent());
+    assertEquals(1,lessonDrafts.history(first.getLessonId(),actor(teacher)).size());
+    assertThrows(ForbiddenException.class, () -> lessonDrafts.history(first.getLessonId(),actor(outsider)));
+  }
+
+  @Test
+  void concurrentLessonEditorsHaveOnlyOneSuccessfulSave() throws Exception {
+    var start = new CountDownLatch(1);
+    try (var pool = Executors.newFixedThreadPool(2)) {
+      Callable<Boolean> save = () -> {
+        start.await();
+        try { lessonService.updateLesson(first.getLessonId(),contentRequest(0,null),actor(teacher)); return true; }
+        catch (ConflictException e) { return false; }
+      };
+      var a = pool.submit(save); var b = pool.submit(save); start.countDown();
+      assertNotEquals(a.get(10,TimeUnit.SECONDS),b.get(10,TimeUnit.SECONDS));
+      assertEquals(1,lessons.findById(first.getLessonId()).orElseThrow().getContentRevision());
+      assertEquals(1,lessonDrafts.history(first.getLessonId(),actor(teacher)).size());
+    }
   }
 }

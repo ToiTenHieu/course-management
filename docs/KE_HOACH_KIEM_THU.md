@@ -182,3 +182,8 @@ Log: `target/local-demo/ux-detail-verify.log` (74 test đạt, bước đóng g�
 - Renderer: 4 bài kiểm thử Node đạt (Markdown, URL ảnh và video, escape HTML).
 - Trình duyệt: tạo/sửa bài, xem trước, tải TXT/PNG, tải xuống, chèn ảnh và viewport 390px đạt.
 
+
+### Bản nháp và lịch sử (08/10/2026)
+- 82 backend đạt trên H2 và PostgreSQL thật; gồm cô lập chủ bản nháp, quyền quản lý, CSRF, revision tăng sau bỏ nháp, lưu lịch sử và rollback khi xung đột.
+- Hai lượt sửa đồng thời chỉ một lượt thành công; lượt cũ không mất bản nháp.
+- Chromium: tự lưu/khôi phục bài mới, hai tab sửa cùng bài báo xung đột giữ văn bản, đưa lịch sử vào bản nháp rồi lưu đạt. Ảnh `output/playwright/draft-history.png`.

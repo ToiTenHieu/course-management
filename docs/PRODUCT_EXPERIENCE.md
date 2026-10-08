@@ -93,3 +93,9 @@ Thông báo cho giảng viên khi có câu hỏi, cho tác giả khi có phản 
 Quyền hỏi đáp dùng đăng ký còn hiệu lực và bài xuất bản; bài nháp và câu hỏi bị ẩn chỉ dành cho người quản lý khóa. Ghi chú riêng vẫn tách khỏi hỏi đáp công khai. Flyway V6 thêm bảng, không reset database. Lưu câu hỏi/phản hồi và tạo thông báo cùng transaction; lỗi thông báo rollback thay đổi.
 
 Các kiểm thử tự động, log và hành trình UI được ghi trong [kế hoạch kiểm thử](KE_HOACH_KIEM_THU.md). Ảnh desktop/mobile và kịch bản Playwright CLI trong thư mục bị Git bỏ qua `output/playwright`; log backend trong `target/local-demo`. Không dùng dữ liệu thật cho các thanh toán thử.
+
+### Tự lưu bản nháp và lịch sử nội dung — 08/10/2026
+
+Trình soạn khôi phục bản nháp cá nhân từ máy chủ, báo đang lưu/đã lưu/lỗi và cho thử lại. Đóng trình soạn giữ bản nháp; chọn dùng bài hiện tại sẽ bỏ nội dung đang soạn sau xác nhận. Lịch sử cho phép đưa phiên bản trước về trình soạn, chưa cập nhật bài cho đến khi lưu thay đổi. Khóa theo khóa học và revision bảo vệ hai tab sửa đồng thời; thao tác xuất bản cũng lấy bài sau khóa để tránh ghi đè nội dung mới.
+
+82 backend đạt trên H2 và PostgreSQL. Browser đã kiểm tra tự lưu, đóng/mở khôi phục, hai tab báo xung đột giữ nội dung và đưa lịch sử vào bản nháp rồi lưu lại.

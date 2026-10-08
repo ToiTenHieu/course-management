@@ -3327,3 +3327,11 @@ body:has(dialog[open]) { overflow: hidden; }
 .resource-item { display: flex; align-items: center; flex-wrap: wrap; gap: .7rem; padding: .7rem 0; }
 .resource-item a { overflow-wrap: anywhere; flex: 1 1 180px; }
 .resource-item small { color: #53645c; }
+
+.draft-status { margin: 16px 0; padding: 12px 16px; border-radius: 12px; background: var(--surface-soft, #f3f7f5); font-size: 13px; }
+.draft-status p { margin: 0 0 6px; }
+.lesson-history { margin-top: 20px; }
+.lesson-history summary { cursor: pointer; font-weight: 600; }
+.history-row { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e4e9e6; }
+.history-row small { display: block; color: #64776e; }
+@media (max-width: 600px) { .history-row { align-items: stretch; flex-direction: column; } }

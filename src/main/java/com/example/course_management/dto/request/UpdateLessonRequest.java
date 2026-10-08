@@ -27,4 +27,10 @@ public class UpdateLessonRequest {
   @NotNull(message = "orderIndex không được để trống")
   @Positive
   private Integer orderIndex;
+
+  @Positive
+  private Integer draftRevision;
+
+  @Min(0)
+  private Integer expectedRevision;
 }

@@ -1,6 +1,7 @@
 import { api, ApiError } from "./api.js";
 import { mountQuestions } from "./questions.js";
 import { mountQuiz } from "./quiz.js";
+import { mountLessonDraft } from "./lesson-drafts.js";
 import { mountResources } from "./lesson-content.js";
 import { enhanceForms, wireNavigation, setPending, lessonBody } from "./experience.js";
 import {
@@ -900,10 +901,14 @@ async function courses() {
   await refresh(0, true);
 }
 async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
+  if (lesson) lesson = await api("/lessons/" + lesson.lessonId);
+  const draft = await api(`/courses/${courseId}/lesson-drafts/${lesson?.lessonId || 0}`);
+  let draftEditor;
   showDialog(
     lesson ? "Chỉnh sửa bài học" : "Thêm bài học",
     `<div class="editor-intro"><span class="eyebrow">CHĂM CHÚT TỪNG BÀI HỌC</span><p>${lesson?.isPublished ? "Bài đang xuất bản. Thay đổi được lưu sẽ cập nhật nội dung học viên đọc." : "Lưu nội dung trước, sau đó xuất bản từ chương trình khóa học."}</p></div><div class="editor-tabs" role="tablist" aria-label="Soạn bài học"><button type="button" id="editLessonTab" role="tab" aria-selected="true" aria-controls="lessonEditPanel">1. Soạn nội dung</button><button type="button" id="previewLessonTab" role="tab" aria-selected="false" aria-controls="lessonPreviewPanel" tabindex="-1">2. Xem trước</button></div><section id="lessonEditPanel" role="tabpanel" aria-labelledby="editLessonTab">${field("Tiêu đề bài học", "title", lesson?.title || "", "text", true, 'maxlength="255" placeholder="Ví dụ: Tạo ứng dụng đầu tiên"')}${field("Thứ tự", "orderIndex", lesson?.orderIndex || nextOrder, "number", true, 'min="1"')}${field("Liên kết tài liệu hoặc video", "contentUrl", lesson?.contentUrl || "", "url", false, 'maxlength="500" placeholder="https://…" aria-describedby="resourceHint"')}<p class="hint" id="resourceHint">Dùng liên kết HTTP/HTTPS. Học viên mở tài liệu hoặc video trong thẻ mới.</p>${select("Định dạng nội dung", "contentFormat", [["TEXT", "Văn bản thường"], ["MARKDOWN", "Nội dung có cấu trúc"]], lesson?.contentFormat || "MARKDOWN")}${field("Video trong phòng học", "videoUrl", lesson?.videoUrl || "", "url", false, 'maxlength="500" placeholder="YouTube hoặc liên kết MP4/WebM"')}<div class="content-toolbar" aria-label="Công cụ soạn nội dung"><button type="button" data-insert="heading">Tiêu đề</button><button type="button" data-insert="bold">In đậm</button><button type="button" data-insert="list">Danh sách</button><button type="button" data-insert="code">Đoạn mã</button><button type="button" data-insert="link">Liên kết</button><button type="button" data-insert="image">Ảnh</button></div>${textarea("Nội dung bài học", "textContent", lesson?.textContent || "", 'rows="10" maxlength="100000" aria-describedby="contentHint"')}<p class="hint" id="contentHint">Gợi ý: mục tiêu bài → giải thích → ví dụ → bài thực hành. Chế độ có cấu trúc hỗ trợ # tiêu đề, **in đậm**, danh sách, đoạn mã và ảnh. HTML được hiển thị như văn bản.</p></section><section id="lessonPreviewPanel" class="lesson-preview" role="tabpanel" aria-labelledby="previewLessonTab" hidden tabindex="0"></section>`,
     async (d) => {
+      await draftEditor.prepare(d);
       d.orderIndex = Number(d.orderIndex);
       d.contentUrl = d.contentUrl || null;
       d.videoUrl = d.videoUrl || null;
@@ -921,6 +926,9 @@ async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
   modal.classList.add("lesson-editor-dialog");
   modal.addEventListener("close", () => modal.classList.remove("lesson-editor-dialog"), { once: true });
   const form = $("#dialogForm"), edit = $("#editLessonTab"), preview = $("#previewLessonTab");
+  draftEditor = mountLessonDraft(form, courseId, lesson, draft);
+  $("#discardMessage").textContent = "Đóng trình soạn? Thay đổi sẽ được giữ trong bản nháp trên máy chủ nếu lưu thành công.";
+  $("#discardChanges").textContent = "Đóng, giữ bản nháp";
   const resourceInput = form.elements.contentUrl;
   const textInput = form.elements.textContent;
   const insert = (value) => {

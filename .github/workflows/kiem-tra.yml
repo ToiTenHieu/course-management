@@ -28,6 +28,7 @@ jobs:
           node --check src/main/resources/static/js/api.js
           node --check src/main/resources/static/js/app.js
           node --check src/main/resources/static/js/experience.js
+          node --check src/main/resources/static/js/lesson-drafts.js
           node --check src/main/resources/static/js/lesson-content.js
           node --test tests/unit/*.test.mjs
           node --check src/main/resources/static/js/lists.js

@@ -165,3 +165,11 @@ Chỉ học viên có đăng ký còn hiệu lực và bài xuất bản đượ
 - `PUT /api/questions/{id}/visibility`: giảng viên phụ trách/admin gửi `{ "hidden": true }` để ẩn hoặc `false` để hiện lại. Phải hiện câu hỏi trước khi trả lời.
 
 Mọi thao tác ghi yêu cầu CSRF. Flyway V6 thêm bảng hỏi đáp, giữ dữ liệu hiện có. Xóa bài học sẽ xóa hỏi đáp của bài; ẩn bài giữ hỏi đáp nhưng chặn học viên đọc. Nội dung được hiển thị như văn bản, không thực thi HTML.
+
+### Bản nháp và lịch sử bài học
+
+Trình soạn tự lưu sau khoảng 0,9 giây, tách theo giảng viên/quản trị viên và bài học. Mở lại sẽ khôi phục bản nháp trên máy chủ; nút **Lưu thay đổi** mới cập nhật bài học. Bản nháp cho bài mới dùng khóa `0` trong mỗi khóa học. Trạng thái lưu và nút thử lại hiển thị khi mất kết nối; hãy chờ báo đã lưu trước khi rời trang.
+
+API `GET/PUT/DELETE /api/courses/{id}/lesson-drafts/{key}` kiểm tra quyền quản lý và phiên bản bản nháp. `GET /api/lessons/{id}/content-versions` trả 30 phiên bản gần nhất. Đưa phiên bản cũ vào bản nháp để xem/chỉnh rồi lưu lại. Flyway V11 giữ lịch sử nội dung trước mỗi lần sửa; lịch sử không sao lưu tệp đã bị xóa.
+
+Giao diện gửi `expectedRevision` và `draftRevision` để tránh ghi đè từ tab khác; lưu nội dung, thêm lịch sử và tiêu thụ bản nháp cùng transaction. Client API cũ vẫn được hỗ trợ khi không gửi hai trường tùy chọn này. Xung đột trả HTTP 409 và giữ bản nháp/nội dung đang soạn.

@@ -27,4 +27,7 @@ public class CreateLessonRequest {
   @NotNull(message = "orderIndex không được để trống")
   @Positive
   private Integer orderIndex;
+
+  @Positive
+  private Integer draftRevision;
 }
