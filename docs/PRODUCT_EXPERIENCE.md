@@ -99,3 +99,9 @@ Các kiểm thử tự động, log và hành trình UI được ghi trong [kế
 Trình soạn khôi phục bản nháp cá nhân từ máy chủ, báo đang lưu/đã lưu/lỗi và cho thử lại. Đóng trình soạn giữ bản nháp; chọn dùng bài hiện tại sẽ bỏ nội dung đang soạn sau xác nhận. Lịch sử cho phép đưa phiên bản trước về trình soạn, chưa cập nhật bài cho đến khi lưu thay đổi. Khóa theo khóa học và revision bảo vệ hai tab sửa đồng thời; thao tác xuất bản cũng lấy bài sau khóa để tránh ghi đè nội dung mới.
 
 82 backend đạt trên H2 và PostgreSQL. Browser đã kiểm tra tự lưu, đóng/mở khôi phục, hai tab báo xung đột giữ nội dung và đưa lịch sử vào bản nháp rồi lưu lại.
+
+### Báo cáo học viên dành cho giảng viên — 08/10/2026
+
+Tab Học viên trong khóa chỉ xuất hiện cho giảng viên phụ trách/quản trị viên. Số tổng toàn khóa không thay đổi theo trang/bộ lọc; các dòng học viên hiển thị tiến độ, quiz, hoạt động và câu hỏi chờ phản hồi. Chọn câu hỏi sẽ mở đúng bài và đánh dấu câu hỏi trong tab Hỏi đáp. Trạng thái ngừng học vẫn giữ dữ liệu lịch sử; ghi chú riêng không xuất hiện.
+
+Nghiệm thu Chromium bằng khóa mẫu 27 học viên: phân trang, tìm tài khoản, lọc trạng thái không có kết quả, sắp xếp, liên kết tới câu hỏi và cả tài khoản giảng viên phụ trách đạt. Desktop và mobile 390px không tràn ngang. 86 backend trên H2/PostgreSQL và sáu hành trình E2E đạt.

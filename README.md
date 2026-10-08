@@ -173,3 +173,9 @@ Trình soạn tự lưu sau khoảng 0,9 giây, tách theo giảng viên/quản 
 API `GET/PUT/DELETE /api/courses/{id}/lesson-drafts/{key}` kiểm tra quyền quản lý và phiên bản bản nháp. `GET /api/lessons/{id}/content-versions` trả 30 phiên bản gần nhất. Đưa phiên bản cũ vào bản nháp để xem/chỉnh rồi lưu lại. Flyway V11 giữ lịch sử nội dung trước mỗi lần sửa; lịch sử không sao lưu tệp đã bị xóa.
 
 Giao diện gửi `expectedRevision` và `draftRevision` để tránh ghi đè từ tab khác; lưu nội dung, thêm lịch sử và tiêu thụ bản nháp cùng transaction. Client API cũ vẫn được hỗ trợ khi không gửi hai trường tùy chọn này. Xung đột trả HTTP 409 và giữ bản nháp/nội dung đang soạn.
+
+### Báo cáo học viên theo khóa
+
+Giảng viên phụ trách và quản trị viên có tab **Học viên** trong chi tiết khóa học. Tab hiển thị tổng toàn khóa, trạng thái/tiến độ, số bài đã hoàn thành đang xuất bản, số lượt nộp quiz, điểm trung bình/cao nhất, hoạt động gần nhất và liên kết tới câu hỏi chờ phản hồi đầu tiên. Ghi chú riêng và email không được đưa vào báo cáo.
+
+`GET /api/courses/{id}/students?search=&status=&sort=name&page=0&size=10` trả summary toàn khóa và trang học viên. Tìm theo tên hoặc tài khoản; trạng thái gồm ENROLLED/COMPLETED/DROPPED; thứ tự name/progress; trang bắt đầu từ 0, kích thước tối đa 100. Giao diện hiển thị 10 học viên/trang, giữ bộ lọc trong phiên trang. Điểm quiz bao gồm mọi lượt nộp còn lưu trong khóa, kể cả phiên bản cũ. Chỉ câu hỏi chưa trả lời và chưa bị ẩn được tính vào hàng chờ. Các truy vấn tổng hợp lấy theo nhóm học viên của trang, không truy vấn riêng từng dòng. Flyway V12 bổ sung index cho báo cáo.

@@ -3335,3 +3335,20 @@ body:has(dialog[open]) { overflow: hidden; }
 .history-row { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e4e9e6; }
 .history-row small { display: block; color: #64776e; }
 @media (max-width: 600px) { .history-row { align-items: stretch; flex-direction: column; } }
+
+.student-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin: 18px 0; }
+.student-summary > div { display: flex; flex-direction: column; gap: 4px; background: #f3f7f5; padding: 14px; border-radius: 12px; }
+.student-summary strong { font-size: 24px; }
+.student-summary span { font-size: 12px; color: #53695e; }
+.student-report-list { display: grid; gap: 16px; }
+.student-report-row { padding: 20px; border: 1px solid #e1e8e3; border-radius: 14px; }
+.student-report-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.student-report-heading h3 { margin: 0 0 4px; overflow-wrap: anywhere; }
+.student-report-heading small { color: #64776e; }
+.student-report-progress { margin: 16px 0; font-size: 13px; }
+.student-report-progress .progress-track { margin-top: 8px; height: 6px; border-radius: 5px; overflow: hidden; background: #e4ede7; }
+.student-report-progress i { display: block; height: 100%; background: #165d4b; }
+.student-report-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin: 0; font-size: 13px; }
+.student-report-metrics dt { color: #64776e; margin-bottom: 6px; }
+.student-report-metrics dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .student-report-metrics { grid-template-columns: 1fr; } .student-report-heading { align-items: flex-start; } }

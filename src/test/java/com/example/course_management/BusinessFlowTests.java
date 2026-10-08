@@ -1976,4 +1976,82 @@ class BusinessFlowTests {
       assertEquals(1,lessonDrafts.history(first.getLessonId(),actor(teacher)).size());
     }
   }
+
+  @Autowired CourseStudentReportService courseStudentReports;
+
+  @Test
+  void courseStudentReportAggregatesOnlyThisCourseAndKeepsNotesPrivate() throws Exception {
+    enrollForQuestions(student);
+    var e = enrollments.findByStudent_UserIdAndCourse_CourseId(student.getUserId(),free.getCourseId()).orElseThrow();
+    e.setProgressPercentage(new BigDecimal("50.00")); enrollments.saveAndFlush(e);
+    var p = new LessonProgress(); p.setEnrollment(e); p.setLesson(first); p.setIsCompleted(true); p.setNote("Secret private note"); progress.saveAndFlush(p);
+    var hidden = lesson(free,"Hidden",3,false);
+    var hiddenProgress = new LessonProgress(); hiddenProgress.setEnrollment(e); hiddenProgress.setLesson(hidden); hiddenProgress.setIsCompleted(true); progress.saveAndFlush(hiddenProgress);
+    var quiz = quizService.save(first.getLessonId(),quizRequest(0,true),actor(teacher));
+    quizService.submit(first.getLessonId(),submission(quiz,2,1),actor(student));
+    quizService.submit(first.getLessonId(),submission(quiz,0,1),actor(student));
+    quizService.save(first.getLessonId(),quizRequest(1,false),actor(teacher));
+    var otherEnrollment = new Enrollment(); otherEnrollment.setStudent(student); otherEnrollment.setCourse(paid); enrollments.saveAndFlush(otherEnrollment);
+    var paidLesson = lessons.findByCourse_CourseIdOrderByOrderIndex(paid.getCourseId()).getFirst();
+    var paidQuiz = quizService.save(paidLesson.getLessonId(),quizRequest(0,true),actor(teacher));
+    quizService.submit(paidLesson.getLessonId(),submission(paidQuiz,0,1),actor(student));
+    var firstPending = questionService.ask(second.getLessonId(),"First pending",actor(student));
+    questionService.ask(first.getLessonId(),"Second pending",actor(student));
+    var answered = questionService.ask(first.getLessonId(),"Answered",actor(student));
+    questionService.answer(answered.questionId(),"Answer",actor(teacher));
+    var hiddenQuestion = questionService.ask(first.getLessonId(),"Hidden",actor(student));
+    questionService.visibility(hiddenQuestion.questionId(),true,actor(teacher));
+    var latest = java.time.LocalDateTime.of(2030,1,2,3,4);
+    jdbc.update("UPDATE lesson_questions SET created_at=? WHERE question_id=?",latest,firstPending.questionId());
+    var report = courseStudentReports.get(free.getCourseId(),"",null,"name",0,10,actor(teacher));
+    assertEquals(1,report.summary().students()); assertEquals(2,report.summary().publishedLessons()); assertEquals(2,report.summary().pendingQuestions());
+    var row = report.students().content().getFirst();
+    assertEquals(1,row.completedLessons()); assertEquals(2,row.quizAttempts());
+    assertEquals(0,new BigDecimal("75").compareTo(row.averageScore())); assertEquals(100,row.bestScore());
+    assertEquals(2,row.pendingQuestions()); assertEquals(firstPending.questionId(),row.pendingQuestionId()); assertEquals(second.getLessonId(),row.pendingLessonId()); assertEquals(latest,row.lastActivity());
+    var json = mvc.perform(get("/api/courses/"+free.getCourseId()+"/students").session(login(teacher)))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.students.content[0].email").doesNotExist())
+        .andReturn().getResponse().getContentAsString();
+    assertFalse(json.contains("Secret private note")); assertFalse(json.contains("questionCount"));
+  }
+
+  @Test
+  void courseStudentReportHasGlobalSummaryAndStableFilteredPagination() {
+    enrollForQuestions(student);
+    for (int i=0;i<11;i++) {
+      var u = user(String.format("learner%02d",i),Role.STUDENT);
+      var e = new Enrollment(); e.setStudent(u); e.setCourse(free);
+      e.setStatus(i==0 ? EnrollmentStatus.COMPLETED : i==1 ? EnrollmentStatus.DROPPED : EnrollmentStatus.ENROLLED);
+      e.setProgressPercentage(BigDecimal.valueOf(i==0?100:i*5)); enrollments.saveAndFlush(e);
+    }
+    var a = courseStudentReports.get(free.getCourseId(),"",null,"name",0,10,actor(teacher));
+    var b = courseStudentReports.get(free.getCourseId(),"",null,"name",1,10,actor(teacher));
+    assertEquals(12,a.students().totalElements()); assertEquals(2,a.students().totalPages()); assertEquals(10,a.students().content().size()); assertEquals(2,b.students().content().size());
+    assertTrue(a.students().content().stream().noneMatch(x->b.students().content().stream().anyMatch(y->x.enrollmentId()==y.enrollmentId())));
+    var filtered = courseStudentReports.get(free.getCourseId(),"learner",EnrollmentStatus.COMPLETED,"progress",0,10,actor(admin));
+    assertEquals(1,filtered.students().totalElements()); assertEquals(12,filtered.summary().students()); assertEquals(1,filtered.summary().completed()); assertEquals(1,filtered.summary().dropped()); assertEquals(10,filtered.summary().enrolled());
+    assertEquals(100,filtered.students().content().getFirst().progressPercentage().intValue());
+  }
+
+  @Test
+  void courseStudentReportHandlesEmptyAndLiteralWildcardSearches() {
+    var empty = courseStudentReports.get(free.getCourseId(),"",null,"name",0,10,actor(teacher));
+    assertEquals(0,empty.summary().students()); assertEquals(0,empty.students().totalPages());
+    student.setFullName("Learner %_!"); users.saveAndFlush(student); enrollForQuestions(student);
+    assertEquals(1,courseStudentReports.get(free.getCourseId(),"%_!",null,"name",0,10,actor(teacher)).students().totalElements());
+    assertEquals(0,courseStudentReports.get(free.getCourseId(),"missing",null,"name",0,10,actor(teacher)).students().totalElements());
+    assertThrows(BadRequestException.class,()->courseStudentReports.get(free.getCourseId(),"x".repeat(256),null,"name",0,10,actor(teacher)));
+    assertThrows(BadRequestException.class,()->courseStudentReports.get(free.getCourseId(),"",null,"name",-1,10,actor(teacher)));
+    assertThrows(BadRequestException.class,()->courseStudentReports.get(free.getCourseId(),"",null,"name",0,101,actor(teacher)));
+  }
+
+  @Test
+  void courseStudentReportRequiresTheCourseManager() throws Exception {
+    assertThrows(ForbiddenException.class,()->courseStudentReports.get(free.getCourseId(),"",null,"name",0,10,actor(outsider)));
+    assertThrows(ForbiddenException.class,()->courseStudentReports.get(free.getCourseId(),"",null,"name",0,10,actor(student)));
+    mvc.perform(get("/api/courses/"+free.getCourseId()+"/students")).andExpect(status().isUnauthorized());
+    mvc.perform(get("/api/courses/"+free.getCourseId()+"/students").session(login(student))).andExpect(status().isForbidden());
+    mvc.perform(get("/api/courses/"+free.getCourseId()+"/students").session(login(outsider))).andExpect(status().isForbidden());
+    mvc.perform(get("/api/courses/"+free.getCourseId()+"/students?sort=invalid").session(login(teacher))).andExpect(status().isBadRequest());
+  }
 }

@@ -187,3 +187,9 @@ Log: `target/local-demo/ux-detail-verify.log` (74 test đạt, bước đóng g�
 - 82 backend đạt trên H2 và PostgreSQL thật; gồm cô lập chủ bản nháp, quyền quản lý, CSRF, revision tăng sau bỏ nháp, lưu lịch sử và rollback khi xung đột.
 - Hai lượt sửa đồng thời chỉ một lượt thành công; lượt cũ không mất bản nháp.
 - Chromium: tự lưu/khôi phục bài mới, hai tab sửa cùng bài báo xung đột giữ văn bản, đưa lịch sử vào bản nháp rồi lưu đạt. Ảnh `output/playwright/draft-history.png`.
+
+### Báo cáo học viên và hồi quy cả ba phần (08/10/2026)
+- 86 backend đạt trên H2 và PostgreSQL thật. Kiểm tra quyền giảng viên, metadata không lộ ghi chú/email, tổng hợp quiz chỉ trong khóa, bài ẩn không tăng số bài hoàn thành, câu hỏi ẩn/đã trả lời không tăng hàng chờ, phân trang/tổng toàn khóa và từ khóa chứa ký tự wildcard.
+- 4 kiểm thử renderer Node đạt; cú pháp các module mới hợp lệ. JAR đóng gói thành công.
+- Sáu hành trình E2E hiện có đạt. Browser kiểm tra báo cáo 27 học viên, lọc/tìm/trang/thứ tự, liên kết câu hỏi và giảng viên phụ trách; viewport 390×844 không tràn ngang.
+- Ảnh `output/playwright/course-students-desktop.png`, `course-students-mobile.png`; log H2 `target/local-demo/student-report-verify.log`, PostgreSQL `drafts-postgres.log`, E2E `upgrades-e2e.log` (các thư mục bằng chứng được Git bỏ qua).
