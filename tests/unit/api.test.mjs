@@ -43,3 +43,20 @@ test('an HTML authorization error clears the cached CSRF token before retry',asy
   assert.deepEqual(await api('/test','PUT',{}),{saved:true});
   assert.equal(tokens,2);
 });
+
+test('shared app configuration is cached and a failed request can be retried',async()=>{
+  const {appConfig}=await moduleForTest();
+  let calls=0;
+  const configured={demo:false,learning:{maxFileBytes:1024,maxQuizQuestions:2}};
+  globalThis.fetch=async()=>{
+    calls++;
+    return calls===1 ? new Response('Unavailable',{status:503}) : json({success:true,data:configured});
+  };
+  await assert.rejects(appConfig(),error=>error.status===503);
+  const [first,second]=await Promise.all([appConfig(),appConfig()]);
+  assert.deepEqual(first,configured);
+  assert.equal(first,second);
+  assert.equal(calls,2);
+  assert.deepEqual(await appConfig(true),configured);
+  assert.equal(calls,3);
+});

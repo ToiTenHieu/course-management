@@ -20,13 +20,18 @@ public class AuthController {
   private final AuthService authService;
 
   private final UserService userService;
+  private final com.example.course_management.config.LearningSettings settings;
+  private final com.example.course_management.config.DemoAccountSeeder demoAccounts;
 
   @Value("${app.demo.enabled:false}")
   private boolean demo;
 
-  public AuthController(AuthService authService, UserService userService) {
+  public AuthController(AuthService authService, UserService userService,
+      com.example.course_management.config.LearningSettings settings,
+      com.example.course_management.config.DemoAccountSeeder demoAccounts) {
     this.authService = authService;
     this.userService = userService;
+    this.settings = settings; this.demoAccounts = demoAccounts;
   }
 
   @GetMapping("/csrf")
@@ -36,8 +41,12 @@ public class AuthController {
   }
 
   @GetMapping("/config")
-  public ApiResponse<Map<String, Boolean>> config() {
-    return ApiResponse.success("OK", Map.of("demo", demo));
+  public ApiResponse<Map<String, Object>> config() {
+    var config = new java.util.LinkedHashMap<String, Object>();
+    config.put("demo", demo);
+    config.put("learning", settings.publicSettings());
+    if (demo) config.put("demoAccounts", demoAccounts.loginAccounts());
+    return ApiResponse.success("OK", config);
   }
 
   @PostMapping("/register")

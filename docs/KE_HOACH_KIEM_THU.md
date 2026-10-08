@@ -194,6 +194,13 @@ Log: `target/local-demo/ux-detail-verify.log` (74 test đạt, bước đóng g�
 - Sáu hành trình E2E hiện có đạt. Browser kiểm tra báo cáo 27 học viên, lọc/tìm/trang/thứ tự, liên kết câu hỏi và giảng viên phụ trách; viewport 390×844 không tràn ngang.
 - Ảnh `output/playwright/course-students-desktop.png`, `course-students-mobile.png`; log H2 `target/local-demo/student-report-verify.log`, PostgreSQL `drafts-postgres.log`, E2E `upgrades-e2e.log` (các thư mục bằng chứng được Git bỏ qua).
 
+### Lưu cài đặt và nội dung trong database (08/10/2026)
+- Flyway V13 thêm `application_settings` và `demo_login_accounts`. Trang Cài đặt của admin lưu giới hạn tài liệu/quiz, điểm đạt mặc định, chủ đề/trình độ điền sẵn và thông tin ngân hàng vào database. Backend đọc mỗi thao tác, frontend lấy các giá trị cần hiển thị từ `/api/auth/config`.
+- Ba ca cấu hình kiểm tra quyền admin, CSRF, dữ liệu sai, trần multipart, revision xung đột; lưu và đọc qua service mới; đổi giới hạn 1 KB/1 tài liệu/2 câu rồi áp dụng ngay 2 KB/2 tài liệu/3 câu; giữ URL, tiêu đề và mật khẩu đã sửa khi gọi lại seed. Đăng nhập nhanh đọc tên/vai trò từ bảng người dùng theo ID, tài khoản đổi mật khẩu không hiện nút.
+- 94/94 backend trên H2 và 10/10 Node đạt. Bộ backend bao gồm 91 ca hiện có và ba ca cấu hình database. Cấu trúc bốn lựa chọn quiz và giới hạn độ dài gắn schema được giữ.
+- Catalog chỉ khởi tạo bản ghi demo, không dùng làm nguồn đọc nội dung đang vận hành. Bộ nền có marker riêng và không bổ sung khóa mẫu vào database đã có khóa. Hướng dẫn tại `docs/CAU_HINH_VA_DU_LIEU_DEMO.md`.
+- Demo PostgreSQL: lưu điểm đạt 65% và ngân hàng qua giao diện, khởi động lại vẫn giữ; hoàn nguyên về 70% và ngân hàng ban đầu sau QA. 6/6 E2E đạt. Kiểm tra desktop và màn hình 390×844 không tràn ngang; ảnh `output/playwright/database-settings-desktop.png`, `database-settings-mobile.png` đã được xem. Log `target/database-settings-tests.log`, `database-settings-e2e.log`, `database-settings-package.log`; các bằng chứng được Git bỏ qua.
+
 ### Khóa demo dùng YouTube (08/10/2026)
 - Hai khóa miễn phí HTML/JavaScript, mỗi khóa 5 bài Markdown, ghi nguồn freeCodeCamp.org/tác giả và một quiz ôn tập. Profile demo tạo dữ liệu một lần qua `demo_seed_runs`; giữ các khóa cũ, URL đã sửa và bài đã xóa.
 - 91 kiểm thử backend trên H2 và 9 kiểm thử Node đạt. Kiểm thử mới xác nhận quyền xem video sau đăng ký, tiến độ 20%, không tạo thanh toán, không seed trùng; renderer giữ timestamp và link dự phòng, bỏ timestamp không hợp lệ.

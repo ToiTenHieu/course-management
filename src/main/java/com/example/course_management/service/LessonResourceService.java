@@ -21,11 +21,14 @@ public class LessonResourceService {
   private final LessonRepository repository;
   private final CourseRepository courses;
   private final ContentPolicy policy;
+  private final com.example.course_management.config.LearningSettings settings;
 
   public LessonResourceService(JdbcTemplate jdbc, LessonService lessons,
-      LessonRepository repository, CourseRepository courses, ContentPolicy policy) {
+      LessonRepository repository, CourseRepository courses, ContentPolicy policy,
+      com.example.course_management.config.LearningSettings settings) {
     this.jdbc = jdbc; this.lessons = lessons; this.repository = repository;
     this.courses = courses; this.policy = policy;
+    this.settings = settings;
   }
 
   public List<Resource> list(Integer id, CustomUserDetails actor) {
@@ -36,10 +39,10 @@ public class LessonResourceService {
 
   public List<Resource> upload(Integer id, MultipartFile file, CustomUserDetails actor) {
     manager(id, actor);
-    if (file.isEmpty() || file.getSize() > 5 * 1024 * 1024)
-      throw new BadRequestException("Chọn tài liệu từ 1 byte đến 5 MB");
-    if (jdbc.queryForObject("SELECT COUNT(*) FROM lesson_resources WHERE lesson_id=?", Long.class, id) >= 20)
-      throw new BadRequestException("Mỗi bài tối đa 20 tài liệu");
+    if (file.isEmpty() || file.getSize() > settings.maxFileBytes())
+      throw new BadRequestException("Chọn tài liệu từ 1 byte đến " + settings.maxFileBytes() + " byte");
+    if (jdbc.queryForObject("SELECT COUNT(*) FROM lesson_resources WHERE lesson_id=?", Long.class, id) >= settings.maxResourcesPerLesson())
+      throw new BadRequestException("Mỗi bài tối đa " + settings.maxResourcesPerLesson() + " tài liệu");
     byte[] bytes;
     try { bytes = file.getBytes(); }
     catch (java.io.IOException ex) { throw new BadRequestException("Không đọc được tài liệu, hãy thử lại"); }

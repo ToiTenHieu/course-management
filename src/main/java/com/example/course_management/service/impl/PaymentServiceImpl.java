@@ -24,14 +24,7 @@ public class PaymentServiceImpl implements PaymentService {
   private final com.example.course_management.repository.UserRepository users;
   private final com.example.course_management.repository.NotificationRepository notifications;
 
-  @org.springframework.beans.factory.annotation.Value("${app.bank.name}")
-  private String bankName;
-
-  @org.springframework.beans.factory.annotation.Value("${app.bank.account-number}")
-  private String bankAccount;
-
-  @org.springframework.beans.factory.annotation.Value("${app.bank.account-holder}")
-  private String bankHolder;
+  private final com.example.course_management.config.LearningSettings settings;
 
   private final PaymentRepository paymentRepository;
   private final CourseRepository courseRepository;
@@ -42,20 +35,23 @@ public class PaymentServiceImpl implements PaymentService {
       CourseRepository courseRepository,
       EnrollmentRepository enrollmentRepository,
       com.example.course_management.repository.UserRepository users,
-      com.example.course_management.repository.NotificationRepository notifications) {
+      com.example.course_management.repository.NotificationRepository notifications,
+      com.example.course_management.config.LearningSettings settings) {
     this.users = users;
     this.notifications = notifications;
     this.paymentRepository = paymentRepository;
     this.courseRepository = courseRepository;
     this.enrollmentRepository = enrollmentRepository;
+    this.settings = settings;
   }
 
   @Override
   public BankInfoResponse getBankInfo() {
+    var bank = settings.current();
     return BankInfoResponse.builder()
-        .bankName(bankName)
-        .accountNumber(bankAccount)
-        .accountHolder(bankHolder)
+        .bankName(bank.bankName())
+        .accountNumber(bank.bankAccount())
+        .accountHolder(bank.bankHolder())
         .build();
   }
 

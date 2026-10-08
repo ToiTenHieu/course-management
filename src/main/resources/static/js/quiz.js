@@ -1,4 +1,4 @@
-import { api } from "./api.js";
+import { api, appConfig } from "./api.js";
 import { enhanceForms } from "./experience.js";
 
 const esc = (value) =>
@@ -9,13 +9,13 @@ const esc = (value) =>
         c
       ],
   );
-const letters = ["A", "B", "C", "D"];
+let letters = [];
 const editorDrafts = new Map();
 const selections = new Map();
 const date = (v) => new Date(v).toLocaleString("vi-VN");
 const blankQuestion = () => ({
   prompt: "",
-  options: ["", "", "", ""],
+  options: letters.map(() => ""),
   correctIndex: 0,
   explanation: "",
 });
@@ -23,6 +23,7 @@ const blankQuestion = () => ({
 export function mountQuiz(root, lessonId, manager, userId) {
   const draftKey = `${userId}:${lessonId}`;
   const pendingKey = `cm-quiz-pending:${draftKey}`;
+  let settings;
   let quiz = null,
     revision = 0,
     resultRevision = 0,
@@ -36,10 +37,10 @@ export function mountQuiz(root, lessonId, manager, userId) {
       if (!saved) return null;
       if (!saved.quiz || !Array.isArray(saved.quiz.questions)
           || !saved.quiz.questions.length
-          || !saved.quiz.questions.every(q => Array.isArray(q.options) && q.options.length === 4)
+          || !saved.quiz.questions.every(q => Array.isArray(q.options) && q.options.length === letters.length)
           || !saved.payload || !Array.isArray(saved.payload.answers)
           || saved.payload.answers.length !== saved.quiz.questions.length
-          || !saved.payload.answers.every(answer => Number.isInteger(answer) && answer >= 0 && answer < 4)
+          || !saved.payload.answers.every(answer => Number.isInteger(answer) && answer >= 0 && answer < letters.length)
           || saved.payload.quizVersionId !== saved.quiz.quizVersionId
           || typeof saved.payload.submissionKey !== "string") {
         sessionStorage.removeItem(pendingKey);
@@ -64,6 +65,8 @@ export function mountQuiz(root, lessonId, manager, userId) {
     ++resultRevision;
     root.innerHTML = header + '<p role="status">Đang tải quiz…</p>';
     try {
+      settings = (await appConfig()).learning;
+      letters = Array.from({length: settings.quizOptionCount}, (_, index) => String.fromCharCode(65 + index));
       const loaded = await api(`/lessons/${lessonId}/quiz`);
       if (!active() || request !== revision) return;
       quiz = loaded;
@@ -271,14 +274,14 @@ export function mountQuiz(root, lessonId, manager, userId) {
     const model = editorDrafts.get(draftKey) || {
       expectedRevision: quiz?.revision || 0,
       title: quiz?.title || "Kiểm tra sau bài học",
-      passPercentage: quiz?.passPercentage || 70,
+      passPercentage: quiz?.passPercentage || settings.defaultPassPercentage,
       published: quiz?.published || false,
       questions: quiz?.questions.map((q) => ({
         ...q,
         options: [...q.options],
       })) || [blankQuestion()],
     };
-    container.innerHTML = `<p class="hint">1–20 câu, mỗi câu có bốn lựa chọn và một đáp án đúng. Giải thích giúp học viên hiểu vì sao. Mỗi lần lưu tạo phiên bản mới và giữ lịch sử cũ. Bỏ xuất bản sẽ ẩn đề hiện tại với học viên.</p><form class="quiz-editor-form"><label>Tên quiz<input name="title" required maxlength="255" value="${esc(model.title)}"></label><label>Mức đạt (%)<input name="passPercentage" type="number" required min="1" max="100" value="${model.passPercentage}"></label><label class="quiz-option"><input type="checkbox" name="published" ${model.published ? "checked" : ""}><span>Xuất bản quiz cho học viên</span></label><div class="quiz-editor-questions">${model.questions.map((q, i) => `<fieldset data-question-index="${i}"><legend>Câu ${i + 1}</legend><label>Nội dung câu ${i + 1}<textarea name="prompt${i}" required rows="3" maxlength="5000">${esc(q.prompt)}</textarea></label>${q.options.map((o, j) => `<label>Lựa chọn ${letters[j]} của câu ${i + 1}<input name="option${i}_${j}" required maxlength="1000" value="${esc(o)}"></label>`).join("")}<label>Đáp án đúng của câu ${i + 1}<select name="correct${i}">${letters.map((letter, j) => `<option value="${j}" ${q.correctIndex === j ? "selected" : ""}>${letter}</option>`).join("")}</select></label><label>Giải thích câu ${i + 1}<textarea name="explanation${i}" required maxlength="5000" rows="3">${esc(q.explanation)}</textarea></label>${model.questions.length > 1 ? `<button type="button" class="text-link danger" data-remove="${i}">Bỏ câu ${i + 1}</button>` : ""}</fieldset>`).join("")}</div><div class="quiz-editor-actions"><button type="button" class="btn secondary compact" data-add ${model.questions.length >= 20 ? "disabled" : ""}>Thêm câu hỏi</button><button type="submit" class="btn compact">Lưu quiz</button><button type="button" class="text-link" data-cancel>Đóng trình soạn</button></div><p class="quiz-editor-status" role="status" aria-live="polite"></p></form>`;
+    container.innerHTML = `<p class="hint">1–${settings.maxQuizQuestions} câu, mỗi câu có ${settings.quizOptionCount} lựa chọn và một đáp án đúng. Giải thích giúp học viên hiểu vì sao. Mỗi lần lưu tạo phiên bản mới và giữ lịch sử cũ. Bỏ xuất bản sẽ ẩn đề hiện tại với học viên.</p><form class="quiz-editor-form"><label>Tên quiz<input name="title" required maxlength="255" value="${esc(model.title)}"></label><label>Mức đạt (%)<input name="passPercentage" type="number" required min="1" max="100" value="${model.passPercentage}"></label><label class="quiz-option"><input type="checkbox" name="published" ${model.published ? "checked" : ""}><span>Xuất bản quiz cho học viên</span></label><div class="quiz-editor-questions">${model.questions.map((q, i) => `<fieldset data-question-index="${i}"><legend>Câu ${i + 1}</legend><label>Nội dung câu ${i + 1}<textarea name="prompt${i}" required rows="3" maxlength="5000">${esc(q.prompt)}</textarea></label>${q.options.map((o, j) => `<label>Lựa chọn ${letters[j]} của câu ${i + 1}<input name="option${i}_${j}" required maxlength="1000" value="${esc(o)}"></label>`).join("")}<label>Đáp án đúng của câu ${i + 1}<select name="correct${i}">${letters.map((letter, j) => `<option value="${j}" ${q.correctIndex === j ? "selected" : ""}>${letter}</option>`).join("")}</select></label><label>Giải thích câu ${i + 1}<textarea name="explanation${i}" required maxlength="5000" rows="3">${esc(q.explanation)}</textarea></label>${model.questions.length > 1 ? `<button type="button" class="text-link danger" data-remove="${i}">Bỏ câu ${i + 1}</button>` : ""}</fieldset>`).join("")}</div><div class="quiz-editor-actions"><button type="button" class="btn secondary compact" data-add ${model.questions.length >= settings.maxQuizQuestions ? "disabled" : ""}>Thêm câu hỏi</button><button type="submit" class="btn compact">Lưu quiz</button><button type="button" class="text-link" data-cancel>Đóng trình soạn</button></div><p class="quiz-editor-status" role="status" aria-live="polite"></p></form>`;
     const form = container.querySelector("form");
     enhanceForms(container);
     function collect() {
@@ -300,6 +303,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
     form.onchange = form.oninput;
     container.querySelector("[data-add]").onclick = () => {
       const value = collect();
+      if (value.questions.length >= settings.maxQuizQuestions) return;
       value.questions.push(blankQuestion());
       editorDrafts.set(draftKey, value);
       renderEditor();
@@ -375,7 +379,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
           .querySelectorAll("input,textarea,select,button")
           .forEach((n) => (n.disabled = false));
         form.querySelector("[data-add]").disabled =
-          model.questions.length >= 20;
+          model.questions.length >= settings.maxQuizQuestions;
       }
     };
   }

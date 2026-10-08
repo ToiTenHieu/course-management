@@ -1,5 +1,5 @@
 import { mountCourseStudents } from "./course-students.js";
-import { api, ApiError } from "./api.js";
+import { api, ApiError, appConfig } from "./api.js";
 import { mountQuestions } from "./questions.js";
 import { mountQuiz } from "./quiz.js";
 import { mountLessonDraft } from "./lesson-drafts.js";
@@ -17,7 +17,7 @@ const app = $("#app"),
   modal = $("#modal");
 const page = document.body.dataset.page,
   params = new URLSearchParams(location.search);
-let user = null;
+let user = null, uiConfig = null;
 const esc = (v) =>
   String(v ?? "").replace(
     /[&<>"']/g,
@@ -70,6 +70,7 @@ const icons = {
   plus: "M12 4v16 M4 12h16",
   close: "m5 5 14 14 M19 5 5 19",
   lock: "M5 10h14v11H5z M8 10V6a4 4 0 0 1 8 0v4",
+  tools: "M4 6h16 M4 12h16 M4 18h16 M8 3v6 M16 9v6 M10 15v6",
 };
 const icon = (n) =>
   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${icons[n] || icons.book}"/></svg>`;
@@ -135,6 +136,7 @@ function shell(title, subtitle, content, actions = "") {
           ["users", "users", "Người dùng"],
           ["payments", "card", "Duyệt thanh toán"],
           ["reports", "chart", "Báo cáo"],
+          ["settings", "tools", "Cài đặt"],
         ]
       : []),
     ["notifications", "bell", "Thông báo"],
@@ -285,14 +287,11 @@ function select(label, name, options, value) {
   return `<label>${esc(label)}<select name="${name}">${options.map(([v, t]) => `<option value="${esc(v)}" ${String(v) === String(value) ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`;
 }
 function art(c, large = false) {
-  const styles = {
-    "Thiết kế": ["design", "✳", "DESIGN"],
-    "Dữ liệu": ["data", "{ }", "DATA"],
-    "Công cụ": ["tools", "⌘", "WORKFLOW"],
-    "Lập trình": ["code", "&lt;/&gt;", "DEVELOPMENT"],
-  };
-  const [style, symbol, label] = styles[c.category] || styles["Lập trình"];
-  return `<div class="course-art ${style} ${large ? "large" : ""}"><span class="art-label">${label}</span><div class="art-orbit"></div><div class="art-symbol">${symbol}</div><span class="art-bottom">COURSE MANAGEMENT <span>↗</span></span></div>`;
+  const category = c.category || "Khóa học";
+  const palette = ["code", "design", "data", "tools"];
+  const hash = [...category].reduce((value, char) => (value * 31 + char.codePointAt(0)) >>> 0, 0);
+  const style = palette[hash % palette.length];
+  return `<div class="course-art ${style} ${large ? "large" : ""}"><span class="art-label">${esc(category)}</span><div class="art-orbit"></div><div class="art-symbol">${esc(initials(category))}</div><span class="art-bottom">COURSE MANAGEMENT <span>↗</span></span></div>`;
 }
 function publicHeader() {
   return `<header class="public-header"><a class="brand" href="/"><img src="/assets/mark.svg" alt=""><span>Course<span class="brand-sub">MANAGEMENT</span></span></a><nav aria-label="Điều hướng chính"><a href="/courses.html" class="public-explore">Khám phá khóa học</a>${user ? link("Không gian của tôi " + icon("arrow"), "/dashboard.html", "btn compact") : link("Đăng nhập", "/login.html", "btn secondary compact") + link("Bắt đầu học", "/login.html?register=1", "btn compact")}</nav></header>`;
@@ -416,24 +415,20 @@ async function guestDetail() {
   wireDetailTabs();
 }
 async function login() {
-  const config = await api("/auth/config");
+  const config = await appConfig();
   let register = params.has("register"), authUsername = "";
   function draw() {
     setTitle(register ? "Tạo tài khoản" : "Đăng nhập");
     app.innerHTML = `<div class="auth-page"><section class="auth-story"><a class="brand light" href="/"><img src="/assets/mark.svg" alt=""><span>Course<span class="brand-sub">MANAGEMENT</span></span></a><div><span class="eyebrow">KHÔNG GIAN CHO SỰ TIẾN BỘ</span><h1>Đi xa hơn,<br>bắt đầu từ<br><em>một bài học.</em></h1><p>Một nơi để khám phá kỹ năng mới, tiếp tục điều đang học và nhìn thấy mình tiến bộ mỗi ngày.</p><div class="story-art"><span>&lt;/&gt;</span><span>✳</span><span>{ }</span></div></div><small>Học để tiến xa.</small></section><section class="auth-form"><div class="auth-inner"><a class="back-link" href="/">← Trang chủ</a><h2>${register ? "Bắt đầu hành trình" : "Chào mừng trở lại"}</h2><p class="muted-text">${register ? "Tạo tài khoản học viên để khám phá các khóa học." : "Đăng nhập để tiếp tục hành trình học tập của bạn."}</p><form id="authForm">${register ? field("Họ và tên", "fullName", "", "text", true, 'maxlength="100"') : ""}${field("Tên đăng nhập", "username", authUsername, "text", true, 'autocomplete="username" minlength="3" maxlength="40"')}${register ? field("Email", "email", "", "email", true, 'autocomplete="email" maxlength="100"') : ""}${field("Mật khẩu", "password", "", "password", true, `autocomplete="${register ? "new" : "current"}-password" ${register ? 'minlength="8" maxlength="64"' : ""}`)}${register ? '<small class="hint">Mật khẩu từ 8 đến 64 ký tự.</small>' : ""}<div id="authError" role="alert"></div><button class="btn full" id="authSubmit">${register ? "Tạo tài khoản" : "Đăng nhập"} ${icon("arrow")}</button></form><p class="auth-switch">${register ? "Đã có tài khoản?" : "Chưa có tài khoản?"} <button class="text-link" id="toggleAuth">${register ? "Đăng nhập" : "Đăng ký miễn phí"}</button></p>${
       config.demo && !register
-        ? `<div class="demo-box"><span class="mini-label">KHÁM PHÁ BẢN DEMO</span><div>${[
-            ["student_demo", "Học viên"],
-            ["teacher_demo", "Giảng viên"],
-            ["admin_demo", "Admin"],
-          ]
+        ? `<div class="demo-box"><span class="mini-label">KHÁM PHÁ BẢN DEMO</span><div>${(config.demoAccounts || [])
             .map(
-              ([u, t]) =>
-                `<button class="btn secondary compact" data-demo="${u}">${t}</button>`,
+              account =>
+                `<button class="btn secondary compact" data-demo="${esc(account.username)}">${esc(role(account.role))}</button>`,
             )
             .join(
               "",
-            )}</div><small>Chọn vai trò để điền tài khoản mẫu. Mật khẩu: Demo123!</small></div>`
+            )}</div><small>Chọn vai trò để điền tài khoản mẫu.</small></div>`
         : ""
     }</div></section></div>`;
     enhanceForms(app);
@@ -451,7 +446,7 @@ async function login() {
         (b.onclick = () => {
           const f = $("#authForm");
           f.elements.username.value = b.dataset.demo;
-          f.elements.password.value = "Demo123!";
+          f.elements.password.value = config.demoAccounts.find(account => account.username === b.dataset.demo).password;
         }),
     );
     $("#authForm").onsubmit = async (e) => {
@@ -650,7 +645,7 @@ async function courseEditor(course, done) {
       "teacherId",
       teachers.map((t) => [t.userId, t.fullName]),
       course?.teacherId,
-    )}<div class="form-grid">${field("Chủ đề", "category", course?.category || "Lập trình", "text", true, 'maxlength="100"')}${field("Trình độ", "level", course?.level || "Cơ bản", "text", true, 'maxlength="100"')}${field("Học phí (₫)", "price", course?.price || 0, "number", true, 'min="0" max="99999999" step="0.01"' + (user.role !== "ADMIN" ? ' readonly aria-describedby="priceHint"' : ""))}${field("Thời lượng (giờ)", "durationHours", course?.durationHours || 1, "number", true, 'min="1" max="10000"')}</div>${user.role !== "ADMIN" ? '<p class="hint" id="priceHint">Học phí và phân công giảng viên do quản trị viên quản lý.</p>' : ""}${textarea("Kết quả học tập (mỗi dòng một mục)", "learningOutcomes", course?.learningOutcomes || "", 'maxlength="10000"')}`,
+    )}<div class="form-grid">${field("Chủ đề", "category", course?.category || uiConfig.learning.defaultCategory, "text", true, 'maxlength="100"')}${field("Trình độ", "level", course?.level || uiConfig.learning.defaultLevel, "text", true, 'maxlength="100"')}${field("Học phí (₫)", "price", course?.price || 0, "number", true, 'min="0" max="99999999" step="0.01"' + (user.role !== "ADMIN" ? ' readonly aria-describedby="priceHint"' : ""))}${field("Thời lượng (giờ)", "durationHours", course?.durationHours || 1, "number", true, 'min="1" max="10000"')}</div>${user.role !== "ADMIN" ? '<p class="hint" id="priceHint">Học phí và phân công giảng viên do quản trị viên quản lý.</p>' : ""}${textarea("Kết quả học tập (mỗi dòng một mục)", "learningOutcomes", course?.learningOutcomes || "", 'maxlength="10000"')}`,
     async (d) => {
       d.teacherId = Number(d.teacherId);
       d.price = Number(d.price);
@@ -1893,6 +1888,47 @@ async function profile() {
     }, e.submitter);
   };
 }
+async function settings() {
+  if (user.role !== "ADMIN") throw new ApiError("Cài đặt dành cho quản trị viên.", 403);
+  const config = await api("/settings");
+  let values = config.values;
+  const mb = 1024 * 1024;
+  shell("Cài đặt", "Điều chỉnh giới hạn học tập và thông tin chuyển khoản.",
+    `<form id="settingsForm"><section class="panel"><h2>Học tập và tài liệu</h2><div class="form-grid">
+    ${field("Dung lượng tối đa mỗi file (MB)", "maxFileMB", values.maxFileBytes / mb, "number", true, `min="${1 / mb}" max="${config.uploadCeilingBytes / mb}" step="any"`)}
+    ${field("Số tài liệu tối đa mỗi bài", "maxResourcesPerLesson", values.maxResourcesPerLesson, "number", true, 'min="1" step="1"')}
+    ${field("Số câu tối đa mỗi quiz", "maxQuizQuestions", values.maxQuizQuestions, "number", true, 'min="1" step="1"')}
+    ${field("Điểm đạt mặc định (%)", "defaultPassPercentage", values.defaultPassPercentage, "number", true, 'min="1" max="100" step="1"')}
+    ${field("Chủ đề mặc định", "defaultCategory", values.defaultCategory, "text", true, 'maxlength="100"')}
+    ${field("Trình độ mặc định", "defaultLevel", values.defaultLevel, "text", true, 'maxlength="100"')}
+    </div><p class="hint">Máy chủ hiện hỗ trợ file tối đa ${(config.uploadCeilingBytes / mb).toLocaleString("vi-VN")} MB. Giá trị mặc định áp dụng khi tạo mới; nội dung đã lưu giữ nguyên.</p></section>
+    <section class="panel"><h2>Thông tin chuyển khoản</h2><div class="form-grid">
+    ${field("Ngân hàng", "bankName", values.bankName, "text", true, 'maxlength="255"')}
+    ${field("Số tài khoản", "bankAccount", values.bankAccount, "text", true, 'maxlength="255"')}
+    ${field("Chủ tài khoản", "bankHolder", values.bankHolder, "text", true, 'maxlength="255"')}
+    </div></section><div id="settingsError" role="alert"></div><div class="row-actions"><button class="btn" type="submit">Lưu cài đặt</button><span class="hint" id="settingsStatus" role="status">Thay đổi có hiệu lực sau khi lưu. Tải lại các trang đang mở để nhận cài đặt mới.</span></div></form>`);
+  $("#settingsForm").onsubmit = event => {
+    event.preventDefault();
+    action(async () => {
+      $("#settingsError").replaceChildren();
+      const data = Object.fromEntries(new FormData(event.target));
+      data.maxFileBytes = Math.round(Number(data.maxFileMB) * mb);
+      delete data.maxFileMB;
+      for (const key of ["maxResourcesPerLesson", "maxQuizQuestions", "defaultPassPercentage"]) data[key] = Number(data[key]);
+      try {
+        values = await api("/settings", "PUT", { ...data, revision: values.revision });
+      } catch (error) {
+        $("#settingsError").innerHTML = errorBox(error);
+        throw error;
+      }
+      $("#settingsStatus").textContent = "Đã lưu cài đặt. Tải lại các trang đang mở để nhận thay đổi.";
+      toast("Đã lưu cài đặt");
+      try { uiConfig = await appConfig(true); }
+      catch { toast("Cài đặt đã lưu. Tải lại trang để cập nhật giao diện.", true); }
+    }, event.submitter);
+  };
+}
+
 async function reports() {
   if (user.role !== "ADMIN")
     throw new ApiError("Báo cáo dành cho quản trị viên.", 403);
@@ -1958,6 +1994,7 @@ async function reports() {
 
 async function start() {
   try {
+    uiConfig = await appConfig();
     if (page === "index") return await landing();
     if (page === "login") return await login();
     user = await api(
@@ -1978,6 +2015,7 @@ async function start() {
       notifications,
       profile,
       reports,
+      settings,
     };
     await (routes[page] || dashboard)();
   } catch (error) {

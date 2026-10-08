@@ -59,7 +59,9 @@ Profile demo còn tạo bộ tình huống theo vai trò: 36 khóa mới (xuất
 
 ## Cấu hình và database
 
-`application.properties` đọc `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `PORT`, `BANK_NAME`, `BANK_ACCOUNT`, `BANK_HOLDER` từ môi trường. Profile demo cũng nhận `DB_URL`; khi không đặt biến, dùng database `course_management_demo`. `.env.example` chỉ minh họa biến; Spring Boot không tự đọc file `.env`. Hãy export biến hoặc dùng file cấu hình bên ngoài. Không đưa thông tin đăng nhập thật vào repo.
+Đăng nhập admin → **Cài đặt** để lưu giới hạn tài liệu/quiz, các giá trị điền sẵn và thông tin ngân hàng vào bảng `application_settings`. Thay đổi áp dụng ở backend ngay sau khi lưu; tải lại trang để cập nhật giao diện. Khóa, bài, URL YouTube, quiz và tài khoản tiếp tục chỉnh qua giao diện và lưu trong database. `src/main/resources/demo/catalog.json` chỉ khởi tạo dữ liệu demo lần đầu. Xem [dữ liệu và cài đặt](docs/CAU_HINH_VA_DU_LIEU_DEMO.md).
+
+`application.properties` đọc cấu hình hạ tầng như `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `PORT` từ môi trường. Profile demo cũng nhận `DB_URL`; khi không đặt biến, dùng database `course_management_demo`. Ngân hàng chỉnh trong trang Cài đặt; các biến `BANK_NAME`, `BANK_ACCOUNT`, `BANK_HOLDER` không còn được sử dụng. `.env.example` chỉ minh họa biến; Spring Boot không tự đọc file `.env`. Hãy export biến hoặc dùng file cấu hình bên ngoài. Không đưa thông tin đăng nhập thật vào repo.
 
 Flyway quản lý schema qua `src/main/resources/db/migration`, Hibernate chỉ validate. Database mới được tạo bảng tự động. Database cũ được baseline ở phiên bản 0, giữ dữ liệu và thêm metadata/chỉ mục. Nếu dữ liệu cũ đã có đăng ký/tiến độ/đánh giá trùng, migration sẽ dừng ở unique index; cần rà soát dữ liệu trùng trước khi chạy tiếp. Không xóa tự động dữ liệu cũ.
 
@@ -74,7 +76,7 @@ node --check src/main/resources/static/js/questions.js
 node --check src/main/resources/static/js/quiz.js
 ```
 
-Bộ backend có 91 kiểm thử (90 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 và PostgreSQL với migration thật. Bao gồm lưu hồ sơ/vai trò đồng thời, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 94 kiểm thử (90 ca nghiệp vụ/API, ba ca cấu hình và một ca khởi động), dùng migration thật. Bộ đầy đủ đạt trên H2; các ca nghiệp vụ trước đó đã chạy trên PostgreSQL. Bao gồm lưu hồ sơ/vai trò đồng thời, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
 Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
 
@@ -151,7 +153,7 @@ Lưu bài nháp trước để tải file từ trình soạn. Mỗi bài tối �
 - `GET/POST /api/lessons/{id}/resources`: danh sách metadata hoặc upload multipart `file`; upload chỉ dành cho admin/giảng viên phụ trách và yêu cầu CSRF.
 - `GET /api/lesson-resources/{id}/content`: chỉ người quản lý hoặc học viên còn đăng ký và bài published. PDF/TXT tải xuống, ảnh được hiển thị inline; response không cache và có nosniff/sandbox.
 - `DELETE /api/lesson-resources/{id}`: người quản lý khóa, yêu cầu CSRF. Xóa bài xóa tài liệu của bài qua khóa ngoại.
-- `node --test tests/unit/*.test.mjs`: chín kiểm thử bộ hiển thị/URL và API; giữ mã HTTP khi máy chủ trả HTML, kiểm tra CSRF trước khi gửi dữ liệu và làm mới token sau lỗi quyền; giữ mốc thời gian YouTube trong player và link dự phòng.
+- `node --test tests/unit/*.test.mjs`: mười kiểm thử bộ hiển thị/URL và API; giữ mã HTTP khi máy chủ trả HTML, kiểm tra CSRF trước khi gửi dữ liệu và làm mới token sau lỗi quyền; giữ mốc thời gian YouTube trong player và link dự phòng.
 
 ## Hồ sơ quản trị và thông báo
 

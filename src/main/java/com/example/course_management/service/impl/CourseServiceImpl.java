@@ -27,6 +27,7 @@ public class CourseServiceImpl implements CourseService {
   private final EnrollmentRepository enrollments;
   private final ReviewRepository reviews;
   private final ContentPolicy policy;
+  private final com.example.course_management.config.LearningSettings settings;
 
   public CourseServiceImpl(
       CourseRepository courses,
@@ -34,13 +35,14 @@ public class CourseServiceImpl implements CourseService {
       LessonRepository lessons,
       EnrollmentRepository enrollments,
       ReviewRepository reviews,
-      ContentPolicy policy) {
+      ContentPolicy policy, com.example.course_management.config.LearningSettings settings) {
     this.courses = courses;
     this.users = users;
     this.lessons = lessons;
     this.enrollments = enrollments;
     this.reviews = reviews;
     this.policy = policy;
+    this.settings = settings;
   }
 
   @Transactional(readOnly = true)
@@ -179,14 +181,15 @@ public class CourseServiceImpl implements CourseService {
   }
 
   public CourseResponse createCourse(CreateCourseRequest r) {
+    var defaults = settings.current();
     var c = new Course();
     c.setTeacher(teacher(r.getTeacherId()));
     c.setTitle(r.getTitle().trim());
     c.setDescription(r.getDescription());
     c.setPrice(r.getPrice() == null ? BigDecimal.ZERO : r.getPrice());
     c.setDurationHours(r.getDurationHours());
-    c.setCategory(value(r.getCategory(), "Lập trình"));
-    c.setLevel(value(r.getLevel(), "Cơ bản"));
+    c.setCategory(value(r.getCategory(), defaults.defaultCategory()));
+    c.setLevel(value(r.getLevel(), defaults.defaultLevel()));
     c.setLearningOutcomes(r.getLearningOutcomes());
     return toResponse(courses.save(c));
   }

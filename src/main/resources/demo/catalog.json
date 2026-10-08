@@ -1,0 +1,2650 @@
+{
+  "accounts": [
+    {
+      "key": "student",
+      "username": "student_demo",
+      "fullName": "Học viên Demo",
+      "role": "STUDENT",
+      "quickLogin": true
+    },
+    {
+      "key": "teacher",
+      "username": "teacher_demo",
+      "fullName": "Nguyễn Minh Anh",
+      "role": "TEACHER",
+      "quickLogin": true
+    },
+    {
+      "key": "admin",
+      "username": "admin_demo",
+      "fullName": "Quản trị viên Demo",
+      "role": "ADMIN",
+      "quickLogin": true
+    },
+    {
+      "key": "otherTeacher",
+      "username": "teacher_scenario",
+      "fullName": "Trần Hà Phương (mẫu)",
+      "role": "TEACHER",
+      "quickLogin": false
+    }
+  ],
+  "baseCourses": [
+    {
+      "title": "Java từ nền tảng đến ứng dụng",
+      "category": "Lập trình",
+      "level": "Cơ bản",
+      "price": "0",
+      "durationHours": 12,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "lessons": [
+        {
+          "title": "Bắt đầu và chuẩn bị môi trường",
+          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Các khái niệm cốt lõi",
+          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Thực hành qua ví dụ",
+          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Tổng kết và dự án nhỏ",
+          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Thiết kế giao diện với tư duy sản phẩm",
+      "category": "Thiết kế",
+      "level": "Cơ bản",
+      "price": "249000",
+      "durationHours": 8,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "lessons": [
+        {
+          "title": "Bắt đầu và chuẩn bị môi trường",
+          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Các khái niệm cốt lõi",
+          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Thực hành qua ví dụ",
+          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Tổng kết và dự án nhỏ",
+          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "SQL: từ truy vấn đến phân tích dữ liệu",
+      "category": "Dữ liệu",
+      "level": "Trung cấp",
+      "price": "199000",
+      "durationHours": 10,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "lessons": [
+        {
+          "title": "Bắt đầu và chuẩn bị môi trường",
+          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Các khái niệm cốt lõi",
+          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Thực hành qua ví dụ",
+          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Tổng kết và dự án nhỏ",
+          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Xây dựng website với HTML, CSS và JavaScript",
+      "category": "Lập trình",
+      "level": "Cơ bản",
+      "price": "0",
+      "durationHours": 16,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "lessons": [
+        {
+          "title": "Bắt đầu và chuẩn bị môi trường",
+          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Các khái niệm cốt lõi",
+          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Thực hành qua ví dụ",
+          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Tổng kết và dự án nhỏ",
+          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Git và quy trình làm việc nhóm",
+      "category": "Công cụ",
+      "level": "Cơ bản",
+      "price": "99000",
+      "durationHours": 6,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "lessons": [
+        {
+          "title": "Bắt đầu và chuẩn bị môi trường",
+          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Các khái niệm cốt lõi",
+          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Thực hành qua ví dụ",
+          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Tổng kết và dự án nhỏ",
+          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Spring Boot: xây dựng API thực tế",
+      "category": "Lập trình",
+      "level": "Nâng cao",
+      "price": "349000",
+      "durationHours": 20,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "lessons": [
+        {
+          "title": "Bắt đầu và chuẩn bị môi trường",
+          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Các khái niệm cốt lõi",
+          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Thực hành qua ví dụ",
+          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Tổng kết và dự án nhỏ",
+          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    }
+  ],
+  "javaQuiz": {
+    "teacher": "teacher",
+    "courseTitle": "Java từ nền tảng đến ứng dụng",
+    "lessonTitle": "Bắt đầu và chuẩn bị môi trường",
+    "title": "Java: chuẩn bị môi trường",
+    "passPercentage": 70,
+    "questions": [
+      {
+        "prompt": "Bạn cần cài bộ công cụ nào để biên dịch chương trình Java?",
+        "options": [
+          "JDK",
+          "Chỉ trình duyệt",
+          "Chỉ trình soạn văn bản",
+          "Git"
+        ],
+        "correctIndex": 0,
+        "explanation": "JDK cung cấp trình biên dịch javac và các công cụ phát triển Java."
+      },
+      {
+        "prompt": "Tệp mã nguồn Java thường có phần mở rộng nào?",
+        "options": [
+          ".class",
+          ".java",
+          ".exe",
+          ".sql"
+        ],
+        "correctIndex": 1,
+        "explanation": "Mã nguồn được lưu trong tệp .java. Trình biên dịch tạo tệp .class chứa bytecode."
+      },
+      {
+        "prompt": "Lệnh nào biên dịch tệp Hello.java trong terminal?",
+        "options": [
+          "java Hello.java.class",
+          "git Hello.java",
+          "javac Hello.java",
+          "java --compile-all"
+        ],
+        "correctIndex": 2,
+        "explanation": "Chạy javac Hello.java để biên dịch. Sau khi thành công, có thể chạy lớp Hello bằng java Hello."
+      }
+    ]
+  },
+  "youtubeCourses": [
+    {
+      "title": "HTML nhập môn · Demo YouTube",
+      "category": "Lập trình",
+      "level": "Cơ bản",
+      "price": "0",
+      "durationHours": 4,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Khóa học demo miễn phí cho đồ án, không mang tính thương mại. Video tiếng Anh từ freeCodeCamp.org, do Dave Gray hướng dẫn; chia thành 5 bài với hướng dẫn thực hành bằng tiếng Việt. Video thuộc tác giả/kênh gốc và được phát trực tiếp từ YouTube.",
+      "learningOutcomes": "Tạo trang HTML có cấu trúc rõ ràng\nThêm văn bản, liên kết và hình ảnh\nTạo biểu mẫu và trang giới thiệu cá nhân",
+      "lessons": [
+        {
+          "title": "Chuẩn bị và tạo trang HTML đầu tiên",
+          "textContent": "# Mục tiêu\nNhận biết cấu trúc tài liệu HTML và phần head.\n\n# Cách học\nXem phần **00:00–29:02** của video. Các bài trong khóa dùng chung video dài; trình phát mở tại mốc của bài hiện tại. Bạn chủ động dừng khi hết phần được hướng dẫn. Video tiếng Anh; có thể bật phụ đề nếu video hỗ trợ.\n\n# Thực hành\nTạo index.html với doctype, html, head, body và tiêu đề trang. Mở bằng trình duyệt.\n\nGhi lại điều chưa rõ trong ghi chú hoặc mục hỏi đáp. Sau khi thực hành, chọn **Đánh dấu hoàn thành** để cập nhật tiến độ.\n\n# Nguồn video\n[Learn HTML – Full Tutorial for Beginners](https://www.youtube.com/watch?v=kUMe1FH4CHE) · Kênh **freeCodeCamp.org** · Tác giả **Dave Gray**.\n\nVideo được nhúng tạm cho đồ án/demo phi thương mại. Quyền sở hữu thuộc tác giả/kênh gốc.",
+          "orderIndex": 1,
+          "videoUrl": "https://www.youtube.com/watch?v=kUMe1FH4CHE&t=0s",
+          "published": true,
+          "contentFormat": "MARKDOWN"
+        },
+        {
+          "title": "Văn bản và danh sách",
+          "textContent": "# Mục tiêu\nDùng tiêu đề, đoạn văn và danh sách để trình bày nội dung.\n\n# Cách học\nXem phần **29:02–59:55** của video. Các bài trong khóa dùng chung video dài; trình phát mở tại mốc của bài hiện tại. Bạn chủ động dừng khi hết phần được hướng dẫn. Video tiếng Anh; có thể bật phụ đề nếu video hỗ trợ.\n\n# Thực hành\nViết phần giới thiệu bản thân với một tiêu đề, hai đoạn văn và danh sách ba sở thích.\n\nGhi lại điều chưa rõ trong ghi chú hoặc mục hỏi đáp. Sau khi thực hành, chọn **Đánh dấu hoàn thành** để cập nhật tiến độ.\n\n# Nguồn video\n[Learn HTML – Full Tutorial for Beginners](https://www.youtube.com/watch?v=kUMe1FH4CHE) · Kênh **freeCodeCamp.org** · Tác giả **Dave Gray**.\n\nVideo được nhúng tạm cho đồ án/demo phi thương mại. Quyền sở hữu thuộc tác giả/kênh gốc.",
+          "orderIndex": 2,
+          "videoUrl": "https://www.youtube.com/watch?v=kUMe1FH4CHE&t=1742s",
+          "published": true,
+          "contentFormat": "MARKDOWN"
+        },
+        {
+          "title": "Liên kết và hình ảnh",
+          "textContent": "# Mục tiêu\nThêm liên kết và ảnh có mô tả thay thế.\n\n# Cách học\nXem phần **59:55–02:00:58** của video. Các bài trong khóa dùng chung video dài; trình phát mở tại mốc của bài hiện tại. Bạn chủ động dừng khi hết phần được hướng dẫn. Video tiếng Anh; có thể bật phụ đề nếu video hỗ trợ.\n\n# Thực hành\nThêm một liên kết đến website bạn thích và một ảnh có thuộc tính alt vào trang cá nhân.\n\nGhi lại điều chưa rõ trong ghi chú hoặc mục hỏi đáp. Sau khi thực hành, chọn **Đánh dấu hoàn thành** để cập nhật tiến độ.\n\n# Nguồn video\n[Learn HTML – Full Tutorial for Beginners](https://www.youtube.com/watch?v=kUMe1FH4CHE) · Kênh **freeCodeCamp.org** · Tác giả **Dave Gray**.\n\nVideo được nhúng tạm cho đồ án/demo phi thương mại. Quyền sở hữu thuộc tác giả/kênh gốc.",
+          "orderIndex": 3,
+          "videoUrl": "https://www.youtube.com/watch?v=kUMe1FH4CHE&t=3595s",
+          "published": true,
+          "contentFormat": "MARKDOWN"
+        },
+        {
+          "title": "Cấu trúc ngữ nghĩa và bảng",
+          "textContent": "# Mục tiêu\nChia trang bằng các thẻ ngữ nghĩa và trình bày dữ liệu dạng bảng.\n\n# Cách học\nXem phần **02:00:58–02:40:42** của video. Các bài trong khóa dùng chung video dài; trình phát mở tại mốc của bài hiện tại. Bạn chủ động dừng khi hết phần được hướng dẫn. Video tiếng Anh; có thể bật phụ đề nếu video hỗ trợ.\n\n# Thực hành\nDùng header, main, footer cho trang cá nhân; thêm bảng lịch học có tiêu đề cột.\n\nGhi lại điều chưa rõ trong ghi chú hoặc mục hỏi đáp. Sau khi thực hành, chọn **Đánh dấu hoàn thành** để cập nhật tiến độ.\n\n# Nguồn video\n[Learn HTML – Full Tutorial for Beginners](https://www.youtube.com/watch?v=kUMe1FH4CHE) · Kênh **freeCodeCamp.org** · Tác giả **Dave Gray**.\n\nVideo được nhúng tạm cho đồ án/demo phi thương mại. Quyền sở hữu thuộc tác giả/kênh gốc.",
+          "orderIndex": 4,
+          "videoUrl": "https://www.youtube.com/watch?v=kUMe1FH4CHE&t=7258s",
+          "published": true,
+          "contentFormat": "MARKDOWN"
+        },
+        {
+          "title": "Biểu mẫu và dự án nhỏ",
+          "textContent": "# Mục tiêu\nTạo biểu mẫu và ghép các phần thành một trang hoàn chỉnh.\n\n# Cách học\nXem phần **Từ 02:40:42 đến hết video** của video. Các bài trong khóa dùng chung video dài; trình phát mở tại mốc của bài hiện tại. Bạn chủ động dừng khi hết phần được hướng dẫn. Video tiếng Anh; có thể bật phụ đề nếu video hỗ trợ.\n\n# Thực hành\nHoàn thiện trang giới thiệu có biểu mẫu tên, email, lời nhắn. Kiểm tra label và các liên kết. Biểu mẫu chỉ cần giao diện, chưa cần gửi dữ liệu.\n\nGhi lại điều chưa rõ trong ghi chú hoặc mục hỏi đáp. Sau khi thực hành, chọn **Đánh dấu hoàn thành** để cập nhật tiến độ.\n\n# Nguồn video\n[Learn HTML – Full Tutorial for Beginners](https://www.youtube.com/watch?v=kUMe1FH4CHE) · Kênh **freeCodeCamp.org** · Tác giả **Dave Gray**.\n\nVideo được nhúng tạm cho đồ án/demo phi thương mại. Quyền sở hữu thuộc tác giả/kênh gốc.",
+          "orderIndex": 5,
+          "videoUrl": "https://www.youtube.com/watch?v=kUMe1FH4CHE&t=9642s",
+          "published": true,
+          "contentFormat": "MARKDOWN"
+        }
+      ],
+      "quiz": {
+        "title": "Ôn tập HTML nhập môn · Demo YouTube",
+        "passPercentage": 50,
+        "questions": [
+          {
+            "prompt": "Thuộc tính nào mô tả nội dung hình ảnh?",
+            "options": [
+              "href",
+              "alt",
+              "class",
+              "id"
+            ],
+            "correctIndex": 1,
+            "explanation": "alt cung cấp mô tả thay thế cho hình ảnh."
+          },
+          {
+            "prompt": "Thẻ nào biểu thị nội dung chính của trang?",
+            "options": [
+              "main",
+              "footer",
+              "head",
+              "title"
+            ],
+            "correctIndex": 0,
+            "explanation": "main chứa nội dung chính của trang HTML."
+          }
+        ]
+      }
+    },
+    {
+      "title": "JavaScript nhập môn · Demo YouTube",
+      "category": "Lập trình",
+      "level": "Cơ bản",
+      "price": "0",
+      "durationHours": 4,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Khóa học demo miễn phí cho đồ án, không mang tính thương mại. Video tiếng Anh từ freeCodeCamp.org, do Beau Carnes hướng dẫn; chia thành 5 bài với hướng dẫn thực hành bằng tiếng Việt. Video thuộc tác giả/kênh gốc và được phát trực tiếp từ YouTube.",
+      "learningOutcomes": "Sử dụng biến, chuỗi và mảng\nViết hàm và điều kiện\nThực hành đối tượng và vòng lặp",
+      "lessons": [
+        {
+          "title": "Làm quen, biến và chuỗi",
+          "textContent": "# Mục tiêu\nChạy JavaScript và sử dụng biến, số, chuỗi.\n\n# Cách học\nXem phần **00:00–40:44** của video. Các bài trong khóa dùng chung video dài; trình phát mở tại mốc của bài hiện tại. Bạn chủ động dừng khi hết phần được hướng dẫn. Video tiếng Anh; có thể bật phụ đề nếu video hỗ trợ.\n\n# Thực hành\nMở Console của trình duyệt. Khai báo tên và tuổi; in một lời chào và tính tuổi sau một năm.\n\nGhi lại điều chưa rõ trong ghi chú hoặc mục hỏi đáp. Sau khi thực hành, chọn **Đánh dấu hoàn thành** để cập nhật tiến độ.\n\n# Nguồn video\n[Learn JavaScript – Full Course for Beginners](https://www.youtube.com/watch?v=PkZNo7MFNFg) · Kênh **freeCodeCamp.org** · Tác giả **Beau Carnes**.\n\nVideo được nhúng tạm cho đồ án/demo phi thương mại. Quyền sở hữu thuộc tác giả/kênh gốc.",
+          "orderIndex": 1,
+          "videoUrl": "https://www.youtube.com/watch?v=PkZNo7MFNFg&t=0s",
+          "published": true,
+          "contentFormat": "MARKDOWN"
+        },
+        {
+          "title": "Mảng và thao tác dữ liệu",
+          "textContent": "# Mục tiêu\nTạo mảng và thêm, sửa, xóa phần tử.\n\n# Cách học\nXem phần **40:44–51:41** của video. Các bài trong khóa dùng chung video dài; trình phát mở tại mốc của bài hiện tại. Bạn chủ động dừng khi hết phần được hướng dẫn. Video tiếng Anh; có thể bật phụ đề nếu video hỗ trợ.\n\n# Thực hành\nTạo mảng ba môn học. Thêm một môn bằng push, xóa môn cuối bằng pop và in kết quả.\n\nGhi lại điều chưa rõ trong ghi chú hoặc mục hỏi đáp. Sau khi thực hành, chọn **Đánh dấu hoàn thành** để cập nhật tiến độ.\n\n# Nguồn video\n[Learn JavaScript – Full Course for Beginners](https://www.youtube.com/watch?v=PkZNo7MFNFg) · Kênh **freeCodeCamp.org** · Tác giả **Beau Carnes**.\n\nVideo được nhúng tạm cho đồ án/demo phi thương mại. Quyền sở hữu thuộc tác giả/kênh gốc.",
+          "orderIndex": 2,
+          "videoUrl": "https://www.youtube.com/watch?v=PkZNo7MFNFg&t=2444s",
+          "published": true,
+          "contentFormat": "MARKDOWN"
+        },
+        {
+          "title": "Hàm và giá trị trả về",
+          "textContent": "# Mục tiêu\nTách thao tác thành hàm có tham số và kết quả trả về.\n\n# Cách học\nXem phần **51:41–01:08:41** của video. Các bài trong khóa dùng chung video dài; trình phát mở tại mốc của bài hiện tại. Bạn chủ động dừng khi hết phần được hướng dẫn. Video tiếng Anh; có thể bật phụ đề nếu video hỗ trợ.\n\n# Thực hành\nViết hàm tinhTong(a, b) trả về tổng. Gọi hàm với số dương, số âm và số 0.\n\nGhi lại điều chưa rõ trong ghi chú hoặc mục hỏi đáp. Sau khi thực hành, chọn **Đánh dấu hoàn thành** để cập nhật tiến độ.\n\n# Nguồn video\n[Learn JavaScript – Full Course for Beginners](https://www.youtube.com/watch?v=PkZNo7MFNFg) · Kênh **freeCodeCamp.org** · Tác giả **Beau Carnes**.\n\nVideo được nhúng tạm cho đồ án/demo phi thương mại. Quyền sở hữu thuộc tác giả/kênh gốc.",
+          "orderIndex": 3,
+          "videoUrl": "https://www.youtube.com/watch?v=PkZNo7MFNFg&t=3101s",
+          "published": true,
+          "contentFormat": "MARKDOWN"
+        },
+        {
+          "title": "Điều kiện và lựa chọn",
+          "textContent": "# Mục tiêu\nDùng biểu thức Boolean, if/else và switch.\n\n# Cách học\nXem phần **01:08:41–01:49:11** của video. Các bài trong khóa dùng chung video dài; trình phát mở tại mốc của bài hiện tại. Bạn chủ động dừng khi hết phần được hướng dẫn. Video tiếng Anh; có thể bật phụ đề nếu video hỗ trợ.\n\n# Thực hành\nViết hàm xếp loại điểm: từ 8 là Tốt, từ 5 là Đạt, còn lại là Cần ôn. Kiểm tra điểm 4, 5 và 8.\n\nGhi lại điều chưa rõ trong ghi chú hoặc mục hỏi đáp. Sau khi thực hành, chọn **Đánh dấu hoàn thành** để cập nhật tiến độ.\n\n# Nguồn video\n[Learn JavaScript – Full Course for Beginners](https://www.youtube.com/watch?v=PkZNo7MFNFg) · Kênh **freeCodeCamp.org** · Tác giả **Beau Carnes**.\n\nVideo được nhúng tạm cho đồ án/demo phi thương mại. Quyền sở hữu thuộc tác giả/kênh gốc.",
+          "orderIndex": 4,
+          "videoUrl": "https://www.youtube.com/watch?v=PkZNo7MFNFg&t=4121s",
+          "published": true,
+          "contentFormat": "MARKDOWN"
+        },
+        {
+          "title": "Đối tượng, vòng lặp và ôn tập",
+          "textContent": "# Mục tiêu\nMô tả dữ liệu bằng đối tượng và duyệt danh sách bằng vòng lặp.\n\n# Cách học\nXem phần **Từ 01:49:11; phần ES6 từ 02:36:57 là đọc thêm** của video. Các bài trong khóa dùng chung video dài; trình phát mở tại mốc của bài hiện tại. Bạn chủ động dừng khi hết phần được hướng dẫn. Video tiếng Anh; có thể bật phụ đề nếu video hỗ trợ.\n\n# Thực hành\nTạo danh sách ba học viên gồm tên và điểm. Duyệt danh sách để in tên và xếp loại bằng hàm của bài trước; tính điểm trung bình.\n\nGhi lại điều chưa rõ trong ghi chú hoặc mục hỏi đáp. Sau khi thực hành, chọn **Đánh dấu hoàn thành** để cập nhật tiến độ.\n\n# Nguồn video\n[Learn JavaScript – Full Course for Beginners](https://www.youtube.com/watch?v=PkZNo7MFNFg) · Kênh **freeCodeCamp.org** · Tác giả **Beau Carnes**.\n\nVideo được nhúng tạm cho đồ án/demo phi thương mại. Quyền sở hữu thuộc tác giả/kênh gốc.",
+          "orderIndex": 5,
+          "videoUrl": "https://www.youtube.com/watch?v=PkZNo7MFNFg&t=6551s",
+          "published": true,
+          "contentFormat": "MARKDOWN"
+        }
+      ],
+      "quiz": {
+        "title": "Ôn tập JavaScript nhập môn · Demo YouTube",
+        "passPercentage": 50,
+        "questions": [
+          {
+            "prompt": "Lệnh nào thêm một phần tử vào cuối mảng?",
+            "options": [
+              "pop()",
+              "shift()",
+              "push()",
+              "return"
+            ],
+            "correctIndex": 2,
+            "explanation": "push() thêm phần tử vào cuối mảng."
+          },
+          {
+            "prompt": "Từ khóa nào trả kết quả từ một hàm?",
+            "options": [
+              "if",
+              "return",
+              "for",
+              "const"
+            ],
+            "correctIndex": 1,
+            "explanation": "return trả kết quả và kết thúc lần gọi hàm."
+          }
+        ]
+      }
+    }
+  ],
+  "scenarioCourses": [
+    {
+      "title": "Python thực hành · Nhập môn",
+      "category": "Lập trình",
+      "level": "Cơ bản",
+      "price": "99000",
+      "durationHours": 6,
+      "teacher": "otherTeacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Python thực hành.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "React và giao diện tương tác · Nhập môn",
+      "category": "Lập trình",
+      "level": "Cơ bản",
+      "price": "149000",
+      "durationHours": 7,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về React và giao diện tương tác.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Phân tích dữ liệu · Nhập môn",
+      "category": "Dữ liệu",
+      "level": "Cơ bản",
+      "price": "199000",
+      "durationHours": 8,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Phân tích dữ liệu.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Figma cho sản phẩm số · Nhập môn",
+      "category": "Thiết kế",
+      "level": "Cơ bản",
+      "price": "0",
+      "durationHours": 9,
+      "teacher": "otherTeacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Figma cho sản phẩm số.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 6: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 6,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 7: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 7,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 8: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 8,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 9: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 9,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 10: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 10,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 11: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 11,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 12: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 12,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 13: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 13,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 14: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 14,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 15: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 15,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 16: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 16,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 17: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 17,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 18: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 18,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 19: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 19,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 20: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 20,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 21: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 21,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 22: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 22,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 23: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 23,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 24: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 24,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Kiểm thử phần mềm · Nhập môn",
+      "category": "Công cụ",
+      "level": "Cơ bản",
+      "price": "299000",
+      "durationHours": 10,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Kiểm thử phần mềm.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Docker và triển khai · Nhập môn",
+      "category": "Công cụ",
+      "level": "Cơ bản",
+      "price": "99000",
+      "durationHours": 11,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Docker và triển khai.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Tiếng Anh giao tiếp · Nhập môn",
+      "category": "Ngoại ngữ",
+      "level": "Cơ bản",
+      "price": "149000",
+      "durationHours": 12,
+      "teacher": "otherTeacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Tiếng Anh giao tiếp.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Viết và trình bày ý tưởng · Nhập môn",
+      "category": "Kỹ năng",
+      "level": "Cơ bản",
+      "price": "0",
+      "durationHours": 13,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Viết và trình bày ý tưởng.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Excel cho công việc · Nhập môn",
+      "category": "Dữ liệu",
+      "level": "Cơ bản",
+      "price": "249000",
+      "durationHours": 14,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Excel cho công việc.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Quản lý dự án · Nhập môn",
+      "category": "Kỹ năng",
+      "level": "Cơ bản",
+      "price": "299000",
+      "durationHours": 15,
+      "teacher": "otherTeacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Quản lý dự án.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Thiết kế hệ thống · Nhập môn",
+      "category": "Lập trình",
+      "level": "Cơ bản",
+      "price": "99000",
+      "durationHours": 16,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Thiết kế hệ thống.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "SQL nâng cao · Nhập môn",
+      "category": "Dữ liệu",
+      "level": "Cơ bản",
+      "price": "0",
+      "durationHours": 17,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về SQL nâng cao.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Python thực hành · Ứng dụng",
+      "category": "Lập trình",
+      "level": "Trung cấp",
+      "price": "199000",
+      "durationHours": 6,
+      "teacher": "otherTeacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Python thực hành.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "React và giao diện tương tác · Ứng dụng",
+      "category": "Lập trình",
+      "level": "Trung cấp",
+      "price": "249000",
+      "durationHours": 7,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về React và giao diện tương tác.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Phân tích dữ liệu · Ứng dụng",
+      "category": "Dữ liệu",
+      "level": "Trung cấp",
+      "price": "299000",
+      "durationHours": 8,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Phân tích dữ liệu.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Figma cho sản phẩm số · Ứng dụng",
+      "category": "Thiết kế",
+      "level": "Trung cấp",
+      "price": "0",
+      "durationHours": 9,
+      "teacher": "otherTeacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Figma cho sản phẩm số.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Kiểm thử phần mềm · Ứng dụng",
+      "category": "Công cụ",
+      "level": "Trung cấp",
+      "price": "149000",
+      "durationHours": 10,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Kiểm thử phần mềm.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Docker và triển khai · Ứng dụng",
+      "category": "Công cụ",
+      "level": "Trung cấp",
+      "price": "199000",
+      "durationHours": 11,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Docker và triển khai.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Tiếng Anh giao tiếp · Ứng dụng",
+      "category": "Ngoại ngữ",
+      "level": "Trung cấp",
+      "price": "249000",
+      "durationHours": 12,
+      "teacher": "otherTeacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Tiếng Anh giao tiếp.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Viết và trình bày ý tưởng · Ứng dụng",
+      "category": "Kỹ năng",
+      "level": "Trung cấp",
+      "price": "0",
+      "durationHours": 13,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Viết và trình bày ý tưởng.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Excel cho công việc · Ứng dụng",
+      "category": "Dữ liệu",
+      "level": "Trung cấp",
+      "price": "99000",
+      "durationHours": 14,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Excel cho công việc.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Quản lý dự án · Ứng dụng",
+      "category": "Kỹ năng",
+      "level": "Trung cấp",
+      "price": "149000",
+      "durationHours": 15,
+      "teacher": "otherTeacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Quản lý dự án.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Thiết kế hệ thống · Ứng dụng",
+      "category": "Lập trình",
+      "level": "Trung cấp",
+      "price": "199000",
+      "durationHours": 16,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Thiết kế hệ thống.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "SQL nâng cao · Ứng dụng",
+      "category": "Dữ liệu",
+      "level": "Trung cấp",
+      "price": "0",
+      "durationHours": 17,
+      "teacher": "teacher",
+      "status": "PUBLISHED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về SQL nâng cao.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Python thực hành · Dự án",
+      "category": "Lập trình",
+      "level": "Nâng cao",
+      "price": "299000",
+      "durationHours": 6,
+      "teacher": "otherTeacher",
+      "status": "DRAFT",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Python thực hành.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Python thực hành.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "React và giao diện tương tác · Dự án",
+      "category": "Lập trình",
+      "level": "Nâng cao",
+      "price": "99000",
+      "durationHours": 7,
+      "teacher": "teacher",
+      "status": "DRAFT",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về React và giao diện tương tác.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của React và giao diện tương tác.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Phân tích dữ liệu · Dự án",
+      "category": "Dữ liệu",
+      "level": "Nâng cao",
+      "price": "149000",
+      "durationHours": 8,
+      "teacher": "teacher",
+      "status": "DRAFT",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Phân tích dữ liệu.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Phân tích dữ liệu.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Figma cho sản phẩm số · Dự án",
+      "category": "Thiết kế",
+      "level": "Nâng cao",
+      "price": "0",
+      "durationHours": 9,
+      "teacher": "otherTeacher",
+      "status": "DRAFT",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Figma cho sản phẩm số.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Figma cho sản phẩm số.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Kiểm thử phần mềm · Dự án",
+      "category": "Công cụ",
+      "level": "Nâng cao",
+      "price": "249000",
+      "durationHours": 10,
+      "teacher": "teacher",
+      "status": "DRAFT",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Kiểm thử phần mềm.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Kiểm thử phần mềm.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Docker và triển khai · Dự án",
+      "category": "Công cụ",
+      "level": "Nâng cao",
+      "price": "299000",
+      "durationHours": 11,
+      "teacher": "teacher",
+      "status": "DRAFT",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Docker và triển khai.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Docker và triển khai.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": false,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Tiếng Anh giao tiếp · Dự án",
+      "category": "Ngoại ngữ",
+      "level": "Nâng cao",
+      "price": "99000",
+      "durationHours": 12,
+      "teacher": "otherTeacher",
+      "status": "ARCHIVED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Tiếng Anh giao tiếp.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Tiếng Anh giao tiếp.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Viết và trình bày ý tưởng · Dự án",
+      "category": "Kỹ năng",
+      "level": "Nâng cao",
+      "price": "0",
+      "durationHours": 13,
+      "teacher": "teacher",
+      "status": "ARCHIVED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Viết và trình bày ý tưởng.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Viết và trình bày ý tưởng.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Excel cho công việc · Dự án",
+      "category": "Dữ liệu",
+      "level": "Nâng cao",
+      "price": "199000",
+      "durationHours": 14,
+      "teacher": "teacher",
+      "status": "ARCHIVED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Excel cho công việc.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Excel cho công việc.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Quản lý dự án · Dự án",
+      "category": "Kỹ năng",
+      "level": "Nâng cao",
+      "price": "249000",
+      "durationHours": 15,
+      "teacher": "otherTeacher",
+      "status": "ARCHIVED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Quản lý dự án.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Quản lý dự án.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "Thiết kế hệ thống · Dự án",
+      "category": "Lập trình",
+      "level": "Nâng cao",
+      "price": "299000",
+      "durationHours": 16,
+      "teacher": "teacher",
+      "status": "ARCHIVED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về Thiết kế hệ thống.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của Thiết kế hệ thống.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    },
+    {
+      "title": "SQL nâng cao · Dự án",
+      "category": "Dữ liệu",
+      "level": "Nâng cao",
+      "price": "0",
+      "durationHours": 17,
+      "teacher": "teacher",
+      "status": "ARCHIVED",
+      "description": "Dữ liệu mẫu để trải nghiệm Course Management. Học qua ví dụ, tự kiểm tra và một dự án nhỏ về SQL nâng cao.",
+      "learningOutcomes": "Giải thích các khái niệm chính\nÁp dụng vào tình huống thực tế\nHoàn thành và tự đánh giá dự án",
+      "lessons": [
+        {
+          "title": "Bài 1: Làm quen và chuẩn bị",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 1,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 2: Khái niệm và ví dụ",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 2,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 3: Thực hành từng bước",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 3,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 4: Kiểm tra và cải thiện",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 4,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        },
+        {
+          "title": "Bài 5: Tổng kết dự án",
+          "textContent": "Mục tiêu\nÁp dụng kiến thức của SQL nâng cao.\n\nVí dụ\nChia bài toán thành từng bước và kiểm tra kết quả.\n\nThực hành\nViết một ví dụ của bạn, ghi chú điều chưa rõ và thảo luận với giảng viên.\n\nĐây là nội dung mẫu phục vụ kiểm tra các vai trò.",
+          "orderIndex": 5,
+          "videoUrl": null,
+          "published": true,
+          "contentFormat": "TEXT"
+        }
+      ],
+      "quiz": null
+    }
+  ],
+  "scenario": {
+    "enrolledCourses": 12,
+    "pendingCoursesEnd": 24,
+    "fullyCompletedCourses": 2,
+    "sharedCourseIndex": 3,
+    "paymentCourseIndex": 0,
+    "studentCount": 26,
+    "activeStudents": 22,
+    "notificationsPerUser": 18,
+    "studentUsernamePrefix": "student_scenario_",
+    "studentNamePrefix": "Học viên mẫu ",
+    "note": "Ghi chú mẫu: ôn lại ví dụ và đặt câu hỏi.",
+    "review": "Nhận xét mẫu %d: ví dụ dễ theo dõi, cần thêm bài thực hành.",
+    "question": "Câu hỏi mẫu %d: em nên kiểm tra kết quả bài thực hành như thế nào?",
+    "answer": "Hãy thử một trường hợp đơn giản, sau đó kiểm tra các trường hợp biên.",
+    "notification": "Cập nhật mẫu %d: xem lại nội dung và kế hoạch học tập.",
+    "notificationType": "GENERAL",
+    "notificationTarget": "/courses.html",
+    "quiz": {
+      "title": "Tự kiểm tra kiến thức",
+      "passPercentage": 70,
+      "questions": [
+        {
+          "prompt": "Cách nào giúp học hiệu quả?",
+          "options": [
+            "Thực hành và kiểm tra",
+            "Chỉ đọc tiêu đề",
+            "Bỏ qua phản hồi",
+            "Sao chép đáp án"
+          ],
+          "correctIndex": 0,
+          "explanation": "Thực hành và phản hồi giúp xác định điều cần cải thiện."
+        }
+      ]
+    }
+  }
+}

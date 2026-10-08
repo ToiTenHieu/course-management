@@ -177,6 +177,8 @@ class BusinessFlowTests {
 
   Course course(String title, BigDecimal price) {
     var c = new Course();
+    c.setCategory("Lập trình");
+    c.setLevel("Cơ bản");
     c.setTitle(title);
     c.setTeacher(teacher);
     c.setPrice(price);

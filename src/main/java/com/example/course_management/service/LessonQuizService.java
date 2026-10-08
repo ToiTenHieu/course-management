@@ -20,18 +20,20 @@ public class LessonQuizService {
   private final LessonQuizRepository quizzes;
   private final QuizAttemptRepository attempts;
   private final ContentPolicy policy;
+  private final com.example.course_management.config.LearningSettings settings;
 
   public LessonQuizService(
       LessonRepository lessons,
       CourseRepository courses,
       LessonQuizRepository quizzes,
       QuizAttemptRepository attempts,
-      ContentPolicy policy) {
+      ContentPolicy policy, com.example.course_management.config.LearningSettings settings) {
     this.lessons = lessons;
     this.courses = courses;
     this.quizzes = quizzes;
     this.attempts = attempts;
     this.policy = policy;
+    this.settings = settings;
   }
 
   @Transactional(readOnly = true)
@@ -46,6 +48,8 @@ public class LessonQuizService {
   }
 
   public QuizResponse save(Integer lessonId, SaveQuizRequest r, CustomUserDetails actor) {
+    if (r.questions().size() > settings.maxQuizQuestions())
+      throw new BadRequestException("Quiz tối đa " + settings.maxQuizQuestions() + " câu hỏi");
     lockCourse(lessonId);
     var lesson = lesson(lessonId);
     policy.manager(lesson.getCourse(), actor);

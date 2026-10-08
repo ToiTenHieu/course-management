@@ -16,8 +16,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Course {
 
-  private String category = "Lập trình";
-  private String level = "Cơ bản";
+  private String category;
+  private String level;
 
   @Column(columnDefinition = "TEXT")
   private String learningOutcomes;

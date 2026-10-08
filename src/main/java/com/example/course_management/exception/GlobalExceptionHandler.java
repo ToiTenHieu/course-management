@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
   public ResponseEntity<ApiResponse<Void>> uploadTooLarge(Exception ex) {
-    return ResponseEntity.status(413).body(ApiResponse.error("Mỗi tài liệu tối đa 5 MB"));
+    return ResponseEntity.status(413).body(ApiResponse.error("Tài liệu vượt giới hạn dung lượng của máy chủ."));
   }
 
   @ExceptionHandler(BadRequestException.class)

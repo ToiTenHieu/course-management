@@ -1,4 +1,13 @@
 let csrf = null;
+let configRequest = null;
+export function appConfig(refresh = false) {
+  if (refresh) configRequest = null;
+  if (!configRequest) configRequest = api("/auth/config").catch(error => {
+    configRequest = null;
+    throw error;
+  });
+  return configRequest;
+}
 export class ApiError extends Error {
   constructor(message, status) {
     super(message);

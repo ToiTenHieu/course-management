@@ -1,4 +1,4 @@
-import { api } from "./api.js";
+import { api, appConfig } from "./api.js";
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 function safe(value) {
   try {
@@ -80,14 +80,21 @@ export function video(value) {
 export async function mountResources(root, lessonId, manager = false, insertImage) {
   root.setAttribute("aria-busy", "true");
   root.innerHTML = '<p class="hint" role="status">Đang tải tài liệu đính kèm…</p>';
+  let limits;
+  const sizeLabel = () => {
+    const units = ["byte", "KB", "MB", "GB"];
+    let size = limits.maxFileBytes, unit = 0;
+    while (size >= 1024 && unit < units.length - 1) { size /= 1024; unit++; }
+    return `${size.toLocaleString("vi-VN", {maximumFractionDigits: 2})} ${units[unit]}`;
+  };
   const render = (items) => {
-    root.innerHTML = `<h3>Tài liệu đính kèm</h3>${manager ? '<p class="hint">PDF, TXT, PNG, JPG, WebP · Tối đa 5 MB/file, 20 file/bài. Tải lên và xóa tài liệu có hiệu lực ngay.</p><label>Tải tài liệu<input type="file" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp" data-upload></label>' : '<p class="hint">Mở tài liệu để xem hoặc tải xuống và thực hành cùng bài học.</p>'}<div class="resource-items">${items.map(r => `<div class="resource-item"><a href="/api/lesson-resources/${r.resourceId}/content" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a><small>${Math.ceil(r.size / 1024)} KB</small>${manager ? `<button type="button" class="text-link danger" data-remove="${r.resourceId}">Xóa</button>${r.mediaType.startsWith("image/") ? `<button type="button" class="text-link" data-image="${r.resourceId}">Chèn ảnh vào bài</button>` : ""}` : ""}</div>`).join("") || '<p class="muted-text">Chưa có tài liệu đính kèm.</p>'}</div><p data-status role="status"></p>`;
+    root.innerHTML = `<h3>Tài liệu đính kèm</h3>${manager ? `<p class="hint">PDF, TXT, PNG, JPG, WebP · Tối đa ${sizeLabel()}/file, ${limits.maxResourcesPerLesson} file/bài. Tải lên và xóa tài liệu có hiệu lực ngay.</p><label>Tải tài liệu<input type="file" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp" data-upload ${items.length >= limits.maxResourcesPerLesson ? "disabled" : ""}></label>` : '<p class="hint">Mở tài liệu để xem hoặc tải xuống và thực hành cùng bài học.</p>'}<div class="resource-items">${items.map(r => `<div class="resource-item"><a href="/api/lesson-resources/${r.resourceId}/content" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a><small>${Math.ceil(r.size / 1024)} KB</small>${manager ? `<button type="button" class="text-link danger" data-remove="${r.resourceId}">Xóa</button>${r.mediaType.startsWith("image/") ? `<button type="button" class="text-link" data-image="${r.resourceId}">Chèn ảnh vào bài</button>` : ""}` : ""}</div>`).join("") || '<p class="muted-text">Chưa có tài liệu đính kèm.</p>'}</div><p data-status role="status"></p>`;
     if (!manager) return;
     root.querySelector("[data-upload]").onchange = async (e) => {
       const file = e.target.files[0];
       if (!file) return;
       const status = root.querySelector("[data-status]");
-      if (file.size > 5 * 1024 * 1024) { status.textContent = "Mỗi tài liệu tối đa 5 MB"; e.target.value = ""; return; }
+      if (file.size > limits.maxFileBytes) { status.textContent = `Mỗi tài liệu tối đa ${sizeLabel()}`; e.target.value = ""; return; }
       const body = new FormData(); body.append("file", file);
       e.target.disabled = true; status.textContent = "Đang tải tài liệu…";
       try { render(await api(`/lessons/${lessonId}/resources`, "POST", body)); }
@@ -101,7 +108,10 @@ export async function mountResources(root, lessonId, manager = false, insertImag
     }; });
     root.querySelectorAll("[data-image]").forEach(button => { button.onclick = () => insertImage?.(`![Mô tả ảnh](/api/lesson-resources/${button.dataset.image}/content)`); });
   };
-  try { render(await api(`/lessons/${lessonId}/resources`)); }
+  try {
+    limits = (await appConfig()).learning;
+    render(await api(`/lessons/${lessonId}/resources`));
+  }
   catch (error) { root.innerHTML = `<p role="alert">${esc(error.message)}</p><button type="button" class="text-link">Thử tải lại tài liệu</button>`; root.querySelector("button").onclick = () => mountResources(root, lessonId, manager, insertImage); }
   finally { root.setAttribute("aria-busy", "false"); }
 }
