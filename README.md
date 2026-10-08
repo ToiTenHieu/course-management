@@ -14,6 +14,8 @@ Nền tảng quản lý khóa học trực tuyến phục vụ đồ án/demo. B
 - Quyền học được kiểm tra ở backend; danh sách chương trình của người chưa đăng ký chỉ trả metadata, không trả nội dung hoặc URL tài liệu.
 - Danh mục khóa học phân trang ở máy chủ, tìm theo tên/mô tả/giảng viên, lọc chủ đề, học phí và trạng thái; bộ lọc và trang hiện tại được lưu trong URL.
 
+Kịch bản trình diễn theo vai trò và checklist kiểm thử: [Luồng demo và test](docs/LUONG_DEMO_VA_TEST.md).
+
 ## Chạy bản demo
 
 Cần JDK 21 trở lên và PostgreSQL đang chạy. Maven Wrapper tải Maven/dependency trong lần chạy đầu. Tạo database demo trong PostgreSQL:
@@ -72,7 +74,7 @@ node --check src/main/resources/static/js/questions.js
 node --check src/main/resources/static/js/quiz.js
 ```
 
-Bộ backend có 74 kiểm thử (73 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 và PostgreSQL với migration thật. Bao gồm quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 86 kiểm thử (85 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 và PostgreSQL với migration thật. Bao gồm bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
 Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
 
