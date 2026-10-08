@@ -10,7 +10,15 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface PaymentRepository extends JpaRepository<Payment, Integer> {
+public interface PaymentRepository
+    extends JpaRepository<Payment, Integer>,
+        org.springframework.data.jpa.repository.JpaSpecificationExecutor<Payment> {
+  @Override
+  @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"student", "course"})
+  org.springframework.data.domain.Page<Payment> findAll(
+      org.springframework.data.jpa.domain.Specification<Payment> filter,
+      org.springframework.data.domain.Pageable pageable);
+
   List<Payment> findByStudent_UserIdOrderByCreatedAtDesc(Integer studentId);
 
   @Query(

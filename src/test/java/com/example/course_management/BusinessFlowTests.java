@@ -50,6 +50,7 @@ class BusinessFlowTests {
   @Autowired LessonQuizRepository quizzes;
   @Autowired QuizAttemptRepository quizAttempts;
   @Autowired com.example.course_management.config.DemoScenarioSeeder demoScenarios;
+  @Autowired PagedListService pagedLists;
   @Autowired jakarta.persistence.EntityManagerFactory entityManagerFactory;
   @MockitoSpyBean NotificationRepository notifications;
   User admin, teacher, student, outsider;
@@ -151,13 +152,218 @@ class BusinessFlowTests {
     assertEquals(26, questions.count());
     assertEquals(26, quizAttempts.count());
     assertTrue(payments.search(PaymentStatus.PENDING).size() > 10);
-    var edited = courses.findAll().stream().filter(c -> c.getTitle().startsWith("Python thực hành")).findFirst().orElseThrow();
-    edited.setTitle("Tên đã được chỉnh sửa"); courses.saveAndFlush(edited);
+    var edited =
+        courses.findAll().stream()
+            .filter(c -> c.getTitle().startsWith("Python thực hành"))
+            .findFirst()
+            .orElseThrow();
+    edited.setTitle("Tên đã được chỉnh sửa");
+    courses.saveAndFlush(edited);
     long userCount = users.count(), courseCount = courses.count(), paymentCount = payments.count();
     demoScenarios.seed();
-    assertEquals(userCount, users.count()); assertEquals(courseCount, courses.count());
+    assertEquals(userCount, users.count());
+    assertEquals(courseCount, courses.count());
     assertEquals(paymentCount, payments.count());
-    assertEquals("Tên đã được chỉnh sửa", courses.findById(edited.getCourseId()).orElseThrow().getTitle());
+    assertEquals(
+        "Tên đã được chỉnh sửa", courses.findById(edited.getCourseId()).orElseThrow().getTitle());
+  }
+
+  @Test
+  void pagedUsersFilterBeforeCountingAndTreatWildcardsLiterally() throws Exception {
+    for (int i = 0; i < 13; i++) user("sample_" + i, Role.STUDENT);
+    var one = pagedLists.users("sample_", Role.STUDENT, "active", 0, 5, actor(admin));
+    var two = pagedLists.users("sample_", Role.STUDENT, "active", 1, 5, actor(admin));
+    assertEquals(13, one.totalElements());
+    assertEquals(3, one.totalPages());
+    assertEquals(5, one.content().size());
+    assertTrue(
+        one.content().stream()
+            .noneMatch(
+                u -> two.content().stream().anyMatch(v -> v.getUserId().equals(u.getUserId()))));
+    assertEquals(0, pagedLists.users("%", null, "", 0, 10, actor(admin)).totalElements());
+    assertThrows(
+        ForbiddenException.class, () -> pagedLists.users("", null, "", 0, 10, actor(student)));
+    mvc.perform(get("/api/lists/users").session(login(teacher))).andExpect(status().isForbidden());
+    mvc.perform(get("/api/lists/users?size=101").session(login(admin)))
+        .andExpect(status().isBadRequest());
+    mvc.perform(get("/api/lists/users?status=unknown").session(login(admin)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void pagedPaymentsKeepStudentScopeAndUseStableOrdering() throws Exception {
+    var other = user("another", Role.STUDENT);
+    for (int i = 0; i < 7; i++) {
+      var p = new Payment();
+      p.setStudent(i % 2 == 0 ? student : other);
+      p.setCourse(paid);
+      p.setAmount(paid.getPrice());
+      p.setTransferNote("FILTER_" + i);
+      p.setCreatedAt(java.time.LocalDateTime.of(2026, 1, 1, 10, 0));
+      payments.saveAndFlush(p);
+    }
+    var mine = pagedLists.payments("", PaymentStatus.PENDING, "old", 0, 2, actor(student));
+    assertEquals(4, mine.totalElements());
+    assertEquals(2, mine.content().size());
+    assertTrue(mine.content().stream().allMatch(p -> p.getStudentId().equals(student.getUserId())));
+    assertTrue(mine.content().getFirst().getPaymentId() < mine.content().get(1).getPaymentId());
+    assertEquals(7, pagedLists.summary(actor(admin)).get("PENDING"));
+    assertEquals(4, pagedLists.summary(actor(student)).get("PENDING"));
+    assertFalse(pagedLists.summary(actor(teacher)).containsKey("users"));
+    mvc.perform(get("/api/lists/payments").session(login(teacher)))
+        .andExpect(status().isForbidden());
+    mvc.perform(get("/api/lists/payments?sort=invalid").session(login(student)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void pagedNotificationsArePrivateAndUnreadCountsUpdateAfterReading() {
+    for (int i = 0; i < 14; i++) {
+      var n = new Notification();
+      n.setUser(i == 13 ? teacher : student);
+      n.setMessage("Notice " + i);
+      n.setIsRead(i % 3 == 0);
+      notifications.saveAndFlush(n);
+    }
+    var unread = pagedLists.notifications("unread", 0, 3, actor(student));
+    assertEquals(8, unread.totalElements());
+    assertEquals(3, unread.content().size());
+    assertEquals(8, pagedLists.summary(actor(student)).get("unread"));
+    var id = unread.content().getFirst().getNotificationId();
+    var n = notifications.findById(id).orElseThrow();
+    n.setIsRead(true);
+    notifications.saveAndFlush(n);
+    assertEquals(7, pagedLists.notifications("unread", 0, 3, actor(student)).totalElements());
+    assertEquals(1, pagedLists.notifications("", 0, 10, actor(teacher)).totalElements());
+    assertEquals(7, pagedLists.markAllRead(actor(student)));
+    assertEquals(0, pagedLists.summary(actor(student)).get("unread"));
+    assertEquals(1, pagedLists.summary(actor(teacher)).get("unread"));
+    assertEquals(0, pagedLists.markAllRead(actor(student)));
+    assertThrows(
+        BadRequestException.class, () -> pagedLists.notifications("bad", 0, 10, actor(student)));
+  }
+
+  @Test
+  void pagedLearningIncludesCourseMetadataWithoutOneRequestPerCourse() {
+    for (int i = 0; i < 12; i++) {
+      var c = course("Learning " + i, BigDecimal.ZERO);
+      lesson(c, "A lesson", 1, true);
+      var e = new Enrollment();
+      e.setStudent(student);
+      e.setCourse(c);
+      enrollments.saveAndFlush(e);
+    }
+    var other = user("other", Role.STUDENT);
+    enrollForQuestions(other);
+    var stats = entityManagerFactory.unwrap(org.hibernate.SessionFactory.class).getStatistics();
+    stats.clear();
+    var result =
+        pagedLists.learning("Learning", EnrollmentStatus.ENROLLED, "new", 0, 9, actor(student));
+    assertEquals(12, result.totalElements());
+    assertEquals(9, result.content().size());
+    assertTrue(result.content().stream().allMatch(e -> e.course().getLessonCount() == 1));
+    assertTrue(
+        stats.getPrepareStatementCount() <= 6, "A bounded page must use batched course statistics");
+    assertEquals(1, pagedLists.learning("", null, "new", 0, 9, actor(other)).totalElements());
+    assertThrows(
+        ForbiddenException.class, () -> pagedLists.learning("", null, "new", 0, 9, actor(teacher)));
+    assertThrows(
+        BadRequestException.class,
+        () -> pagedLists.learning("", null, "bad", 0, 9, actor(student)));
+  }
+
+  @Test
+  void courseStateFindsThePendingPaymentForTheRequestedCourseOnly() {
+    var one = paymentService.createPayment(paid.getCourseId(), actor(student));
+    var anotherCourse = course("Another paid course", BigDecimal.TEN);
+    paymentService.createPayment(anotherCourse.getCourseId(), actor(student));
+    var state = pagedLists.courseState(paid.getCourseId(), actor(student));
+    assertEquals(
+        one.getPaymentId(),
+        ((com.example.course_management.dto.response.PaymentResponse) state.get("payment"))
+            .getPaymentId());
+    assertNull(state.get("enrollment"));
+    assertNull(
+        pagedLists
+            .courseState(paid.getCourseId(), actor(user("other", Role.STUDENT)))
+            .get("payment"));
+    assertThrows(
+        ForbiddenException.class, () -> pagedLists.courseState(paid.getCourseId(), actor(teacher)));
+  }
+
+  @Test
+  void reviewsPaginateAndOwnReviewRemainsAvailableBeyondTheFirstPage() {
+    enrollForQuestions(student);
+    var own = new Review();
+    own.setCourse(free);
+    own.setStudent(student);
+    own.setRating(5);
+    reviews.saveAndFlush(own);
+    for (int i = 0; i < 8; i++) {
+      var r = new Review();
+      r.setCourse(free);
+      r.setStudent(user("review_" + i, Role.STUDENT));
+      r.setRating(4);
+      reviews.saveAndFlush(r);
+    }
+    var result = pagedLists.reviews(free.getCourseId(), 0, 6, actor(student));
+    assertEquals(9, result.totalElements());
+    assertEquals(6, result.content().size());
+    assertTrue(result.content().stream().noneMatch(r -> r.getReviewId().equals(own.getReviewId())));
+    assertEquals(
+        own.getReviewId(), pagedLists.ownReview(free.getCourseId(), actor(student)).getReviewId());
+    free.setStatus(CourseStatus.DRAFT);
+    courses.saveAndFlush(free);
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> pagedLists.reviews(free.getCourseId(), 0, 6, actor(outsider)));
+    assertEquals(9, pagedLists.reviews(free.getCourseId(), 0, 6, actor(teacher)).totalElements());
+  }
+
+  @Test
+  void markAllReadRequiresAuthenticationAndCsrf() throws Exception {
+    mvc.perform(put("/api/lists/notifications/read-all")).andExpect(status().isForbidden());
+    mvc.perform(put("/api/lists/notifications/read-all").session(login(student)))
+        .andExpect(status().isForbidden());
+    mvc.perform(put("/api/lists/notifications/read-all").session(login(student)).with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").value(0));
+  }
+
+  @Test
+  void pagedReportsKeepWholeDatasetTotalsWithBoundedQueriesAndAdminPermissions() throws Exception {
+    for (int i = 0; i < 12; i++) {
+      var c = course("Report " + i, BigDecimal.ZERO);
+      lesson(c, "Lesson", 1, true);
+      var e = new Enrollment();
+      e.setCourse(c);
+      e.setStudent(student);
+      enrollments.saveAndFlush(e);
+    }
+    var stats = entityManagerFactory.unwrap(org.hibernate.SessionFactory.class).getStatistics();
+    stats.clear();
+    var teacherReport = pagedLists.teacherReport(teacher.getUserId(), 0, 5, actor(admin));
+    var coursePage =
+        (com.example.course_management.dto.response.PageResponse<?>) teacherReport.get("courses");
+    assertEquals(14, coursePage.totalElements());
+    assertEquals(5, coursePage.content().size());
+    assertTrue(
+        stats.getPrepareStatementCount() <= 10,
+        "Teacher report must aggregate per page rather than per course");
+    var studentReport = pagedLists.studentReport(student.getUserId(), 1, 5, actor(admin));
+    var learningPage =
+        (com.example.course_management.dto.response.PageResponse<?>) studentReport.get("courses");
+    assertEquals(12, learningPage.totalElements());
+    assertEquals(5, learningPage.content().size());
+    assertEquals(12L, ((java.util.Map<?, ?>) studentReport.get("summary")).get("totalEnrollments"));
+    assertThrows(
+        ForbiddenException.class,
+        () -> pagedLists.teacherReport(teacher.getUserId(), 0, 5, actor(student)));
+    assertThrows(
+        BadRequestException.class,
+        () -> pagedLists.studentReport(teacher.getUserId(), 0, 5, actor(admin)));
+    mvc.perform(get("/api/lists/student-report/" + student.getUserId()).session(login(teacher)))
+        .andExpect(status().isForbidden());
   }
 
   SaveQuizRequest quizRequest(int revision, boolean published) {

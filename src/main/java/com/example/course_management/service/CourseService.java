@@ -8,6 +8,8 @@ import com.example.course_management.security.CustomUserDetails;
 import java.util.List;
 
 public interface CourseService {
+  List<CourseResponse> summarizeCourses(List<com.example.course_management.entity.Course> courses);
+
   PageResponse<CourseResponse> getCatalog(
       String search,
       Integer teacherId,

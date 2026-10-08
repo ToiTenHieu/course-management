@@ -259,6 +259,11 @@ public class CourseServiceImpl implements CourseService {
     return toResponses(List.of(c)).getFirst();
   }
 
+  @Transactional(readOnly = true)
+  public List<CourseResponse> summarizeCourses(List<Course> found) {
+    return toResponses(found);
+  }
+
   private List<CourseResponse> toResponses(List<Course> found) {
     if (found.isEmpty()) return List.of();
     var ids = found.stream().map(Course::getCourseId).toList();

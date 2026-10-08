@@ -8,10 +8,23 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
-public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer> {
+public interface EnrollmentRepository
+    extends JpaRepository<Enrollment, Integer>,
+        org.springframework.data.jpa.repository.JpaSpecificationExecutor<Enrollment> {
+  @Override
+  @org.springframework.data.jpa.repository.EntityGraph(
+      attributePaths = {"course", "course.teacher"})
+  org.springframework.data.domain.Page<Enrollment> findAll(
+      org.springframework.data.jpa.domain.Specification<Enrollment> filter,
+      org.springframework.data.domain.Pageable pageable);
+
   List<Enrollment> findByCourse_CourseId(Integer courseId);
 
   List<Enrollment> findByStudent_UserId(Integer studentId);
+
+  @Query("SELECT AVG(e.progressPercentage) FROM Enrollment e WHERE e.student.userId = :studentId")
+  Double averageProgress(
+      @org.springframework.data.repository.query.Param("studentId") Integer studentId);
 
   Optional<Enrollment> findByStudent_UserIdAndCourse_CourseId(Integer studentId, Integer courseId);
 

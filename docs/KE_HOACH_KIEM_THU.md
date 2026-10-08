@@ -134,3 +134,20 @@ Playwright CLI trên backend PostgreSQL demo đã kiểm tra học viên gửi �
 Kết quả chạy mới: Maven verify đạt 65/65 trên H2 và đóng gói JAR; PostgreSQL đạt 65/65 với Flyway V7; sáu E2E hiện có đạt. Kiểm tra cú pháp thêm `quiz.js` vào CI. Log ở `target/local-demo/quiz-verify.log`, `quiz-postgres.log`, `quiz-e2e.log`.
 
 Playwright CLI kiểm tra giảng viên soạn/lưu phiên bản, học viên làm 2/3 đạt 66% và làm đúng đạt 100%, đọc phản hồi và lịch sử, thống kê giảng viên ghi nhận đúng câu sai. Bài đạt 100% vẫn giữ tiến độ đọc 0%. Mô phỏng mất phản hồi sau khi backend thật đã lưu, tải lại vẫn giữ lựa chọn/UUID; thử nhận kết quả trả bài cũ và lịch sử chỉ có hai lần làm, không tạo lần thứ ba. Script ở `output/playwright/quiz-lost-response.js`. Hai editor mở cùng phiên bản: lưu từ tab thứ nhất thành công, tab thứ hai báo xung đột và giữ nội dung; học viên nộp đề cũ cũng báo tải đề mới. Mobile 390 × 844 không tràn ngang. Ảnh ở `output/playwright/quiz-student-mobile.png` và `quiz-teacher-desktop.png`.
+
+## Danh sách lớn và dữ liệu theo vai trò — Flyway V8/V9
+
+Backend hiện đạt 74/74 trên H2 và PostgreSQL thật. Log: `target/local-demo/role-upgrade-verify.log`, `paged-lists-postgres.log`.
+
+| Ca kiểm thử mới | Tiêu chí |
+| --- | --- |
+| `pagedUsersFilterBeforeCountingAndTreatWildcardsLiterally` | Bộ lọc trước phân trang; `%`, `_` là ký tự tìm kiếm thật |
+| `pagedPaymentsKeepStudentScopeAndUseStableOrdering` | Không lộ thanh toán học viên khác; ID quyết định khi thời gian bằng nhau |
+| `pagedNotificationsArePrivateAndUnreadCountsUpdateAfterReading` | Tổng riêng và bulk-read chỉ tác động người hiện tại |
+| `pagedLearningIncludesCourseMetadataWithoutOneRequestPerCourse` | Metadata theo nhóm, tối đa sáu truy vấn cho trang có dữ liệu |
+| `courseStateFindsThePendingPaymentForTheRequestedCourseOnly` | Không lấy nhầm yêu cầu đang chờ của khóa khác |
+| `reviewsPaginateAndOwnReviewRemainsAvailableBeyondTheFirstPage` | Đánh giá cũ của chính mình vẫn đọc được |
+| `markAllReadRequiresAuthenticationAndCsrf` | Chặn chưa đăng nhập và thiếu CSRF |
+| `pagedReportsKeepWholeDatasetTotalsWithBoundedQueriesAndAdminPermissions` | Tổng toàn bộ, danh sách có giới hạn, báo cáo giảng viên tối đa mười truy vấn |
+
+Dữ liệu mẫu chạy trong transaction, có marker V8 để không tạo trùng hoặc ghi đè khi khởi động lại. Test seeder kiểm tra số liệu, trạng thái thanh toán, hỏi đáp, bài làm và bảo toàn chỉnh sửa. V9 bổ sung chỉ mục phân trang người dùng, thanh toán, đăng ký, đánh giá và thông báo.

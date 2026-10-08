@@ -10,7 +10,9 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository
+    extends JpaRepository<User, Integer>,
+        org.springframework.data.jpa.repository.JpaSpecificationExecutor<User> {
   Optional<User> findByUsername(String username);
 
   boolean existsByUsername(String username);

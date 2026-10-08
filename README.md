@@ -70,7 +70,7 @@ node --check src/main/resources/static/js/questions.js
 node --check src/main/resources/static/js/quiz.js
 ```
 
-Bộ backend có 66 kiểm thử (65 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 và PostgreSQL với migration thật. Bao gồm quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 74 kiểm thử (73 ca nghiệp vụ/API và một ca khởi động), kiểm tra trên H2 và PostgreSQL với migration thật. Bao gồm quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
 Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
 
@@ -116,6 +116,17 @@ Ví dụ: `/api/courses/catalog?page=0&size=9&freeOnly=true&sort=price`.
 `GET /api/courses/categories?teacherId=...` trả chủ đề của các khóa có quyền xem; không bị giới hạn bởi trang hiện tại. Học viên chỉ thấy khóa published; giảng viên còn thấy khóa nháp/lưu trữ của mình; admin thấy tất cả. Quyền xem áp dụng trước khi tính tổng và phân trang.
 
 `GET /api/courses` vẫn trả list cho các màn hình/API hiện có. Danh mục mới tải giảng viên cùng khóa học và dùng ba truy vấn thống kê theo nhóm, tối đa năm truy vấn cho một trang có dữ liệu. Flyway V3 bổ sung chỉ mục phục vụ bộ lọc và thống kê theo khóa học.
+
+Các danh sách nghiệp vụ dùng `/api/lists`, phân trang từ 0, size 1–100. Quyền và bộ lọc được áp dụng tại database trước khi tính tổng; thứ tự có ID làm tiêu chí phụ để ổn định khi thời gian trùng nhau. V9 thêm chỉ mục cho các danh sách này; API list cũ còn được giữ để tương thích.
+
+- `GET users`: admin, `search`, `role`, `status=active|inactive`.
+- `GET payments`: admin xem toàn bộ, học viên chỉ xem của mình; `search`, `status=PENDING|CONFIRMED|REJECTED`, `sort=new|old`.
+- `GET enrollments`: học viên, `search`, `status=ENROLLED|COMPLETED|DROPPED`, `sort=new|progress|title`; trả metadata khóa trong cùng trang bằng truy vấn thống kê theo nhóm.
+- `GET notifications`: thông báo của phiên hiện tại, `status=all|unread|read`. `PUT notifications/read-all` đánh dấu đã đọc cho chính người đó, yêu cầu CSRF.
+- `GET summary`: tổng toàn bộ dữ liệu theo phạm vi vai trò, không phụ thuộc trang đang mở.
+- `GET course-state/{id}`: đăng ký và thanh toán đang chờ của học viên cho đúng khóa đó.
+- `GET reviews?courseId=...`: đánh giá theo quyền xem khóa; `GET own-review/{id}`: đánh giá của chính học viên, kể cả khi nằm ngoài trang đầu.
+- `GET student-report/{id}` và `GET teacher-report/{id}`: admin; tổng toàn bộ và danh sách khóa phân trang, không truy vấn lặp theo từng khóa.
 
 ## Phạm vi bản nền
 
