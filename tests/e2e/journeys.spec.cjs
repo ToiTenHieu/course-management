@@ -47,6 +47,7 @@ async function login(page, username, secret = password) {
 }
 async function course(page, title) {
   await page.goto("/courses.html");
+  await page.getByLabel("Tìm khóa học", { exact: true }).fill(title);
   await page.locator(".card-title").filter({ hasText: title }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
 }
@@ -133,6 +134,7 @@ test("Khóa trả phí chỉ mở sau khi admin duyệt thanh toán", async ({
     const admin = await context.newPage();
     await login(admin, "admin_demo", "Demo123!");
     await admin.goto("/payments.html");
+    await admin.getByLabel("Tìm thanh toán").fill(user.fullName);
     const row = admin.getByRole("row").filter({ hasText: user.fullName });
     await row.getByRole("button", { name: "Xác nhận", exact: true }).click();
     await admin

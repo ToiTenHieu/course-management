@@ -151,3 +151,9 @@ Backend hiện đạt 74/74 trên H2 và PostgreSQL thật. Log: `target/local-d
 | `pagedReportsKeepWholeDatasetTotalsWithBoundedQueriesAndAdminPermissions` | Tổng toàn bộ, danh sách có giới hạn, báo cáo giảng viên tối đa mười truy vấn |
 
 Dữ liệu mẫu chạy trong transaction, có marker V8 để không tạo trùng hoặc ghi đè khi khởi động lại. Test seeder kiểm tra số liệu, trạng thái thanh toán, hỏi đáp, bài làm và bảo toàn chỉnh sửa. V9 bổ sung chỉ mục phân trang người dùng, thanh toán, đăng ký, đánh giá và thông báo.
+
+Sáu E2E đạt trên bản demo có dữ liệu lớn; helper chọn khóa tìm kiếm theo tiêu đề và admin tìm thanh toán theo học viên thay vì giả định bản ghi ở trang đầu. Log mới: `target/local-demo/role-upgrade-e2e.log`. CI kiểm tra cú pháp `lists.js`.
+
+Playwright CLI kiểm tra thêm các thao tác ở bốn vai trò, bộ lọc/trang qua tải lại, báo cáo có tổng toàn bộ, tài khoản được tìm ngoài 20 kết quả đầu, thông báo bulk-read riêng, đánh giá và ghi chú lưu qua tải lại. Khóa 23 bài hiển thị 8 bài/trang, tự chọn trang chứa bài hiện tại; thứ tự thêm bài liên tiếp là 1 rồi 2. Đã tạo/sửa/khóa/mở/xóa tài khoản mẫu, tạo/đọc/xóa thông báo, tạo/sửa khóa, sửa/xuất bản/ẩn/xóa bài và chuyển trạng thái khóa, từ chối thanh toán. HTTP 503 cho danh sách có nút thử lại; phản hồi tìm kiếm cũ được trả chậm nhưng không thay thế kết quả mới.
+
+Các script `role-audit-*.js` và ảnh `users-admin-mobile.png`, `reviews-student-mobile.png`, `learn-student-mobile.png`, `reports-admin-desktop.png`, `quiz-teacher-scenario.png` nằm trong `output/playwright` (Git bỏ qua). Mobile không tràn ngang; bảng rộng cuộn trong khung. Các API list cũ vẫn còn để tương thích; syllabus/điều hướng bài tải metadata đầy đủ và chỉ phân trang trên giao diện.

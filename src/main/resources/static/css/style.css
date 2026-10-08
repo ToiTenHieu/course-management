@@ -3027,3 +3027,23 @@ html {
   padding: 14px 0;
   border-top: 1px solid var(--line);
 }
+/* Bound long sections and preserve native hidden behavior with grid/flex rules. */
+[hidden] {
+  display: none !important;
+}
+.detail-tabs a[aria-selected="true"] {
+  color: var(--brand);
+  box-shadow: 0 2px 0 currentColor;
+  font-weight: 600;
+}
+.detail-tabs a:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 5px;
+}
+.list-tabs {
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.pagination {
+  flex-wrap: wrap;
+}

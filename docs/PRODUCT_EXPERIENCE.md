@@ -41,7 +41,6 @@ Checklist là hướng dẫn chất lượng, không thay thế luật xuất b�
 | Ưu tiên | Hạng mục | Người hưởng lợi | Tiêu chí hoàn thành |
 |---|---|---|---|
 | P1 | Soạn nội dung có cấu trúc, video và tài liệu trong phòng học | Giảng viên, học viên | Preview trước xuất bản, phát media an toàn, nội dung dễ đọc và có mô tả hỗ trợ tiếp cận |
-| P1 | Tìm kiếm/phân trang các danh sách quản trị và việc học | Admin, giảng viên, học viên | Không tải toàn bộ dữ liệu; giữ bộ lọc và trang trong URL; tổng số chính xác theo quyền |
 | P2 | Hồ sơ giảng viên, yêu cầu đầu vào và đối tượng phù hợp | Khách, học viên | Người học hiểu khóa dành cho ai và phải chuẩn bị gì; thông tin do giảng viên cung cấp |
 | P2 | Lưu khóa quan tâm và đề xuất dựa trên chủ đề đã chọn | Khách, học viên | Lưu giữa thiết bị, gỡ lưu được; đề xuất giải thích được, không gắn nhãn “phổ biến” bằng dữ liệu giả |
 | P2 | Mục tiêu học theo tuần và nhắc học tùy chọn | Học viên | Học viên chủ động chọn mục tiêu và bật/tắt nhắc; không tạo streak khi chưa có hoạt động học |
@@ -51,6 +50,18 @@ Checklist là hướng dẫn chất lượng, không thay thế luật xuất b�
 Trước khi triển khai rộng cần kiểm tra với người dùng thật ở ba vai trò, đo khả năng tìm đúng khóa, quay lại bài, hoàn thành bài tập và xử lý yêu cầu chờ. Tỷ lệ hoàn thành nội dung không tự chứng minh chất lượng học tập.
 
 ## Bằng chứng kiểm tra
+
+### Danh sách lớn và kiểm tra từng vai trò — 08/10/2026
+
+Demo thêm 36 khóa học và các tài khoản/kịch bản học tập, thanh toán, đánh giá, hỏi đáp, quiz và thông báo vào PostgreSQL. Seeder có marker trong cùng transaction, không lặp dữ liệu hoặc ghi đè chỉnh sửa khi khởi động lại.
+
+Người dùng, thanh toán và thông báo tải 10 mục/trang; việc học tải 9 khóa/trang; đánh giá tải 6/trang; báo cáo tải 8 khóa/trang. Bộ lọc, thứ tự và trang của danh sách chính nằm trong URL; tìm kiếm đổi về trang đầu, trang vượt giới hạn tự điều chỉnh. Các số tổng trên dashboard/báo cáo tính trên toàn bộ phạm vi có quyền, không lấy số dòng trang hiện tại. Chọn giảng viên/học viên/người nhận chỉ tải 20 kết quả và tìm thêm bằng tên, email hoặc tài khoản.
+
+Trang khóa học chia thành các tab thật: kết quả, chương trình, đánh giá, hỏi đáp và quiz theo quyền. Tab hỗ trợ phím mũi tên, Home/End và liên kết hash. Chương trình và điều hướng phòng học hiển thị 8 bài/trang; phòng học tự mở trang chứa bài đang học. Metadata bài học vẫn được tải đầy đủ vì trang cần dùng cho điều hướng và tính mức sẵn sàng; phân trang phần này thực hiện trên giao diện. Form thêm bài tự chọn thứ tự tiếp theo.
+
+Playwright CLI đã dùng khách, học viên, giảng viên và admin trên dữ liệu lớn. Đã kiểm tra tìm kiếm/trang/tải lại, đăng nhập quay về khóa, đăng ký/học, ghi chú, đánh giá, quiz và lịch sử, hỏi đáp/phản hồi/ẩn/hiện, tạo/sửa/khóa/mở/xóa tài khoản, thông báo, soạn/sửa/xuất bản/ẩn/xóa bài, chỉnh sửa/trạng thái khóa, duyệt/từ chối thanh toán và báo cáo. Mô phỏng HTTP 503 có thể thử lại; phản hồi tìm kiếm cũ không ghi đè kết quả mới. Mobile 390 × 844 không tràn ngang; các bảng quản trị cuộn trong khung riêng. Đây là kiểm tra với tài khoản mẫu, chưa thay thế đánh giá của người dùng thật.
+
+74 kiểm thử backend đạt trên H2 và PostgreSQL; sáu E2E đạt sau khi thêm tìm kiếm để truy cập bản ghi ở ngoài trang đầu. Ảnh và script kiểm tra được giữ trong `output/playwright`; kết quả chi tiết ở kế hoạch kiểm thử.
 
 ### Nâng cấp quiz theo bài — 07/10/2026
 
