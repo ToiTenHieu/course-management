@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap");
 :root {
   --ink: #172e2a;
-  --muted: #71817c;
+  --muted: #61726b;
   --brand: #104b43;
   --brand-hover: #0a3832;
   --lime: #d6eba9;
@@ -1345,6 +1345,10 @@ dialog::backdrop {
   padding: 18px 25px;
   border-top: 1px solid var(--line);
   background: #fafbf8;
+}
+.dialog-footer > .hint {
+  margin: 0 auto 0 0;
+  align-self: center;
 }
 .form-grid {
   display: grid;
@@ -3027,6 +3031,265 @@ html {
   padding: 14px 0;
   border-top: 1px solid var(--line);
 }
+/* Interaction details: editable forms, previews, loading and mobile navigation. */
+body:has(dialog[open]) { overflow: hidden; }
+.password-field {
+  position: relative;
+}
+.password-field input {
+  padding-right: 76px;
+}
+.password-toggle {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: #edf3ed;
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 600;
+}
+[aria-invalid="true"] {
+  border-color: var(--danger);
+  background: #fffafa;
+}
+.field-error {
+  display: block;
+  color: var(--danger);
+  margin: -10px 0 18px;
+}
+.character-count {
+  display: block;
+  text-align: right;
+  margin: -12px 0 16px;
+  font-variant-numeric: tabular-nums;
+}
+.button-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: button-spin 0.8s linear infinite;
+}
+@keyframes button-spin { to { transform: rotate(360deg); } }
+.discard-prompt {
+  padding: 18px 25px;
+  border-top: 1px solid #ead8b5;
+  background: #fff9ed;
+}
+.discard-prompt p {
+  color: #6e5328;
+  margin-bottom: 12px;
+}
+.discard-prompt .row-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.lesson-editor-dialog {
+  width: min(800px, calc(100vw - 30px));
+}
+.editor-intro p {
+  margin: 8px 0 18px;
+  font-size: 13px;
+}
+.editor-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  margin-bottom: 24px;
+}
+.editor-tabs button {
+  flex: 1;
+  border: 0;
+  border-radius: 8px;
+  padding: 11px;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 600;
+}
+.editor-tabs [aria-selected="true"] {
+  color: var(--brand);
+  background: white;
+  box-shadow: 0 2px 8px #143b2710;
+}
+.lesson-preview {
+  border: 1px solid var(--line);
+  padding: 24px;
+  border-radius: 14px;
+  overflow-wrap: anywhere;
+}
+.lesson-preview h2 {
+  margin-top: 20px;
+  font-size: 24px;
+}
+.preview-caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.lesson-resource {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f4f8ef;
+  margin: 20px 0;
+}
+.resource-symbol {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: white;
+  color: var(--brand);
+  font-size: 22px;
+}
+.lesson-resource > div {
+  flex: 1;
+  min-width: 140px;
+  overflow-wrap: anywhere;
+}
+.lesson-resource small {
+  display: block;
+  margin-top: 3px;
+}
+.payment-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+}
+.payment-steps li {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 20px;
+}
+.payment-steps li:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 33px;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+.payment-steps li > span {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 33px;
+  height: 33px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 700;
+}
+.payment-steps .done > span { background: var(--brand); color: white; }
+.payment-steps .current > span { background: var(--lime); border-color: var(--lime); }
+.payment-steps strong { font-size: 13px; }
+.payment-steps small { display: block; }
+.bank-info > div { flex-wrap: wrap; gap: 8px 12px; }
+.bank-info strong { overflow-wrap: anywhere; }
+.copy-button {
+  padding: 7px 10px;
+  min-height: 34px;
+  background: #edf3ed;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--brand);
+  font-size: 11px;
+  font-weight: 600;
+}
+.active-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 14px 0 4px;
+}
+.filter-token {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: left;
+  border: 1px solid #cedfcb;
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: #edf4e8;
+  color: var(--brand);
+  font-size: 12px;
+}
+.filter-token svg { width: 14px; height: 14px; }
+.course-skeleton {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding-bottom: 24px;
+  overflow: hidden;
+}
+.course-skeleton > div, .course-skeleton > span {
+  display: block;
+  background: linear-gradient(100deg, #edf1e9 30%, #f8faf5 50%, #edf1e9 70%);
+  background-size: 200% 100%;
+  animation: skeleton-shift 1.6s linear infinite;
+}
+.course-skeleton > div { height: 175px; margin-bottom: 24px; }
+.course-skeleton > span { height: 14px; margin: 14px 24px; border-radius: 5px; }
+.course-skeleton > span:last-child { width: 45%; }
+@keyframes skeleton-shift { to { background-position: -200% 0; } }
+.close-navigation, .navigation-overlay { display: none; }
+@media (max-width: 700px) {
+  body.navigation-open { overflow: hidden; }
+  .sidebar { overflow-y: auto; overscroll-behavior: contain; }
+  .close-navigation {
+    display: inline-flex;
+    align-self: flex-end;
+    margin: -12px -3px 12px;
+    flex-shrink: 0;
+  }
+  .navigation-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 29;
+    border: 0;
+    border-radius: 0;
+    background: #14261a70;
+    backdrop-filter: blur(2px);
+  }
+  .dialog-body { padding: 20px; max-height: 60dvh; }
+  .dialog-footer { padding: 16px 20px; flex-wrap: wrap; }
+  .dialog-footer > .hint:not(:empty) { width: 100%; }
+  .lesson-preview { padding: 18px; }
+  .editor-tabs button { padding: 10px 6px; font-size: 12px; }
+  .payment-steps li { padding-bottom: 16px; }
+  .bank-info > div > span { width: 100%; }
+  .bank-info > div > strong { flex: 1; text-align: left; }
+  .copy-button { min-height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .button-spinner, .course-skeleton > div, .course-skeleton > span { animation: none; }
+}
+
 /* Bound long sections and preserve native hidden behavior with grid/flex rules. */
 [hidden] {
   display: none !important;

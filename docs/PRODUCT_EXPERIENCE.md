@@ -51,6 +51,17 @@ Trước khi triển khai rộng cần kiểm tra với người dùng thật �
 
 ## Bằng chứng kiểm tra
 
+### Hoàn thiện chi tiết thao tác — 08/10/2026
+
+- **Biểu mẫu:** hiển thị lỗi tiếng Việt sát ô nhập, liên kết lỗi với ô qua `aria-describedby`, đưa focus tới lỗi đầu tiên. Kiểm tra các ràng buộc bắt buộc/email/URL/độ dài/số và nội dung chỉ có khoảng trắng. Mật khẩu có nút hiện/ẩn, giữ nguyên giá trị và không tự bỏ khoảng trắng. Textarea có số ký tự; nút gửi cho biết đang xử lý và chặn gửi lặp.
+- **Hộp soạn:** tiêu đề được đặt tên cho dialog. Đóng/Hủy/Escape khi có thay đổi sẽ hiện lựa chọn tiếp tục sửa hoặc bỏ thay đổi ngay trong hộp. Trong lúc lưu, khóa ô nhập và thao tác đóng để nội dung gửi không bị thay đổi giữa chừng. Lỗi API giữ nội dung để thử lại. Rời/tải lại trang khi còn thay đổi dùng cảnh báo gốc của trình duyệt; chưa có lưu nháp tự động.
+- **Soạn bài:** tab soạn/xem trước hỗ trợ phím mũi tên và Home/End. Preview dùng cùng bộ hiển thị văn bản/liên kết với phòng học, có số từ và thời gian đọc ước tính 200 từ/phút. Chỉ chấp nhận liên kết HTTP/HTTPS. Preview không lưu hoặc xuất bản; bài mới vẫn phải được xuất bản từ chương trình. Video/tài liệu tiếp tục mở ở thẻ mới; chưa có trình soạn rich text hoặc tải file.
+- **Danh mục:** nhãn chỉ rõ từ khóa/chủ đề/học phí/trạng thái đang lọc, gỡ từng điều kiện hoặc xóa tất cả. Trạng thái chọn có `aria-pressed`; khung chờ giữ hình dáng thẻ khóa học và tôn trọng thiết lập giảm chuyển động.
+- **Chuyển khoản:** trình bày ba bước tạo yêu cầu → chuyển khoản → chờ đối chiếu, không suy diễn rằng hệ thống đã nhận tiền. Sao chép riêng số tài khoản, số tiền không kèm ký hiệu tiền tệ và nội dung chuyển khoản. Nếu trình duyệt chặn clipboard, chọn văn bản và hướng dẫn sao chép thủ công.
+- **Mobile và bàn phím:** menu có nền che, nút đóng, Escape, khóa cuộn nền và giữ Tab trong menu khi mở; nội dung nền không nhận focus. Thu/phóng qua ngưỡng desktop tự đóng menu và khôi phục điều hướng. Trang hiện tại có `aria-current`. Điều chỉnh màu chữ phụ để dễ đọc hơn.
+
+Nghiệm thu trên Chromium: lỗi bắt buộc/focus đầu tiên, hiện/ẩn mật khẩu, preview giữ văn bản và không thực thi HTML, tab bằng bàn phím, Escape giữ bản soạn, URL ngoài HTTP/HTTPS và tiêu đề chỉ có khoảng trắng bị chặn; HTTP 503 giữ nội dung, lưu lại thành công và đọc được sau tải lại. Menu giữ Tab/Shift+Tab, đóng bằng Escape/nền che và khôi phục khi chuyển sang desktop; bộ lọc khôi phục qua Back/tải lại. Clipboard sao chép đúng ba giá trị và có fallback khi bị chặn. Mobile 390 × 844 không tràn ngang. 74 backend trên H2 và sáu E2E hiện có đạt; bản JAR đã đóng gói thành công. Xem bằng chứng và giới hạn trong kế hoạch kiểm thử.
+
 ### Danh sách lớn và kiểm tra từng vai trò — 08/10/2026
 
 Demo thêm 36 khóa học và các tài khoản/kịch bản học tập, thanh toán, đánh giá, hỏi đáp, quiz và thông báo vào PostgreSQL. Seeder có marker trong cùng transaction, không lặp dữ liệu hoặc ghi đè chỉnh sửa khi khởi động lại.

@@ -1,6 +1,7 @@
 import { api, ApiError } from "./api.js";
 import { mountQuestions } from "./questions.js";
 import { mountQuiz } from "./quiz.js";
+import { enhanceForms, wireNavigation, setPending, lessonBody } from "./experience.js";
 import {
   mountPagedList,
   statusTabs,
@@ -142,19 +143,24 @@ function shell(title, subtitle, content, actions = "") {
       await api("/auth/logout", "POST");
       location.href = "/login.html";
     });
-  $("#menu").onclick = () => {
-    const open = $(".sidebar").classList.toggle("open");
-    $("#menu").setAttribute("aria-expanded", String(open));
-  };
-  document.onkeydown = (event) => {
-    if (event.key === "Escape") {
-      $(".sidebar")?.classList.remove("open");
-      $("#menu")?.setAttribute("aria-expanded", "false");
-    }
-  };
+  const closeNavigation = document.createElement("button");
+  closeNavigation.id = "closeNavigation";
+  closeNavigation.className = "icon-button close-navigation";
+  closeNavigation.setAttribute("aria-label", "Đóng điều hướng");
+  closeNavigation.innerHTML = icon("close");
+  $(".sidebar").prepend(closeNavigation);
+  const overlay = document.createElement("button");
+  overlay.className = "navigation-overlay";
+  overlay.setAttribute("aria-label", "Đóng điều hướng");
+  overlay.tabIndex = -1;
+  $(".workspace").append(overlay);
+  document.querySelectorAll(".nav-item.active").forEach((a) => a.setAttribute("aria-current", "page"));
+  wireNavigation(app);
+  enhanceForms(app);
 }
 async function action(fn, button) {
-  if (button) button.disabled = true;
+  if (button?.disabled) return;
+  setPending(button, true);
   try {
     await fn();
   } catch (e) {
@@ -162,27 +168,68 @@ async function action(fn, button) {
     if (e.status === 401)
       setTimeout(() => (location.href = "/login.html"), 1200);
   } finally {
-    if (button) button.disabled = false;
+    setPending(button, false);
   }
 }
 function showDialog(title, body, onSubmit, submit = "Lưu thay đổi") {
-  modal.innerHTML = `<form id="dialogForm"><div class="dialog-head"><h2>${esc(title)}</h2><button type="button" class="icon-button" id="closeModal" aria-label="Đóng">${icon("close")}</button></div><div class="dialog-body">${body}<div id="dialogError" role="alert"></div></div><div class="dialog-footer"><button type="button" class="btn secondary" id="cancelModal">Hủy</button><button class="btn" id="saveModal">${esc(submit)}</button></div></form>`;
-  $("#closeModal").onclick = $("#cancelModal").onclick = () => modal.close();
-  $("#dialogForm").onsubmit = async (e) => {
+  modal.innerHTML = `<form id="dialogForm"><div class="dialog-head"><h2 id="dialogTitle">${esc(title)}</h2><button type="button" class="icon-button" id="closeModal" aria-label="Đóng">${icon("close")}</button></div><div class="dialog-body">${body}<div id="dialogError" role="alert"></div></div><div class="discard-prompt" id="discardPrompt" hidden><p id="discardMessage">Bạn có thay đổi chưa lưu. Bỏ thay đổi và đóng?</p><div class="row-actions"><button type="button" class="btn secondary compact" id="keepEditing">Tiếp tục chỉnh sửa</button><button type="button" class="btn secondary compact danger" id="discardChanges">Bỏ thay đổi</button></div></div><div class="dialog-footer"><span id="dialogStatus" class="hint" role="status"></span><button type="button" class="btn secondary" id="cancelModal">Hủy</button><button class="btn" id="saveModal">${esc(submit)}</button></div></form>`;
+  modal.setAttribute("aria-labelledby", "dialogTitle");
+  const form = $("#dialogForm"), button = $("#saveModal"), status = $("#dialogStatus");
+  const snapshot = () => JSON.stringify([...new FormData(form)]);
+  let initial = snapshot(), saving = false, closeOrigin;
+  const dirty = () => snapshot() !== initial;
+  const update = () => { status.textContent = dirty() ? "Có thay đổi chưa lưu" : ""; };
+  form.addEventListener("input", update);
+  form.addEventListener("change", update);
+  const close = () => {
+    if (saving) return;
+    if (!dirty()) { modal.close(); return; }
+    closeOrigin = document.activeElement;
+    $("#discardPrompt").hidden = false;
+    $("#keepEditing").focus();
+  };
+  $("#keepEditing").onclick = () => {
+    $("#discardPrompt").hidden = true;
+    if (closeOrigin?.isConnected) closeOrigin.focus();
+  };
+  $("#discardChanges").onclick = () => { if (!saving) modal.close(); };
+  $("#closeModal").onclick = $("#cancelModal").onclick = close;
+  modal.oncancel = (event) => { event.preventDefault(); close(); };
+  const beforeUnload = (event) => {
+    if (!dirty()) return;
+    event.preventDefault(); event.returnValue = "";
+  };
+  window.addEventListener("beforeunload", beforeUnload);
+  modal.onclose = () => window.removeEventListener("beforeunload", beforeUnload);
+  form.onsubmit = async (e) => {
     e.preventDefault();
-    const button = $("#saveModal");
-    button.disabled = true;
+    if (saving) return;
+    saving = true;
+    setPending(button, true, "Đang lưu…");
+    $("#closeModal").disabled = $("#cancelModal").disabled = true;
+    $("#discardPrompt").hidden = true;
+    const data = Object.fromEntries(new FormData(form));
+    const submitted = snapshot();
+    const editable = [...form.querySelectorAll("input, textarea, select")].filter((input) => !input.disabled);
+    editable.forEach((input) => { input.disabled = true; });
     $("#dialogError").innerHTML = "";
     try {
-      await onSubmit(Object.fromEntries(new FormData(e.currentTarget)));
+      await onSubmit(data);
+      initial = submitted;
       modal.close();
     } catch (error) {
       $("#dialogError").innerHTML = errorBox(error);
     } finally {
-      button.disabled = false;
+      saving = false;
+      editable.forEach((input) => { input.disabled = false; });
+      $("#closeModal").disabled = $("#cancelModal").disabled = false;
+      setPending(button, false);
     }
   };
+  enhanceForms(modal);
   modal.showModal();
+  (form.querySelector('input:not([type="hidden"]):not([readonly]), textarea, select') || $("#cancelModal"))
+    .focus({ preventScroll: true });
 }
 function confirmAction(title, text, fn) {
   showDialog(title, `<p>${esc(text)}</p>`, fn, "Xác nhận");
@@ -198,7 +245,7 @@ function field(
   return `<label>${esc(label)}<input name="${name}" type="${type}" value="${esc(value)}" ${required ? "required" : ""} ${extra}></label>`;
 }
 function textarea(label, name, value = "", extra = "") {
-  return `<label>${esc(label)}<textarea name="${name}" rows="4" ${extra}>${esc(value)}</textarea></label>`;
+  return `<label>${esc(label)}<textarea name="${name}" ${extra.includes("rows=") ? "" : 'rows="4"'} ${extra}>${esc(value)}</textarea></label>`;
 }
 function select(label, name, options, value) {
   return `<label>${esc(label)}<select name="${name}">${options.map(([v, t]) => `<option value="${esc(v)}" ${String(v) === String(value) ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`;
@@ -336,10 +383,10 @@ async function guestDetail() {
 }
 async function login() {
   const config = await api("/auth/config");
-  let register = params.has("register");
+  let register = params.has("register"), authUsername = "";
   function draw() {
     setTitle(register ? "Tạo tài khoản" : "Đăng nhập");
-    app.innerHTML = `<div class="auth-page"><section class="auth-story"><a class="brand light" href="/"><img src="/assets/mark.svg" alt=""><span>Course<span class="brand-sub">MANAGEMENT</span></span></a><div><span class="eyebrow">KHÔNG GIAN CHO SỰ TIẾN BỘ</span><h1>Đi xa hơn,<br>bắt đầu từ<br><em>một bài học.</em></h1><p>Một nơi để khám phá kỹ năng mới, tiếp tục điều đang học và nhìn thấy mình tiến bộ mỗi ngày.</p><div class="story-art"><span>&lt;/&gt;</span><span>✳</span><span>{ }</span></div></div><small>Học để tiến xa.</small></section><section class="auth-form"><div class="auth-inner"><a class="back-link" href="/">← Trang chủ</a><h2>${register ? "Bắt đầu hành trình" : "Chào mừng trở lại"}</h2><p class="muted-text">${register ? "Tạo tài khoản học viên để khám phá các khóa học." : "Đăng nhập để tiếp tục hành trình học tập của bạn."}</p><form id="authForm">${register ? field("Họ và tên", "fullName", "", "text", true, 'maxlength="100"') : ""}${field("Tên đăng nhập", "username", "", "text", true, 'autocomplete="username" minlength="3" maxlength="40"')}${register ? field("Email", "email", "", "email", true, 'autocomplete="email" maxlength="100"') : ""}${field("Mật khẩu", "password", "", "password", true, `autocomplete="${register ? "new" : "current"}-password" ${register ? 'minlength="8" maxlength="64"' : ""}`)}${register ? '<small class="hint">Mật khẩu từ 8 đến 64 ký tự.</small>' : ""}<div id="authError" role="alert"></div><button class="btn full" id="authSubmit">${register ? "Tạo tài khoản" : "Đăng nhập"} ${icon("arrow")}</button></form><p class="auth-switch">${register ? "Đã có tài khoản?" : "Chưa có tài khoản?"} <button class="text-link" id="toggleAuth">${register ? "Đăng nhập" : "Đăng ký miễn phí"}</button></p>${
+    app.innerHTML = `<div class="auth-page"><section class="auth-story"><a class="brand light" href="/"><img src="/assets/mark.svg" alt=""><span>Course<span class="brand-sub">MANAGEMENT</span></span></a><div><span class="eyebrow">KHÔNG GIAN CHO SỰ TIẾN BỘ</span><h1>Đi xa hơn,<br>bắt đầu từ<br><em>một bài học.</em></h1><p>Một nơi để khám phá kỹ năng mới, tiếp tục điều đang học và nhìn thấy mình tiến bộ mỗi ngày.</p><div class="story-art"><span>&lt;/&gt;</span><span>✳</span><span>{ }</span></div></div><small>Học để tiến xa.</small></section><section class="auth-form"><div class="auth-inner"><a class="back-link" href="/">← Trang chủ</a><h2>${register ? "Bắt đầu hành trình" : "Chào mừng trở lại"}</h2><p class="muted-text">${register ? "Tạo tài khoản học viên để khám phá các khóa học." : "Đăng nhập để tiếp tục hành trình học tập của bạn."}</p><form id="authForm">${register ? field("Họ và tên", "fullName", "", "text", true, 'maxlength="100"') : ""}${field("Tên đăng nhập", "username", authUsername, "text", true, 'autocomplete="username" minlength="3" maxlength="40"')}${register ? field("Email", "email", "", "email", true, 'autocomplete="email" maxlength="100"') : ""}${field("Mật khẩu", "password", "", "password", true, `autocomplete="${register ? "new" : "current"}-password" ${register ? 'minlength="8" maxlength="64"' : ""}`)}${register ? '<small class="hint">Mật khẩu từ 8 đến 64 ký tự.</small>' : ""}<div id="authError" role="alert"></div><button class="btn full" id="authSubmit">${register ? "Tạo tài khoản" : "Đăng nhập"} ${icon("arrow")}</button></form><p class="auth-switch">${register ? "Đã có tài khoản?" : "Chưa có tài khoản?"} <button class="text-link" id="toggleAuth">${register ? "Đăng nhập" : "Đăng ký miễn phí"}</button></p>${
       config.demo && !register
         ? `<div class="demo-box"><span class="mini-label">KHÁM PHÁ BẢN DEMO</span><div>${[
             ["student_demo", "Học viên"],
@@ -355,8 +402,14 @@ async function login() {
             )}</div><small>Chọn vai trò để điền tài khoản mẫu. Mật khẩu: Demo123!</small></div>`
         : ""
     }</div></section></div>`;
+    enhanceForms(app);
     $("#toggleAuth").onclick = () => {
+      authUsername = $("#authForm").elements.username.value;
       register = !register;
+      const url = new URL(location.href);
+      if (register) url.searchParams.set("register", "1");
+      else url.searchParams.delete("register");
+      history.replaceState(null, "", url);
       draw();
     };
     document.querySelectorAll("[data-demo]").forEach(
@@ -371,12 +424,18 @@ async function login() {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(e.currentTarget)),
         b = $("#authSubmit");
-      b.disabled = true;
+      if (b.disabled) return;
+      setPending(b, true, register ? "Đang tạo tài khoản…" : "Đang đăng nhập…");
+      $("#toggleAuth").disabled = true;
       $("#authError").innerHTML = "";
       try {
         if (register) {
           await api("/auth/register", "POST", data);
+          authUsername = data.username;
           register = false;
+          const url = new URL(location.href);
+          url.searchParams.delete("register");
+          history.replaceState(null, "", url);
           draw();
           toast("Tài khoản đã sẵn sàng. Hãy đăng nhập.");
         } else {
@@ -393,7 +452,8 @@ async function login() {
       } catch (error) {
         $("#authError").innerHTML = errorBox(error);
       } finally {
-        b.disabled = false;
+        setPending(b, false);
+        $("#toggleAuth").disabled = false;
       }
     };
   }
@@ -598,7 +658,7 @@ async function courses() {
       : admin
         ? "Kiểm tra chương trình, phân công giảng viên và quản lý xuất bản."
         : "Chọn một kỹ năng mới. Bắt đầu một hành trình mới.",
-    `<div class="catalog-intro"><div><h2>${admin || teacher ? "Một khóa học tốt.<br><em>Một trải nghiệm đáng học.</em>" : "Đầu tư vào điều<br>bạn <em>có thể trở thành.</em>"}</h2><p>${admin || teacher ? "Hoàn thiện nội dung, kiểm tra kết quả học tập và xuất bản khi sẵn sàng." : "Học theo từng bước, theo tốc độ của riêng bạn."}</p></div><span class="catalog-symbol">✳</span></div><div class="catalog-toolbar"><label class="search-box">${icon("search")}<input id="search" type="search" placeholder="Tìm khóa học hoặc giảng viên…" aria-label="Tìm khóa học"></label><select id="sort" aria-label="Sắp xếp"><option value="new">Mới nhất</option><option value="price">Học phí tăng dần</option><option value="title">Tên A–Z</option></select>${admin || teacher ? '<select id="status" aria-label="Trạng thái"><option value="">Mọi trạng thái</option><option value="DRAFT">Bản nháp</option><option value="PUBLISHED">Đã xuất bản</option><option value="ARCHIVED">Đã lưu trữ</option></select>' : ""}</div><div class="chips" id="categories"><button class="chip active" data-category="">Tất cả</button>${categories.map((c) => `<button class="chip" data-category="${esc(c)}">${esc(c)}</button>`).join("")}<button class="chip" id="freeFilter">Miễn phí</button></div><div class="result-count" id="count" role="status" aria-live="polite"></div><div class="course-grid" id="catalog"></div><nav class="pagination" id="pagination" aria-label="Phân trang khóa học"></nav>`,
+    `<div class="catalog-intro"><div><h2>${admin || teacher ? "Một khóa học tốt.<br><em>Một trải nghiệm đáng học.</em>" : "Đầu tư vào điều<br>bạn <em>có thể trở thành.</em>"}</h2><p>${admin || teacher ? "Hoàn thiện nội dung, kiểm tra kết quả học tập và xuất bản khi sẵn sàng." : "Học theo từng bước, theo tốc độ của riêng bạn."}</p></div><span class="catalog-symbol">✳</span></div><div class="catalog-toolbar"><label class="search-box">${icon("search")}<input id="search" type="search" placeholder="Tìm khóa học hoặc giảng viên…" aria-label="Tìm khóa học"></label><select id="sort" aria-label="Sắp xếp"><option value="new">Mới nhất</option><option value="price">Học phí tăng dần</option><option value="title">Tên A–Z</option></select>${admin || teacher ? '<select id="status" aria-label="Trạng thái"><option value="">Mọi trạng thái</option><option value="DRAFT">Bản nháp</option><option value="PUBLISHED">Đã xuất bản</option><option value="ARCHIVED">Đã lưu trữ</option></select>' : ""}</div><div class="chips" id="categories"><button class="chip active" data-category="">Tất cả</button>${categories.map((c) => `<button class="chip" data-category="${esc(c)}">${esc(c)}</button>`).join("")}<button class="chip" id="freeFilter">Miễn phí</button></div><div id="activeFilters" class="active-filters" aria-label="Bộ lọc đang áp dụng" hidden></div><div class="result-count" id="count" role="status" aria-live="polite"></div><div class="course-grid" id="catalog"></div><nav class="pagination" id="pagination" aria-label="Phân trang khóa học"></nav>`,
     admin
       ? '<button class="btn" id="createCourse">' +
           icon("plus") +
@@ -731,17 +791,7 @@ async function courses() {
           '<button class="btn secondary" id="resetFilters">Xóa bộ lọc</button>',
         );
       if ($("#resetFilters"))
-        $("#resetFilters").onclick = () => {
-          $("#search").value = "";
-          $("#sort").value = "new";
-          if ($("#status")) $("#status").value = "";
-          category = "";
-          free = false;
-          current = 0;
-          saveFilters();
-          restoreFilters();
-          refresh();
-        };
+        $("#resetFilters").onclick = resetFilters;
       drawPagination(result);
     } catch (error) {
       if (requestRevision !== revision) return;
@@ -755,13 +805,54 @@ async function courses() {
         $("#catalog").setAttribute("aria-busy", "false");
     }
   }
+  function resetFilters() {
+    $("#search").value = "";
+    $("#sort").value = "new";
+    if ($("#status")) $("#status").value = "";
+    category = ""; free = false; current = 0;
+    refresh();
+    $("#search").focus();
+  }
+  function drawActiveFilters() {
+    const filters = [
+      ["search", $("#search").value.trim(), "Từ khóa: " + $("#search").value.trim()],
+      ["category", category, "Chủ đề: " + category],
+      ["free", free, "Miễn phí"],
+      ["status", $("#status")?.value, labels[$("#status")?.value]],
+    ].filter(([, value]) => value);
+    const panel = $("#activeFilters");
+    panel.hidden = !filters.length;
+    panel.innerHTML = '<span class="mini-label">ĐANG LỌC</span>' + filters.map(([key, , label]) =>
+      '<button class="filter-token" data-remove-filter="' + key + '" aria-label="Bỏ bộ lọc ' + esc(label) + '">' + esc(label) + ' ' + icon("close") + '</button>'
+    ).join("") + '<button class="text-link" id="clearActiveFilters">Xóa tất cả</button>';
+    panel.querySelectorAll("[data-remove-filter]").forEach((button) => {
+      button.onclick = () => {
+        const key = button.dataset.removeFilter;
+        if (key === "search") $("#search").value = "";
+        if (key === "category") category = "";
+        if (key === "free") free = false;
+        if (key === "status") $("#status").value = "";
+        current = 0; refresh();
+        $("#search").focus();
+      };
+    });
+    $("#clearActiveFilters").onclick = resetFilters;
+    document.querySelectorAll("[data-category]").forEach((button) => {
+      const selected = button.dataset.category === category;
+      button.classList.toggle("active", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
+    $("#freeFilter").classList.toggle("active", free);
+    $("#freeFilter").setAttribute("aria-pressed", String(free));
+  }
   function refresh(delay = 0, replace = false) {
     clearTimeout(timer);
+    drawActiveFilters();
     const requestRevision = ++revision;
     saveFilters(replace);
     $("#count").textContent = "Đang tìm khóa học…";
     $("#catalog").setAttribute("aria-busy", "true");
-    $("#catalog").innerHTML = "";
+    $("#catalog").innerHTML = Array.from({ length: 3 }, () => '<div class="course-skeleton" aria-hidden="true"><div></div><span></span><span></span><span></span></div>').join("");
     $("#pagination").innerHTML = "";
     if (delay) timer = setTimeout(() => load(requestRevision), delay);
     else return load(requestRevision);
@@ -810,7 +901,7 @@ async function courses() {
 async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
   showDialog(
     lesson ? "Chỉnh sửa bài học" : "Thêm bài học",
-    `${field("Tiêu đề bài học", "title", lesson?.title || "", "text", true, 'maxlength="255"')}${field("Thứ tự", "orderIndex", lesson?.orderIndex || nextOrder, "number", true, 'min="1"')}${field("Liên kết tài liệu hoặc video", "contentUrl", lesson?.contentUrl || "", "url", false, 'maxlength="500" placeholder="https://…"')}${textarea("Nội dung bài học", "textContent", lesson?.textContent || "", 'maxlength="100000"')}`,
+    `<div class="editor-intro"><span class="eyebrow">CHĂM CHÚT TỪNG BÀI HỌC</span><p>${lesson?.isPublished ? "Bài đang xuất bản. Thay đổi được lưu sẽ cập nhật nội dung học viên đọc." : "Lưu nội dung trước, sau đó xuất bản từ chương trình khóa học."}</p></div><div class="editor-tabs" role="tablist" aria-label="Soạn bài học"><button type="button" id="editLessonTab" role="tab" aria-selected="true" aria-controls="lessonEditPanel">1. Soạn nội dung</button><button type="button" id="previewLessonTab" role="tab" aria-selected="false" aria-controls="lessonPreviewPanel" tabindex="-1">2. Xem trước</button></div><section id="lessonEditPanel" role="tabpanel" aria-labelledby="editLessonTab">${field("Tiêu đề bài học", "title", lesson?.title || "", "text", true, 'maxlength="255" placeholder="Ví dụ: Tạo ứng dụng đầu tiên"')}${field("Thứ tự", "orderIndex", lesson?.orderIndex || nextOrder, "number", true, 'min="1"')}${field("Liên kết tài liệu hoặc video", "contentUrl", lesson?.contentUrl || "", "url", false, 'maxlength="500" placeholder="https://…" aria-describedby="resourceHint"')}<p class="hint" id="resourceHint">Dùng liên kết HTTP/HTTPS. Học viên mở tài liệu hoặc video trong thẻ mới.</p>${textarea("Nội dung bài học", "textContent", lesson?.textContent || "", 'rows="10" maxlength="100000" aria-describedby="contentHint"')}<p class="hint" id="contentHint">Gợi ý: mục tiêu bài → giải thích → ví dụ → bài thực hành. Nội dung hiển thị dạng văn bản và giữ xuống dòng.</p></section><section id="lessonPreviewPanel" class="lesson-preview" role="tabpanel" aria-labelledby="previewLessonTab" hidden tabindex="0"></section>`,
     async (d) => {
       d.orderIndex = Number(d.orderIndex);
       d.contentUrl = d.contentUrl || null;
@@ -825,21 +916,53 @@ async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
       await done();
     },
   );
+  modal.classList.add("lesson-editor-dialog");
+  modal.addEventListener("close", () => modal.classList.remove("lesson-editor-dialog"), { once: true });
+  const form = $("#dialogForm"), edit = $("#editLessonTab"), preview = $("#previewLessonTab");
+  const resourceInput = form.elements.contentUrl;
+  const checkResource = () => resourceInput.setCustomValidity(
+    resourceInput.value && !safeUrl(resourceInput.value) ? "Liên kết phải bắt đầu bằng http:// hoặc https://." : "",
+  );
+  resourceInput.addEventListener("input", checkResource, true);
+  checkResource();
+  function selectTab(showPreview) {
+    if (showPreview) {
+      const text = form.elements.textContent.value;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      $("#lessonPreviewPanel").innerHTML = `<div class="preview-caption"><span class="badge muted">Xem trước · Chưa lưu</span><span>${words.toLocaleString("vi-VN")} từ${words ? " · Khoảng " + Math.ceil(words / 200) + " phút đọc" : ""}</span></div><h2>${esc(form.elements.title.value || "Tiêu đề bài học")}</h2>${text.trim() || resourceInput.value ? lessonBody(text, resourceInput.value) : '<div class="empty"><h3>Chưa có nội dung để xem trước</h3><p>Quay lại soạn nội dung hoặc thêm liên kết tài liệu.</p></div>'}<p class="hint">Bản xem trước dùng cùng cách hiển thị với phòng học. Lưu thay đổi để cập nhật bài.</p>`;
+    }
+    $("#lessonEditPanel").hidden = showPreview;
+    $("#lessonPreviewPanel").hidden = !showPreview;
+    edit.setAttribute("aria-selected", String(!showPreview));
+    preview.setAttribute("aria-selected", String(showPreview));
+    edit.tabIndex = showPreview ? -1 : 0;
+    preview.tabIndex = showPreview ? 0 : -1;
+  }
+  edit.onclick = () => selectTab(false);
+  preview.onclick = () => selectTab(true);
+  form.addEventListener("form-invalid", () => selectTab(false));
+  for (const tab of [edit, preview]) tab.onkeydown = (event) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const showPreview = event.key === "End" || (event.key !== "Home" && tab === edit);
+    selectTab(showPreview);
+    (showPreview ? preview : edit).focus();
+  };
 }
 async function paymentInfo(payment) {
   const bank = await api("/payments/bank-info");
   showDialog(
     "Hướng dẫn chuyển khoản",
-    `<p>Yêu cầu của bạn đang chờ xác nhận. Quyền học sẽ được cấp sau khi quản trị viên đối chiếu chuyển khoản.</p><div class="bank-info">${[
+    `<ol class="payment-steps"><li class="done"><span>1</span><div><strong>Đã tạo yêu cầu</strong><small>${esc(payment.courseTitle || "Đăng ký khóa học")}</small></div></li><li class="current"><span>2</span><div><strong>Chuyển khoản theo thông tin dưới đây</strong><small>Nếu đã chuyển, không cần chuyển thêm.</small></div></li><li><span>3</span><div><strong>Chờ đối chiếu và mở quyền học</strong><small>Theo dõi trạng thái tại Thanh toán của tôi.</small></div></li></ol><div class="bank-info">${[
       ["Ngân hàng", bank.bankName],
-      ["Số tài khoản", bank.accountNumber],
+      ["Số tài khoản", bank.accountNumber, bank.accountNumber],
       ["Chủ tài khoản", bank.accountHolder],
-      ["Số tiền", money(payment.amount)],
-      ["Nội dung chuyển khoản", payment.transferNote],
+      ["Số tiền", money(payment.amount), String(payment.amount)],
+      ["Nội dung chuyển khoản", payment.transferNote, payment.transferNote],
     ]
       .map(
-        ([t, v]) =>
-          `<div><span>${esc(t)}</span><strong>${esc(v)}</strong></div>`,
+        ([t, v, copy]) =>
+          `<div><span>${esc(t)}</span><strong>${esc(v)}</strong>${copy != null ? `<button type="button" class="copy-button" data-copy="${esc(copy)}" aria-label="Sao chép ${esc(t.toLowerCase())}">Sao chép</button>` : ""}</div>`,
       )
       .join(
         "",
@@ -847,6 +970,20 @@ async function paymentInfo(payment) {
     async () => {},
     "Đã hiểu",
   );
+  modal.querySelectorAll("[data-copy]").forEach((button) => {
+    button.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy);
+        toast("Đã sao chép " + button.getAttribute("aria-label").slice(9));
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(button.previousElementSibling);
+        const selection = getSelection();
+        selection.removeAllRanges(); selection.addRange(range);
+        toast("Chưa sao chép tự động được. Nội dung đã được chọn; hãy dùng chức năng sao chép của thiết bị.", true);
+      }
+    };
+  });
 }
 async function detail() {
   const id = Number(params.get("id") || params.get("courseId"));
@@ -1278,7 +1415,7 @@ async function learn() {
       if (location.search !== "?" + query)
         history[historyMode](null, "", location.pathname + "?" + query);
       $("#lessonContent").innerHTML =
-        `<div class="lesson-position"><span class="eyebrow">BÀI ${index + 1} / ${e.lessons.length}</span><span id="completionBadge">${entry.isCompleted ? badge("COMPLETED") : '<span class="badge muted">Chưa hoàn thành</span>'}</span></div><h2 tabindex="-1">${esc(l.title)}</h2><div class="lesson-text">${esc(l.textContent || "Bài học sử dụng tài liệu hoặc video bên dưới.")}</div>${url ? link("Mở tài liệu / video ↗", url, "btn secondary resource-link") : ""}<div class="lesson-footer"><div><button class="btn" id="completeLesson" ${entry.isCompleted ? "disabled" : ""}>${icon("check")} ${entry.isCompleted ? "Đã hoàn thành" : "Đánh dấu hoàn thành"}</button></div><div class="lesson-step-actions">${previous ? '<button class="btn secondary compact" id="previousLesson">← Bài trước</button>' : ""}${next ? '<button class="btn secondary compact" id="nextLesson">Bài tiếp theo →</button>' : link("Việc học của tôi", "/my-courses.html", "btn secondary compact")}</div></div><section class="private-notes"><div class="section-heading"><div><h3>Ghi chú của tôi</h3><p>Ghi lại ý tưởng, điều cần ôn hoặc câu hỏi cho chính bạn.</p></div><span class="badge muted">${icon("lock")} Riêng tư</span></div><label for="lessonNote" class="sr-only">Ghi chú cho bài học</label><textarea id="lessonNote" rows="6" maxlength="10000" placeholder="Điều mình học được từ bài này…">${esc(note.note)}</textarea><div class="note-actions"><span id="noteStatus" role="status" aria-live="polite">${note.note ? "Ghi chú đã lưu. Chỉ bạn có thể xem." : "Lưu ghi chú để xem lại trên các thiết bị của bạn."}</span><button class="btn secondary compact" id="saveNote">Lưu ghi chú</button></div></section>${Number(e.progressPercentage) === 100 ? '<div class="notice completion-notice">' + icon("check") + "<div><strong>Bạn đã hoàn thành khóa học!</strong><p>Ôn lại những điều quan trọng hoặc chia sẻ trải nghiệm để giúp học viên khác chọn khóa học.</p>" + link("Đánh giá khóa học →", "/course-detail.html?id=" + e.courseId + "#reviews", "text-link") + "</div></div>" : ""}`;
+        `<div class="lesson-position"><span class="eyebrow">BÀI ${index + 1} / ${e.lessons.length}</span><span id="completionBadge">${entry.isCompleted ? badge("COMPLETED") : '<span class="badge muted">Chưa hoàn thành</span>'}</span></div><h2 tabindex="-1">${esc(l.title)}</h2>${lessonBody(l.textContent, url)}<div class="lesson-footer"><div><button class="btn" id="completeLesson" ${entry.isCompleted ? "disabled" : ""}>${icon("check")} ${entry.isCompleted ? "Đã hoàn thành" : "Đánh dấu hoàn thành"}</button></div><div class="lesson-step-actions">${previous ? '<button class="btn secondary compact" id="previousLesson">← Bài trước</button>' : ""}${next ? '<button class="btn secondary compact" id="nextLesson">Bài tiếp theo →</button>' : link("Việc học của tôi", "/my-courses.html", "btn secondary compact")}</div></div><section class="private-notes"><div class="section-heading"><div><h3>Ghi chú của tôi</h3><p>Ghi lại ý tưởng, điều cần ôn hoặc câu hỏi cho chính bạn.</p></div><span class="badge muted">${icon("lock")} Riêng tư</span></div><label for="lessonNote" class="sr-only">Ghi chú cho bài học</label><textarea id="lessonNote" rows="6" maxlength="10000" placeholder="Điều mình học được từ bài này…">${esc(note.note)}</textarea><div class="note-actions"><span id="noteStatus" role="status" aria-live="polite">${note.note ? "Ghi chú đã lưu. Chỉ bạn có thể xem." : "Lưu ghi chú để xem lại trên các thiết bị của bạn."}</span><button class="btn secondary compact" id="saveNote">Lưu ghi chú</button></div></section>${Number(e.progressPercentage) === 100 ? '<div class="notice completion-notice">' + icon("check") + "<div><strong>Bạn đã hoàn thành khóa học!</strong><p>Ôn lại những điều quan trọng hoặc chia sẻ trải nghiệm để giúp học viên khác chọn khóa học.</p>" + link("Đánh giá khóa học →", "/course-detail.html?id=" + e.courseId + "#reviews", "text-link") + "</div></div>" : ""}`;
       drawNav();
       const resource = $(".resource-link");
       const discussion = document.createElement("section");

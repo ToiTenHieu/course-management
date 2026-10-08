@@ -157,3 +157,22 @@ Sáu E2E đạt trên bản demo có dữ liệu lớn; helper chọn khóa tìm
 Playwright CLI kiểm tra thêm các thao tác ở bốn vai trò, bộ lọc/trang qua tải lại, báo cáo có tổng toàn bộ, tài khoản được tìm ngoài 20 kết quả đầu, thông báo bulk-read riêng, đánh giá và ghi chú lưu qua tải lại. Khóa 23 bài hiển thị 8 bài/trang, tự chọn trang chứa bài hiện tại; thứ tự thêm bài liên tiếp là 1 rồi 2. Đã tạo/sửa/khóa/mở/xóa tài khoản mẫu, tạo/đọc/xóa thông báo, tạo/sửa khóa, sửa/xuất bản/ẩn/xóa bài và chuyển trạng thái khóa, từ chối thanh toán. HTTP 503 cho danh sách có nút thử lại; phản hồi tìm kiếm cũ được trả chậm nhưng không thay thế kết quả mới.
 
 Các script `role-audit-*.js` và ảnh `users-admin-mobile.png`, `reviews-student-mobile.png`, `learn-student-mobile.png`, `reports-admin-desktop.png`, `quiz-teacher-scenario.png` nằm trong `output/playwright` (Git bỏ qua). Mobile không tràn ngang; bảng rộng cuộn trong khung. Các API list cũ vẫn còn để tương thích; syllabus/điều hướng bài tải metadata đầy đủ và chỉ phân trang trên giao diện.
+
+## Hoàn thiện UX/UI thao tác — 08/10/2026
+
+74/74 backend trên H2 đạt, sáu hành trình E2E hiện có đạt trên PostgreSQL demo. Đóng gói JAR thành công sau khi dừng tiến trình demo đang giữ file trên Windows. Không có thay đổi schema/nghiệp vụ backend trong đợt này. Cú pháp sáu module JavaScript hợp lệ; CI bổ sung kiểm tra `experience.js`.
+
+| Kiểm tra bổ sung bằng Playwright CLI | Kết quả |
+| --- | --- |
+| Gửi form đăng nhập rỗng, sửa lỗi và hiện/ẩn mật khẩu | Lỗi sát ô, `aria-invalid`/mô tả và focus đầu tiên đúng; đổi kiểu hiển thị giữ giá trị |
+| Preview bài học và tab Home/End | Cùng văn bản/liên kết với phòng học, giữ xuống dòng, HTML là văn bản, tài liệu mở ở thẻ mới |
+| Escape khi đang soạn, tiếp tục sửa, bỏ thay đổi | Giữ nội dung đến khi chủ động bỏ; không đóng thầm lặng |
+| URL FTP, tiêu đề chỉ có khoảng trắng; gửi từ preview | Chặn gửi, mở lại tab soạn và đưa focus đến ô lỗi |
+| HTTP 503 khi lưu rồi thử lại | Giữ nội dung; lưu lại thành công, vẫn có bài sau reload |
+| Giữ request lưu chậm | Ô nhập/nút đóng bị khóa, Escape không đóng và chỉ có một request lưu |
+| Menu mobile: Tab/Shift+Tab, Escape, nền che và resize | Focus không ra ngoài, đóng trả focus, chuyển desktop gỡ inert/khóa cuộn |
+| Nhãn bộ lọc, gỡ từng điều kiện, Back và xóa tất cả | URL/`aria-pressed`/kết quả đồng bộ, trạng thái giữ qua reload |
+| Sao chép tài khoản/số tiền/nội dung CK; clipboard bị chặn | Đúng giá trị gốc; fallback chọn đúng văn bản để sao chép thủ công |
+| Mobile 390 × 844, ảnh desktop/mobile | Menu, preview và hướng dẫn thanh toán không tràn ngang; nội dung dài cuộn trong dialog |
+
+Log: `target/local-demo/ux-detail-verify.log` (74 test đạt, bước đóng gói đầu gặp file bị giữ), `ux-detail-final-package.log` (đóng gói thành công), `ux-detail-e2e.log` (6/6 đạt). Script QA và ảnh `ux-*.png` ở `output/playwright`, đã xem ảnh để kiểm tra bố cục. Bản nháp hộp soạn chưa tự lưu trên máy chủ; video vẫn mở ở liên kết ngoài. Kiểm tra trình duyệt khác và đánh giá với người dùng thật còn thuộc đợt tiếp theo.

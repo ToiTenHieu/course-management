@@ -9,6 +9,7 @@ Nền tảng quản lý khóa học trực tuyến phục vụ đồ án/demo. B
 - Hỏi đáp theo bài: học viên đã đăng ký đặt câu hỏi và đọc trao đổi trong khóa; giảng viên phụ trách/admin trả lời, cập nhật phản hồi, ẩn/hiện câu hỏi. Thông báo dẫn tới đúng bài và câu hỏi, kể cả câu hỏi nằm ngoài trang đầu.
 - Quiz theo bài: giảng viên soạn 1–20 câu trắc nghiệm bốn lựa chọn, đáp án và giải thích; lưu nháp/xuất bản, đặt mức đạt. Học viên nhận điểm và phản hồi từng câu, xem lịch sử phân trang; giảng viên xem thống kê câu hay sai của phiên bản hiện tại. Mỗi lần sửa giữ đề cũ để lịch sử luôn đúng.
 - Giảng viên: dashboard riêng và checklist chuẩn bị khóa, sửa thông tin/mục tiêu của khóa phụ trách, thêm/sửa/xóa bài học, xuất bản/ẩn bài học. Học phí/phân công và xuất bản khóa do admin quản lý.
+- Chi tiết thao tác: lỗi ngay dưới ô nhập, hiện/ẩn mật khẩu, số ký tự nội dung, trạng thái đang lưu; cảnh báo khi đóng hộp soạn có thay đổi chưa lưu. Giảng viên xem trước bài trước khi lưu. Menu điện thoại có nền che, hỗ trợ Escape và giữ focus trong điều hướng.
 - Admin: quản lý người dùng và khóa học, xuất bản/lưu trữ, xác nhận/từ chối thanh toán, tạo thông báo và xem báo cáo.
 - Quyền học được kiểm tra ở backend; danh sách chương trình của người chưa đăng ký chỉ trả metadata, không trả nội dung hoặc URL tài liệu.
 - Danh mục khóa học phân trang ở máy chủ, tìm theo tên/mô tả/giảng viên, lọc chủ đề, học phí và trạng thái; bộ lọc và trang hiện tại được lưu trong URL.
@@ -66,6 +67,7 @@ Flyway quản lý schema qua `src/main/resources/db/migration`, Hibernate chỉ 
 .\mvnw.cmd -B -ntp verify
 node --check src/main/resources/static/js/api.js
 node --check src/main/resources/static/js/app.js
+node --check src/main/resources/static/js/experience.js
 node --check src/main/resources/static/js/questions.js
 node --check src/main/resources/static/js/quiz.js
 ```
