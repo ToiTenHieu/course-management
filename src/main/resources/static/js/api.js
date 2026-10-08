@@ -21,8 +21,11 @@ export async function api(path, method = "GET", body) {
       options.headers[csrf.headerName] = csrf.token;
     }
     if (body !== undefined) {
-      options.headers["Content-Type"] = "application/json";
-      options.body = JSON.stringify(body);
+      if (body instanceof FormData) options.body = body;
+      else {
+        options.headers["Content-Type"] = "application/json";
+        options.body = JSON.stringify(body);
+      }
     }
     const response = await fetch("/api" + path, options);
     const data = await response.json();

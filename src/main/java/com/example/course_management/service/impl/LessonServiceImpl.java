@@ -59,11 +59,14 @@ public class LessonServiceImpl implements LessonService {
     var c = lockedCourse(courseId);
     policy.manager(c, actor);
     policy.contentUrl(r.getContentUrl());
+    policy.contentUrl(r.getVideoUrl());
     var l = new Lesson();
     l.setCourse(c);
     l.setTitle(r.getTitle().trim());
     l.setContentUrl(r.getContentUrl());
     l.setTextContent(r.getTextContent());
+    if (r.getContentFormat() != null) l.setContentFormat(r.getContentFormat());
+    l.setVideoUrl(r.getVideoUrl());
     l.setOrderIndex(r.getOrderIndex());
     return response(lessons.save(l), true);
   }
@@ -73,9 +76,12 @@ public class LessonServiceImpl implements LessonService {
     lockedCourse(l.getCourse().getCourseId());
     policy.manager(l.getCourse(), actor);
     policy.contentUrl(r.getContentUrl());
+    policy.contentUrl(r.getVideoUrl());
     l.setTitle(r.getTitle().trim());
     l.setContentUrl(r.getContentUrl());
     l.setTextContent(r.getTextContent());
+    if (r.getContentFormat() != null) l.setContentFormat(r.getContentFormat());
+    l.setVideoUrl(r.getVideoUrl());
     l.setOrderIndex(r.getOrderIndex());
     l.setUpdatedAt(LocalDateTime.now());
     return response(lessons.save(l), true);
@@ -148,6 +154,8 @@ public class LessonServiceImpl implements LessonService {
         .title(l.getTitle())
         .contentUrl(full ? l.getContentUrl() : null)
         .textContent(full ? l.getTextContent() : null)
+        .contentFormat(full ? l.getContentFormat() : null)
+        .videoUrl(full ? l.getVideoUrl() : null)
         .orderIndex(l.getOrderIndex())
         .isPublished(l.getIsPublished())
         .build();

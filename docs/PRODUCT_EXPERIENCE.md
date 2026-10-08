@@ -40,7 +40,7 @@ Checklist là hướng dẫn chất lượng, không thay thế luật xuất b�
 
 | Ưu tiên | Hạng mục | Người hưởng lợi | Tiêu chí hoàn thành |
 |---|---|---|---|
-| P1 | Soạn nội dung có cấu trúc, video và tài liệu trong phòng học | Giảng viên, học viên | Preview trước xuất bản, phát media an toàn, nội dung dễ đọc và có mô tả hỗ trợ tiếp cận |
+| Đã triển khai 08/10 | Soạn nội dung có cấu trúc, video và tài liệu trong phòng học | Giảng viên, học viên | Markdown giới hạn, preview dùng chung renderer, YouTube/MP4/WebM, file đính kèm được kiểm tra quyền |
 | P2 | Hồ sơ giảng viên, yêu cầu đầu vào và đối tượng phù hợp | Khách, học viên | Người học hiểu khóa dành cho ai và phải chuẩn bị gì; thông tin do giảng viên cung cấp |
 | P2 | Lưu khóa quan tâm và đề xuất dựa trên chủ đề đã chọn | Khách, học viên | Lưu giữa thiết bị, gỡ lưu được; đề xuất giải thích được, không gắn nhãn “phổ biến” bằng dữ liệu giả |
 | P2 | Mục tiêu học theo tuần và nhắc học tùy chọn | Học viên | Học viên chủ động chọn mục tiêu và bật/tắt nhắc; không tạo streak khi chưa có hoạt động học |

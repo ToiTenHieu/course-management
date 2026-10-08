@@ -18,6 +18,12 @@ public class CreateLessonRequest {
   @Size(max = 100000)
   private String textContent;
 
+  @Pattern(regexp = "TEXT|MARKDOWN", message = "Định dạng nội dung không hợp lệ")
+  private String contentFormat;
+
+  @Size(max = 500)
+  private String videoUrl;
+
   @NotNull(message = "orderIndex không được để trống")
   @Positive
   private Integer orderIndex;

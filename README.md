@@ -132,7 +132,18 @@ Các danh sách nghiệp vụ dùng `/api/lists`, phân trang từ 0, size 1–1
 
 ## Phạm vi bản nền
 
-Xem [đánh giá trải nghiệm theo từng vai trò và lộ trình sản phẩm](docs/PRODUCT_EXPERIENCE.md). Ưu tiên tiếp theo là soạn nội dung/video và phân trang các danh sách còn lại. Quiz hiện hỗ trợ một đáp án đúng trong bốn lựa chọn; bài tập tự luận, lịch thi và tiêu chí cấp chứng nhận thuộc giai đoạn sau. Khi triển khai rộng cần thêm email xác minh/quên mật khẩu, thanh toán qua cổng, lưu trữ file, audit log và quan sát vận hành. Bản hiện tại dùng chuyển khoản đối chiếu thủ công.
+Xem [đánh giá trải nghiệm theo từng vai trò và lộ trình sản phẩm](docs/PRODUCT_EXPERIENCE.md). Các danh sách nghiệp vụ đã phân trang ở máy chủ; chương trình/điều hướng bài vẫn tải metadata đầy đủ và phân trang trên giao diện. Quiz hiện hỗ trợ một đáp án đúng trong bốn lựa chọn; bài tập tự luận, lịch thi và tiêu chí cấp chứng nhận thuộc giai đoạn sau. Khi triển khai rộng cần thêm email xác minh/quên mật khẩu, thanh toán qua cổng, audit log và quan sát vận hành. Bản hiện tại dùng chuyển khoản đối chiếu thủ công.
+
+## Nội dung, video và tài liệu bài học
+
+Bài cũ giữ định dạng `TEXT`. Giảng viên chọn `MARKDOWN` để soạn tiêu đề (`#`–`###`), danh sách, chữ đậm, mã inline/fenced, liên kết và ảnh có mô tả. HTML luôn được escape. Preview và phòng học dùng cùng bộ hiển thị. `videoUrl` hỗ trợ YouTube qua youtube-nocookie, MP4/WebM bằng player gốc; nguồn khác hiện liên kết ngoài. Không tự phát video hoặc tải URL từ backend.
+
+Lưu bài nháp trước để tải file từ trình soạn. Mỗi bài tối đa 20 file, 5 MB/file, nhận PDF, TXT UTF-8, PNG/JPG/WebP và kiểm tra chữ ký/định dạng. File được lưu trong PostgreSQL qua V10; sao lưu database bao gồm tài liệu. Giới hạn này phù hợp demo, cần cân nhắc object storage khi có nhiều nội dung. Tải/xóa file có hiệu lực ngay; xóa ảnh đã chèn làm liên kết ảnh không còn tồn tại.
+
+- `GET/POST /api/lessons/{id}/resources`: danh sách metadata hoặc upload multipart `file`; upload chỉ dành cho admin/giảng viên phụ trách và yêu cầu CSRF.
+- `GET /api/lesson-resources/{id}/content`: chỉ người quản lý hoặc học viên còn đăng ký và bài published. PDF/TXT tải xuống, ảnh được hiển thị inline; response không cache và có nosniff/sandbox.
+- `DELETE /api/lesson-resources/{id}`: người quản lý khóa, yêu cầu CSRF. Xóa bài xóa tài liệu của bài qua khóa ngoại.
+- `node --test tests/unit/*.test.mjs`: kiểm tra bộ hiển thị và URL không an toàn.
 
 ## API quiz theo bài
 

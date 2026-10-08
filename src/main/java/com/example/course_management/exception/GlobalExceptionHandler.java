@@ -71,6 +71,11 @@ public class GlobalExceptionHandler {
         .body(ApiResponse.error("Bạn không có quyền thực hiện thao tác này"));
   }
 
+  @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+  public ResponseEntity<ApiResponse<Void>> uploadTooLarge(Exception ex) {
+    return ResponseEntity.status(413).body(ApiResponse.error("Mỗi tài liệu tối đa 5 MB"));
+  }
+
   @ExceptionHandler(BadRequestException.class)
   public ResponseEntity<ApiResponse<Void>> handleBadRequest(BadRequestException ex) {
     return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage()));

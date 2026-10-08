@@ -11,6 +11,8 @@ public class LessonResponse {
   private String title;
   private String contentUrl;
   private String textContent;
+  private String contentFormat;
+  private String videoUrl;
   private Integer orderIndex;
   private Boolean isPublished;
 }

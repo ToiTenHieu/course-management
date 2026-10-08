@@ -33,6 +33,12 @@ public class Lesson {
   @Column(name = "text_content", columnDefinition = "TEXT")
   private String textContent;
 
+  @Column(name = "content_format", nullable = false, length = 20)
+  private String contentFormat = "TEXT";
+
+  @Column(name = "video_url", length = 500)
+  private String videoUrl;
+
   @Column(name = "order_index", nullable = false)
   private Integer orderIndex;
 

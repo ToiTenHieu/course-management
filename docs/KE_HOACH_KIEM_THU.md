@@ -176,3 +176,9 @@ Các script `role-audit-*.js` và ảnh `users-admin-mobile.png`, `reviews-stude
 | Mobile 390 × 844, ảnh desktop/mobile | Menu, preview và hướng dẫn thanh toán không tràn ngang; nội dung dài cuộn trong dialog |
 
 Log: `target/local-demo/ux-detail-verify.log` (74 test đạt, bước đóng gói đầu gặp file bị giữ), `ux-detail-final-package.log` (đóng gói thành công), `ux-detail-e2e.log` (6/6 đạt). Script QA và ảnh `ux-*.png` ở `output/playwright`, đã xem ảnh để kiểm tra bố cục. Bản nháp hộp soạn chưa tự lưu trên máy chủ; video vẫn mở ở liên kết ngoài. Kiểm tra trình duyệt khác và đánh giá với người dùng thật còn thuộc đợt tiếp theo.
+
+### Nội dung và tài liệu bài học (08/10/2026)
+- Backend H2: 77 bài kiểm thử đạt; kiểm tra quyền đọc/tải tài liệu, quyền giảng viên, CSRF và định dạng tệp.
+- Renderer: 4 bài kiểm thử Node đạt (Markdown, URL ảnh và video, escape HTML).
+- Trình duyệt: tạo/sửa bài, xem trước, tải TXT/PNG, tải xuống, chèn ảnh và viewport 390px đạt.
+

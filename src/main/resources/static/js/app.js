@@ -1,6 +1,7 @@
 import { api, ApiError } from "./api.js";
 import { mountQuestions } from "./questions.js";
 import { mountQuiz } from "./quiz.js";
+import { mountResources } from "./lesson-content.js";
 import { enhanceForms, wireNavigation, setPending, lessonBody } from "./experience.js";
 import {
   mountPagedList,
@@ -901,10 +902,11 @@ async function courses() {
 async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
   showDialog(
     lesson ? "Chỉnh sửa bài học" : "Thêm bài học",
-    `<div class="editor-intro"><span class="eyebrow">CHĂM CHÚT TỪNG BÀI HỌC</span><p>${lesson?.isPublished ? "Bài đang xuất bản. Thay đổi được lưu sẽ cập nhật nội dung học viên đọc." : "Lưu nội dung trước, sau đó xuất bản từ chương trình khóa học."}</p></div><div class="editor-tabs" role="tablist" aria-label="Soạn bài học"><button type="button" id="editLessonTab" role="tab" aria-selected="true" aria-controls="lessonEditPanel">1. Soạn nội dung</button><button type="button" id="previewLessonTab" role="tab" aria-selected="false" aria-controls="lessonPreviewPanel" tabindex="-1">2. Xem trước</button></div><section id="lessonEditPanel" role="tabpanel" aria-labelledby="editLessonTab">${field("Tiêu đề bài học", "title", lesson?.title || "", "text", true, 'maxlength="255" placeholder="Ví dụ: Tạo ứng dụng đầu tiên"')}${field("Thứ tự", "orderIndex", lesson?.orderIndex || nextOrder, "number", true, 'min="1"')}${field("Liên kết tài liệu hoặc video", "contentUrl", lesson?.contentUrl || "", "url", false, 'maxlength="500" placeholder="https://…" aria-describedby="resourceHint"')}<p class="hint" id="resourceHint">Dùng liên kết HTTP/HTTPS. Học viên mở tài liệu hoặc video trong thẻ mới.</p>${textarea("Nội dung bài học", "textContent", lesson?.textContent || "", 'rows="10" maxlength="100000" aria-describedby="contentHint"')}<p class="hint" id="contentHint">Gợi ý: mục tiêu bài → giải thích → ví dụ → bài thực hành. Nội dung hiển thị dạng văn bản và giữ xuống dòng.</p></section><section id="lessonPreviewPanel" class="lesson-preview" role="tabpanel" aria-labelledby="previewLessonTab" hidden tabindex="0"></section>`,
+    `<div class="editor-intro"><span class="eyebrow">CHĂM CHÚT TỪNG BÀI HỌC</span><p>${lesson?.isPublished ? "Bài đang xuất bản. Thay đổi được lưu sẽ cập nhật nội dung học viên đọc." : "Lưu nội dung trước, sau đó xuất bản từ chương trình khóa học."}</p></div><div class="editor-tabs" role="tablist" aria-label="Soạn bài học"><button type="button" id="editLessonTab" role="tab" aria-selected="true" aria-controls="lessonEditPanel">1. Soạn nội dung</button><button type="button" id="previewLessonTab" role="tab" aria-selected="false" aria-controls="lessonPreviewPanel" tabindex="-1">2. Xem trước</button></div><section id="lessonEditPanel" role="tabpanel" aria-labelledby="editLessonTab">${field("Tiêu đề bài học", "title", lesson?.title || "", "text", true, 'maxlength="255" placeholder="Ví dụ: Tạo ứng dụng đầu tiên"')}${field("Thứ tự", "orderIndex", lesson?.orderIndex || nextOrder, "number", true, 'min="1"')}${field("Liên kết tài liệu hoặc video", "contentUrl", lesson?.contentUrl || "", "url", false, 'maxlength="500" placeholder="https://…" aria-describedby="resourceHint"')}<p class="hint" id="resourceHint">Dùng liên kết HTTP/HTTPS. Học viên mở tài liệu hoặc video trong thẻ mới.</p>${select("Định dạng nội dung", "contentFormat", [["TEXT", "Văn bản thường"], ["MARKDOWN", "Nội dung có cấu trúc"]], lesson?.contentFormat || "MARKDOWN")}${field("Video trong phòng học", "videoUrl", lesson?.videoUrl || "", "url", false, 'maxlength="500" placeholder="YouTube hoặc liên kết MP4/WebM"')}<div class="content-toolbar" aria-label="Công cụ soạn nội dung"><button type="button" data-insert="heading">Tiêu đề</button><button type="button" data-insert="bold">In đậm</button><button type="button" data-insert="list">Danh sách</button><button type="button" data-insert="code">Đoạn mã</button><button type="button" data-insert="link">Liên kết</button><button type="button" data-insert="image">Ảnh</button></div>${textarea("Nội dung bài học", "textContent", lesson?.textContent || "", 'rows="10" maxlength="100000" aria-describedby="contentHint"')}<p class="hint" id="contentHint">Gợi ý: mục tiêu bài → giải thích → ví dụ → bài thực hành. Chế độ có cấu trúc hỗ trợ # tiêu đề, **in đậm**, danh sách, đoạn mã và ảnh. HTML được hiển thị như văn bản.</p></section><section id="lessonPreviewPanel" class="lesson-preview" role="tabpanel" aria-labelledby="previewLessonTab" hidden tabindex="0"></section>`,
     async (d) => {
       d.orderIndex = Number(d.orderIndex);
       d.contentUrl = d.contentUrl || null;
+      d.videoUrl = d.videoUrl || null;
       await api(
         lesson
           ? "/lessons/" + lesson.lessonId
@@ -920,6 +922,24 @@ async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
   modal.addEventListener("close", () => modal.classList.remove("lesson-editor-dialog"), { once: true });
   const form = $("#dialogForm"), edit = $("#editLessonTab"), preview = $("#previewLessonTab");
   const resourceInput = form.elements.contentUrl;
+  const textInput = form.elements.textContent;
+  const insert = (value) => {
+    form.elements.contentFormat.value = "MARKDOWN";
+    textInput.setRangeText(value, textInput.selectionStart, textInput.selectionEnd, "end");
+    textInput.dispatchEvent(new Event("input", { bubbles: true }));
+    textInput.focus();
+  };
+  const snippets = { heading: "\n# Tiêu đề\n", bold: "**Nội dung nổi bật**", list: "\n- Mục thứ nhất\n- Mục thứ hai\n", code: "\n```\n// Đoạn mã của bạn\n```\n", link: "[Tên liên kết](https://example.com)", image: "![Mô tả ảnh](https://example.com/image.png)" };
+  form.querySelectorAll("[data-insert]").forEach(b => { b.onclick = () => insert(snippets[b.dataset.insert]); });
+  const files = document.createElement("section");
+  files.className = "lesson-attachments";
+  $("#lessonEditPanel").append(files);
+  if (lesson) await mountResources(files, lesson.lessonId, true, insert);
+  else files.innerHTML = '<p class="hint">Lưu bài nháp trước để tải tài liệu và chèn ảnh từ máy. Tài liệu tải lên được lưu ngay.</p>';
+  for (const input of [resourceInput, form.elements.videoUrl]) {
+    const check = () => input.setCustomValidity(input.value && !safeUrl(input.value) ? "Liên kết phải bắt đầu bằng http:// hoặc https://." : "");
+    input.addEventListener("input", check, true); check();
+  }
   const checkResource = () => resourceInput.setCustomValidity(
     resourceInput.value && !safeUrl(resourceInput.value) ? "Liên kết phải bắt đầu bằng http:// hoặc https://." : "",
   );
@@ -929,7 +949,7 @@ async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
     if (showPreview) {
       const text = form.elements.textContent.value;
       const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-      $("#lessonPreviewPanel").innerHTML = `<div class="preview-caption"><span class="badge muted">Xem trước · Chưa lưu</span><span>${words.toLocaleString("vi-VN")} từ${words ? " · Khoảng " + Math.ceil(words / 200) + " phút đọc" : ""}</span></div><h2>${esc(form.elements.title.value || "Tiêu đề bài học")}</h2>${text.trim() || resourceInput.value ? lessonBody(text, resourceInput.value) : '<div class="empty"><h3>Chưa có nội dung để xem trước</h3><p>Quay lại soạn nội dung hoặc thêm liên kết tài liệu.</p></div>'}<p class="hint">Bản xem trước dùng cùng cách hiển thị với phòng học. Lưu thay đổi để cập nhật bài.</p>`;
+      $("#lessonPreviewPanel").innerHTML = `<div class="preview-caption"><span class="badge muted">Xem trước · Chưa lưu</span><span>${words.toLocaleString("vi-VN")} từ${words ? " · Khoảng " + Math.ceil(words / 200) + " phút đọc" : ""}</span></div><h2>${esc(form.elements.title.value || "Tiêu đề bài học")}</h2>${text.trim() || resourceInput.value ? lessonBody(text, resourceInput.value, form.elements.contentFormat.value, form.elements.videoUrl.value) : '<div class="empty"><h3>Chưa có nội dung để xem trước</h3><p>Quay lại soạn nội dung hoặc thêm liên kết tài liệu.</p></div>'}<p class="hint">Bản xem trước dùng cùng cách hiển thị với phòng học. Lưu thay đổi để cập nhật bài.</p>`;
     }
     $("#lessonEditPanel").hidden = showPreview;
     $("#lessonPreviewPanel").hidden = !showPreview;
@@ -1415,7 +1435,7 @@ async function learn() {
       if (location.search !== "?" + query)
         history[historyMode](null, "", location.pathname + "?" + query);
       $("#lessonContent").innerHTML =
-        `<div class="lesson-position"><span class="eyebrow">BÀI ${index + 1} / ${e.lessons.length}</span><span id="completionBadge">${entry.isCompleted ? badge("COMPLETED") : '<span class="badge muted">Chưa hoàn thành</span>'}</span></div><h2 tabindex="-1">${esc(l.title)}</h2>${lessonBody(l.textContent, url)}<div class="lesson-footer"><div><button class="btn" id="completeLesson" ${entry.isCompleted ? "disabled" : ""}>${icon("check")} ${entry.isCompleted ? "Đã hoàn thành" : "Đánh dấu hoàn thành"}</button></div><div class="lesson-step-actions">${previous ? '<button class="btn secondary compact" id="previousLesson">← Bài trước</button>' : ""}${next ? '<button class="btn secondary compact" id="nextLesson">Bài tiếp theo →</button>' : link("Việc học của tôi", "/my-courses.html", "btn secondary compact")}</div></div><section class="private-notes"><div class="section-heading"><div><h3>Ghi chú của tôi</h3><p>Ghi lại ý tưởng, điều cần ôn hoặc câu hỏi cho chính bạn.</p></div><span class="badge muted">${icon("lock")} Riêng tư</span></div><label for="lessonNote" class="sr-only">Ghi chú cho bài học</label><textarea id="lessonNote" rows="6" maxlength="10000" placeholder="Điều mình học được từ bài này…">${esc(note.note)}</textarea><div class="note-actions"><span id="noteStatus" role="status" aria-live="polite">${note.note ? "Ghi chú đã lưu. Chỉ bạn có thể xem." : "Lưu ghi chú để xem lại trên các thiết bị của bạn."}</span><button class="btn secondary compact" id="saveNote">Lưu ghi chú</button></div></section>${Number(e.progressPercentage) === 100 ? '<div class="notice completion-notice">' + icon("check") + "<div><strong>Bạn đã hoàn thành khóa học!</strong><p>Ôn lại những điều quan trọng hoặc chia sẻ trải nghiệm để giúp học viên khác chọn khóa học.</p>" + link("Đánh giá khóa học →", "/course-detail.html?id=" + e.courseId + "#reviews", "text-link") + "</div></div>" : ""}`;
+        `<div class="lesson-position"><span class="eyebrow">BÀI ${index + 1} / ${e.lessons.length}</span><span id="completionBadge">${entry.isCompleted ? badge("COMPLETED") : '<span class="badge muted">Chưa hoàn thành</span>'}</span></div><h2 tabindex="-1">${esc(l.title)}</h2>${lessonBody(l.textContent, url, l.contentFormat, l.videoUrl)}<div class="lesson-footer"><div><button class="btn" id="completeLesson" ${entry.isCompleted ? "disabled" : ""}>${icon("check")} ${entry.isCompleted ? "Đã hoàn thành" : "Đánh dấu hoàn thành"}</button></div><div class="lesson-step-actions">${previous ? '<button class="btn secondary compact" id="previousLesson">← Bài trước</button>' : ""}${next ? '<button class="btn secondary compact" id="nextLesson">Bài tiếp theo →</button>' : link("Việc học của tôi", "/my-courses.html", "btn secondary compact")}</div></div><section class="private-notes"><div class="section-heading"><div><h3>Ghi chú của tôi</h3><p>Ghi lại ý tưởng, điều cần ôn hoặc câu hỏi cho chính bạn.</p></div><span class="badge muted">${icon("lock")} Riêng tư</span></div><label for="lessonNote" class="sr-only">Ghi chú cho bài học</label><textarea id="lessonNote" rows="6" maxlength="10000" placeholder="Điều mình học được từ bài này…">${esc(note.note)}</textarea><div class="note-actions"><span id="noteStatus" role="status" aria-live="polite">${note.note ? "Ghi chú đã lưu. Chỉ bạn có thể xem." : "Lưu ghi chú để xem lại trên các thiết bị của bạn."}</span><button class="btn secondary compact" id="saveNote">Lưu ghi chú</button></div></section>${Number(e.progressPercentage) === 100 ? '<div class="notice completion-notice">' + icon("check") + "<div><strong>Bạn đã hoàn thành khóa học!</strong><p>Ôn lại những điều quan trọng hoặc chia sẻ trải nghiệm để giúp học viên khác chọn khóa học.</p>" + link("Đánh giá khóa học →", "/course-detail.html?id=" + e.courseId + "#reviews", "text-link") + "</div></div>" : ""}`;
       drawNav();
       const resource = $(".resource-link");
       const discussion = document.createElement("section");
@@ -1437,6 +1457,10 @@ async function learn() {
           : "Ghi chú đã lưu.";
       };
       $("#saveNote").onclick = saveNotes;
+      const attached = document.createElement("section");
+      attached.className = "lesson-attachments";
+      $("#lessonContent").append(attached);
+      mountResources(attached, l.lessonId);
       $("#completeLesson").onclick = (event) =>
         action(async () => {
           if (!(await saveNotes())) return;

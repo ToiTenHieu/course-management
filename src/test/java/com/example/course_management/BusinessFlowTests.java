@@ -73,6 +73,7 @@ class BusinessFlowTests {
           "lesson_progress",
           "payments",
           "enrollments",
+          "lesson_resources",
           "lessons",
           "courses",
           "users"
@@ -1839,5 +1840,56 @@ class BusinessFlowTests {
                 .content("{broken"))
         .andExpect(status().isBadRequest());
     assertEquals(2, courses.count());
+  }
+
+  @Test
+  void lessonMediaRoundTripsAndMetadataDoesNotExposeContent() throws Exception {
+    var request = new UpdateLessonRequest();
+    request.setTitle("Structured"); request.setOrderIndex(1);
+    request.setTextContent("# Mục tiêu\n- Java");
+    request.setContentFormat("MARKDOWN"); request.setVideoUrl("https://youtu.be/abcdefghijk");
+    lessonService.updateLesson(first.getLessonId(), request, actor(teacher));
+    var saved = lessonService.getLessonById(first.getLessonId(), actor(teacher));
+    assertEquals("MARKDOWN", saved.getContentFormat());
+    assertEquals(request.getVideoUrl(), saved.getVideoUrl());
+    var metadata = lessonService.getLessonsByCourse(free.getCourseId(), actor(student)).getFirst();
+    assertNull(metadata.getVideoUrl()); assertNull(metadata.getTextContent());
+    request.setVideoUrl("javascript:alert(1)");
+    assertThrows(BadRequestException.class, () -> lessonService.updateLesson(first.getLessonId(), request, actor(teacher)));
+  }
+
+  @Test
+  void attachmentsRequireEnrollmentAndCorrectManagerAndUsePrivateDownloads() throws Exception {
+    var session = login(teacher);
+    byte[] content = "%PDF-1.4 sample".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    mvc.perform(multipart("/api/lessons/" + first.getLessonId() + "/resources")
+        .file(new org.springframework.mock.web.MockMultipartFile("file", "guide.pdf", "application/pdf", content))
+        .session(session).with(csrf())).andExpect(status().isOk());
+    int id = jdbc.queryForObject("SELECT resource_id FROM lesson_resources", Integer.class);
+    var studentSession = login(student);
+    mvc.perform(get("/api/lesson-resources/" + id + "/content").session(studentSession)).andExpect(status().isForbidden());
+    enrollForQuestions(student);
+    mvc.perform(get("/api/lesson-resources/" + id + "/content").session(studentSession))
+        .andExpect(status().isOk()).andExpect(content().bytes(content))
+        .andExpect(header().string("Cache-Control", "no-store"))
+        .andExpect(header().string("X-Content-Type-Options", "nosniff"));
+    mvc.perform(delete("/api/lesson-resources/" + id).session(login(outsider)).with(csrf())).andExpect(status().isForbidden());
+    mvc.perform(post("/api/lessons/" + first.getLessonId() + "/publish")
+        .session(session).with(csrf())).andExpect(status().isMethodNotAllowed());
+    first.setIsPublished(false); lessons.saveAndFlush(first);
+    mvc.perform(get("/api/lesson-resources/" + id + "/content").session(studentSession)).andExpect(status().isNotFound());
+    mvc.perform(delete("/api/lesson-resources/" + id).session(session).with(csrf())).andExpect(status().isOk());
+    assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM lesson_resources", Integer.class));
+  }
+
+  @Test
+  void attachmentUploadRejectsSpoofedFilesAndMissingCsrf() throws Exception {
+    var file = new org.springframework.mock.web.MockMultipartFile("file", "bad.png", "image/png", "<script>x</script>".getBytes());
+    var session = login(teacher);
+    mvc.perform(multipart("/api/lessons/" + first.getLessonId() + "/resources").file(file).session(session).with(csrf()))
+        .andExpect(status().isBadRequest());
+    mvc.perform(multipart("/api/lessons/" + first.getLessonId() + "/resources").file(file).session(session))
+        .andExpect(status().isForbidden());
+    assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM lesson_resources", Integer.class));
   }
 }

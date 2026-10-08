@@ -3310,3 +3310,20 @@ body:has(dialog[open]) { overflow: hidden; }
 .pagination {
   flex-wrap: wrap;
 }
+/* Structured lessons and protected resources */
+.structured-content { white-space: normal; overflow-wrap: anywhere; }
+.structured-content h3, .structured-content h4, .structured-content h5 { margin: 1.6em 0 .6em; }
+.structured-content p { margin: 1em 0; }
+.structured-content ul, .structured-content ol { padding-left: 1.6rem; }
+.structured-content pre { overflow-x: auto; background: #172d2a; color: #eff7f4; padding: 1rem; border-radius: 12px; white-space: pre; }
+.structured-content code { font-family: Consolas, monospace; font-size: .92em; }
+.structured-content img { max-width: 100%; height: auto; border-radius: 12px; display: block; margin: 1rem 0; }
+.lesson-video { aspect-ratio: 16/9; margin-bottom: 1.4rem; }
+.lesson-video iframe { width: 100%; height: 100%; border: 0; border-radius: 12px; }
+.lesson-player { width: 100%; max-height: 560px; border-radius: 12px; background: #172d2a; }
+.content-toolbar { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.content-toolbar button { border: 1px solid var(--border, #d5dfd9); border-radius: 8px; padding: .5rem .7rem; background: #fff; cursor: pointer; }
+.lesson-attachments { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #d5dfd9; }
+.resource-item { display: flex; align-items: center; flex-wrap: wrap; gap: .7rem; padding: .7rem 0; }
+.resource-item a { overflow-wrap: anywhere; flex: 1 1 180px; }
+.resource-item small { color: #53645c; }
