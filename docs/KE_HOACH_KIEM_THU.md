@@ -197,3 +197,12 @@ Log: `target/local-demo/ux-detail-verify.log` (74 test đạt, bước đóng g�
 ### Bài chỉ có video (08/10/2026)
 - Sửa điều kiện preview/mức sẵn sàng để nhận video khi không có văn bản hay liên kết tài liệu; API preview báo có video.
 - Kiểm thử backend liên quan và đóng gói JAR đạt; bốn kiểm thử renderer/cú pháp module đạt. Chromium tạo bài chỉ có video, xem trước iframe và kiểm tra mục nội dung đã có đạt.
+
+### Sửa lỗi và hoàn thiện giao diện (08/10/2026)
+- Sửa lỗi `manager is not defined` làm trang chi tiết khóa dành cho khách mất nội dung; xác nhận liên kết trực tiếp tới tab Chương trình và điều hướng bàn phím End hoạt động.
+- Nút Thử lại ở lỗi mở trang tải lại URL hiện tại, giữ mã khóa/tham số/hash; kiểm tra HTTP 503 rồi phục hồi và thử lại thành công. Trang lỗi của người đã đăng nhập cũng có nút thử lại.
+- Trình soạn không chờ API tài liệu trước khi gắn tương tác xem trước/kiểm tra URL; giữ request tài liệu chờ trong khi mở preview thành công. Dialog cuộn nội dung, giữ Lưu/Hủy trong màn hình ngang 844×390.
+- Tài liệu phòng học nằm trước thao tác hoàn thành, có trạng thái tải và thử lại, hướng dẫn riêng cho người học. Chuyển bài đưa focus và cuộn về tiêu đề; kiểm tra desktop/mobile 390×844 không tràn ngang.
+- Mô phỏng lỗi lưu ghi chú: giữ nguyên bài và văn bản đang sửa. Hoàn nguyên nội dung trong ô trước khi tiếp tục để không đổi ghi chú demo.
+- Cú pháp toàn bộ module JavaScript và 4 kiểm thử renderer đạt; đóng gói JAR thành công sau khi dừng demo. Sáu E2E đạt trong lần chạy này. Không chạy lại bộ backend vì chỉ thay đổi frontend.
+- Script QA `output/playwright/ui-regression.js`, `learning-ui-regression.js`; ảnh `guest-tabs-fixed-mobile.png`, `editor-fixed-mobile.png`, `editor-fixed-landscape.png`, `learning-fixed-mobile.png`, `learning-fixed-desktop.png`. Log `target/local-demo/ui-fixes-build.log`, `ui-fixes-e2e.log`, `ui-fixes-learning-qa.log`. Các thư mục bằng chứng được Git bỏ qua; T33–T36 bổ sung cách kiểm tra vào tài liệu demo.

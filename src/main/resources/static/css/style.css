@@ -3327,6 +3327,27 @@ body:has(dialog[open]) { overflow: hidden; }
 .resource-item { display: flex; align-items: center; flex-wrap: wrap; gap: .7rem; padding: .7rem 0; }
 .resource-item a { overflow-wrap: anywhere; flex: 1 1 180px; }
 .resource-item small { color: #53645c; }
+.lesson-article > .lesson-attachments {
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f3f7f5;
+}
+.lesson-article > .lesson-attachments h3 { margin-top: 0; }
+.lesson-article > .lesson-attachments [data-status]:empty { display: none; }
+
+/* Keep the dialog actions reachable while its content scrolls. */
+dialog { max-height: 90dvh; }
+dialog > form {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(90dvh - 2px);
+}
+.dialog-body { min-height: 0; }
+.dialog-head, .dialog-footer, .discard-prompt { flex-shrink: 0; }
+.syllabus-row > div:not(.row-actions) { min-width: 0; overflow-wrap: anywhere; }
+.lesson-article h2 { overflow-wrap: anywhere; scroll-margin-top: 24px; }
 
 .draft-status { margin: 16px 0; padding: 12px 16px; border-radius: 12px; background: var(--surface-soft, #f3f7f5); font-size: 13px; }
 .draft-status p { margin: 0 0 6px; }

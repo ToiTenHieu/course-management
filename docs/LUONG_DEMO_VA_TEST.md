@@ -188,6 +188,10 @@ Ghi mỗi ca: người chạy, thời điểm, dữ liệu, Pass/Fail và screen
 | T30 | Request ghi không CSRF; request API chưa đăng nhập | Bị chặn; không có thay đổi dữ liệu |
 | T31 | Màn hình 390×844; menu Tab/Shift+Tab/Escape; preview dài | Không tràn ngang; focus/đóng menu đúng; nội dung dài cuộn được |
 | T32 | Danh mục lọc/trang, reload và Back; HTTP 503 danh sách | Trạng thái URL khôi phục trên màn có đồng bộ URL; lỗi có thử lại |
+| T33 | Khách mở chi tiết khóa bằng liên kết có `id` và `#curriculum`; đổi tab bằng End/Home | Trang mở được; tab Chương trình được chọn; bàn phím chuyển đúng tab |
+| T34 | HTTP 503 khi mở trang khóa, sau đó bấm Thử lại khi máy chủ hoạt động | Tải lại đúng mã khóa và tab đang mở, không mất tham số URL |
+| T35 | Tải tài liệu chậm trong trình soạn; chuyển tab Xem trước; xoay màn hình 844×390 | Preview hoạt động khi tài liệu còn tải; nội dung cuộn và nút Lưu/Hủy vẫn nhìn thấy |
+| T36 | Phòng học: lỗi lưu ghi chú, lỗi tải tài liệu và chuyển bài trên mobile | Lỗi lưu giữ bài/ghi chú; tài liệu có nút thử lại, nằm trước hoàn thành; chuyển bài đưa focus và cuộn về tiêu đề |
 
 T05/T06/T10/T20/T30 nên kiểm tra thêm bằng API hoặc bộ test tự động, vì chỉ bấm UI không chứng minh được tình huống đồng thời/CSRF/idempotency. Bộ lọc tab Học viên giữ trong phiên trang; không yêu cầu giữ qua reload như danh mục khóa học.
 

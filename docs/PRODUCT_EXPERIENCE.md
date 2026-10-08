@@ -105,3 +105,9 @@ Trình soạn khôi phục bản nháp cá nhân từ máy chủ, báo đang lư
 Tab Học viên trong khóa chỉ xuất hiện cho giảng viên phụ trách/quản trị viên. Số tổng toàn khóa không thay đổi theo trang/bộ lọc; các dòng học viên hiển thị tiến độ, quiz, hoạt động và câu hỏi chờ phản hồi. Chọn câu hỏi sẽ mở đúng bài và đánh dấu câu hỏi trong tab Hỏi đáp. Trạng thái ngừng học vẫn giữ dữ liệu lịch sử; ghi chú riêng không xuất hiện.
 
 Nghiệm thu Chromium bằng khóa mẫu 27 học viên: phân trang, tìm tài khoản, lọc trạng thái không có kết quả, sắp xếp, liên kết tới câu hỏi và cả tài khoản giảng viên phụ trách đạt. Desktop và mobile 390px không tràn ngang. 86 backend trên H2/PostgreSQL và sáu hành trình E2E đạt.
+
+### Hoàn thiện khám phá, soạn bài và phòng học — 08/10/2026
+
+Khách mở lại được chi tiết khóa và các tab chương trình/cách học. Lỗi mở trang có nút tải lại giữ đúng mã khóa và tab. Trình soạn cho xem trước ngay khi tài liệu còn đang tải; trên màn hình thấp, nội dung cuộn trong hộp và các nút Lưu/Hủy vẫn hiển thị.
+
+Phòng học đặt tài liệu ngay sau nội dung, trước nút hoàn thành; hướng dẫn xem/tải tài liệu dành cho học viên, còn giới hạn upload chỉ dành cho người soạn. Chuyển bài đưa focus và vị trí cuộn về tiêu đề để người học bắt đầu đọc, thay vì giữ ở cuối bài cũ. Lỗi lưu ghi chú vẫn giữ văn bản và ngăn chuyển bài; lỗi tải tài liệu có thể thử lại. Bốn renderer, sáu E2E và kiểm tra Chromium desktop/mobile/màn hình ngang đạt trong đợt này.

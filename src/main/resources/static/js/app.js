@@ -381,7 +381,6 @@ async function guestDetail() {
     "Tìm hiểu khóa học trước khi bắt đầu.",
     `<a class="back-link" href="/courses.html">← Trở lại khóa học</a><div class="detail-grid"><div><section class="course-overview" id="overview"><div class="chips"><span class="chip">${esc(c.category)}</span><span class="chip">${esc(c.level)}</span></div><h2>${esc(c.title)}</h2><p>${esc(c.description || "Giảng viên đang cập nhật giới thiệu.")}</p><div class="instructor"><span class="avatar">${esc(initials(c.teacherName))}</span><span>Giảng viên<strong>${esc(c.teacherName)}</strong></span></div><div class="course-meta"><span>${icon("clock")}${c.durationHours || "—"} giờ</span><span>${icon("book")}${c.lessonCount} bài học</span><span>${icon("users")}${c.enrollmentCount} lượt đăng ký</span>${c.averageRating ? `<span class="rating">★ ${Number(c.averageRating).toFixed(1)}</span>` : ""}</div></section><nav class="detail-tabs" aria-label="Thông tin khóa học"><a href="#outcomes">Kết quả học tập</a><a href="#curriculum">Chương trình</a><a href="#howToLearn">Cách học</a></nav><section class="panel" id="outcomes"><h2>Bạn sẽ học được gì?</h2>${outcomes(c)}</section><section class="panel" id="curriculum"><div class="section-heading"><div><h2>Chương trình học</h2><p>${c.lessons.length} bài học · Trình độ ${esc(c.level)}</p></div></div><div class="syllabus">${c.lessons.map((l) => `<div class="syllabus-row"><span class="lesson-number">${String(l.orderIndex).padStart(2, "0")}</span><div><strong>${esc(l.title)}</strong><small>Nội dung dành cho học viên đã đăng ký</small></div>${icon("lock")}</div>`).join("")}</div></section><section class="panel" id="howToLearn"><h2>Học theo cách của bạn</h2><div class="three-grid learning-benefits"><div>${icon("play")}<h3>Từng bước rõ ràng</h3><p>Đọc bài học và mở tài liệu hoặc video do giảng viên cung cấp.</p></div><div>${icon("book")}<h3>Ghi chú riêng</h3><p>Lưu lại ý tưởng và điều cần ôn trong từng bài học.</p></div><div>${icon("chart")}<h3>Theo dõi tiến độ</h3><p>Đánh dấu bài đã học, quay lại bài gần nhất và xem kết quả của bạn.</p></div></div></section></div><aside class="enroll-panel">${art(c, true)}<div class="enroll-body"><span class="mini-label">BẮT ĐẦU HÀNH TRÌNH</span><div class="price">${money(c.price)}</div>${link("Đăng nhập để đăng ký " + icon("arrow"), authDestination(), "btn full")}${link("Tạo tài khoản miễn phí", authDestination(true), "text-link full")}<p class="hint">${Number(c.price) > 0 ? "Thanh toán chuyển khoản. Quyền học được cấp sau khi quản trị viên xác nhận." : "Đăng ký miễn phí để truy cập các bài học."}</p><ul class="included"><li>${icon("check")} ${esc(c.level)} · ${c.durationHours || "—"} giờ học</li><li>${icon("check")} ${c.lessonCount} bài học trong chương trình</li><li>${icon("check")} Ghi chú và theo dõi tiến độ</li></ul></div></aside></div>`,
   );
-  if (manager) mountCourseStudents(id);
   paginateElements($("#curriculum"), ".syllabus-row");
   wireDetailTabs();
 }
@@ -944,17 +943,12 @@ async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
   const files = document.createElement("section");
   files.className = "lesson-attachments";
   $("#lessonEditPanel").append(files);
-  if (lesson) await mountResources(files, lesson.lessonId, true, insert);
+  if (lesson) mountResources(files, lesson.lessonId, true, insert);
   else files.innerHTML = '<p class="hint">Lưu bài nháp trước để tải tài liệu và chèn ảnh từ máy. Tài liệu tải lên được lưu ngay.</p>';
   for (const input of [resourceInput, form.elements.videoUrl]) {
     const check = () => input.setCustomValidity(input.value && !safeUrl(input.value) ? "Liên kết phải bắt đầu bằng http:// hoặc https://." : "");
     input.addEventListener("input", check, true); check();
   }
-  const checkResource = () => resourceInput.setCustomValidity(
-    resourceInput.value && !safeUrl(resourceInput.value) ? "Liên kết phải bắt đầu bằng http:// hoặc https://." : "",
-  );
-  resourceInput.addEventListener("input", checkResource, true);
-  checkResource();
   function selectTab(showPreview) {
     if (showPreview) {
       const text = form.elements.textContent.value;
@@ -1431,6 +1425,7 @@ async function learn() {
       if (request !== revision) return;
       if (current === lessonId && savedBeforeRequest !== savedText)
         note.note = savedText;
+      const changingLesson = current !== lessonId;
       current = lessonId;
       savedText = note.note;
       dirtyNote = false;
@@ -1470,7 +1465,7 @@ async function learn() {
       $("#saveNote").onclick = saveNotes;
       const attached = document.createElement("section");
       attached.className = "lesson-attachments";
-      $("#lessonContent").append(attached);
+      $(".lesson-footer").before(attached);
       mountResources(attached, l.lessonId);
       $("#completeLesson").onclick = (event) =>
         action(async () => {
@@ -1497,6 +1492,11 @@ async function learn() {
         $("#nextLesson").onclick = () => load(next.lessonId);
       if (matchMedia("(max-width: 700px)").matches)
         $("#curriculumMenu").open = false;
+      if (changingLesson) {
+        const heading = $("#lessonContent h2");
+        heading.focus({ preventScroll: true });
+        heading.scrollIntoView({ block: "start", behavior: "instant" });
+      }
       await api(`/enrollments/${id}/access_lesson/${lessonId}`, "PUT").catch(
         (error) => toast("Chưa lưu được vị trí học: " + error.message, true),
       );
@@ -1959,10 +1959,12 @@ async function start() {
         "Không thể mở trang",
         "Vui lòng kiểm tra và thử lại.",
         errorBox(error) +
+          '<button class="btn" id="retryPage">Thử lại</button> ' +
           link("Về tổng quan", "/dashboard.html", "btn secondary"),
       );
     } else
-      app.innerHTML = `<main class="public-error">${errorBox(error)}${link("Thử lại", location.pathname)}${link("Trang chủ", "/", "btn secondary")}</main>`;
+      app.innerHTML = `<main id="main" class="public-error">${errorBox(error)}<button class="btn" id="retryPage">Thử lại</button>${link("Trang chủ", "/", "btn secondary")}</main>`;
+    $("#retryPage").onclick = () => location.reload();
   }
 }
 start();
