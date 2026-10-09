@@ -1,6 +1,6 @@
 # Course Management — Học để tiến xa
 
-Nền tảng quản lý khóa học trực tuyến phục vụ đồ án/demo. Backend Spring Boot, Java 21, PostgreSQL; giao diện HTML/CSS/JavaScript có bố cục chung, hỗ trợ màn hình nhỏ. Thanh toán chuyển khoản được admin đối chiếu và duyệt thủ công.
+Nền tảng quản lý khóa học trực tuyến phục vụ đồ án/demo. Backend Spring Boot, Java 21, PostgreSQL; giao diện HTML/CSS/JavaScript có bố cục chung, hỗ trợ màn hình nhỏ. Thanh toán chuyển khoản hỗ trợ QR khi admin cấu hình mã BIN ngân hàng và tài khoản; admin đối chiếu và duyệt thủ công.
 
 ## Chức năng
 
@@ -76,7 +76,7 @@ node --check src/main/resources/static/js/questions.js
 node --check src/main/resources/static/js/quiz.js
 ```
 
-Bộ backend có 94 kiểm thử (90 ca nghiệp vụ/API, ba ca cấu hình và một ca khởi động), dùng migration thật. Bộ đầy đủ đạt trên H2; các ca nghiệp vụ trước đó đã chạy trên PostgreSQL. Bao gồm lưu hồ sơ/vai trò đồng thời, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 95 kiểm thử (90 ca nghiệp vụ/API, bốn ca cấu hình và một ca khởi động), dùng migration thật. Bộ đầy đủ đạt trên H2; các ca nghiệp vụ trước đó đã chạy trên PostgreSQL. Bao gồm lưu hồ sơ/vai trò đồng thời, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
 Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
 
@@ -153,7 +153,7 @@ Lưu bài nháp trước để tải file từ trình soạn. Mỗi bài tối �
 - `GET/POST /api/lessons/{id}/resources`: danh sách metadata hoặc upload multipart `file`; upload chỉ dành cho admin/giảng viên phụ trách và yêu cầu CSRF.
 - `GET /api/lesson-resources/{id}/content`: chỉ người quản lý hoặc học viên còn đăng ký và bài published. PDF/TXT tải xuống, ảnh được hiển thị inline; response không cache và có nosniff/sandbox.
 - `DELETE /api/lesson-resources/{id}`: người quản lý khóa, yêu cầu CSRF. Xóa bài xóa tài liệu của bài qua khóa ngoại.
-- `node --test tests/unit/*.test.mjs`: mười kiểm thử bộ hiển thị/URL và API; giữ mã HTTP khi máy chủ trả HTML, kiểm tra CSRF trước khi gửi dữ liệu và làm mới token sau lỗi quyền; giữ mốc thời gian YouTube trong player và link dự phòng.
+- `node --test tests/unit/*.test.mjs`: 13 kiểm thử bộ hiển thị/URL, API và QR thanh toán; giữ mã HTTP khi máy chủ trả HTML, kiểm tra CSRF trước khi gửi dữ liệu và làm mới token sau lỗi quyền; giữ mốc thời gian YouTube trong player và link dự phòng.
 
 ## Hồ sơ quản trị và thông báo
 

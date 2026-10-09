@@ -6,13 +6,21 @@
 
 - Dung lượng một tài liệu, số tài liệu mỗi bài, số câu mỗi quiz.
 - Điểm đạt mặc định, chủ đề và trình độ điền sẵn khi tạo mới.
-- Ngân hàng, số tài khoản và chủ tài khoản dùng trong hướng dẫn thanh toán.
+- Ngân hàng, số tài khoản, chủ tài khoản và mã BIN ngân hàng dùng trong hướng dẫn thanh toán/QR.
 
 Các giá trị nằm ở một bản ghi trong bảng `application_settings`, được Flyway V13 tạo với giá trị ban đầu. Backend đọc database khi xử lý yêu cầu, không cần build hoặc khởi động lại sau khi lưu. Tải lại các trang đang mở để giao diện nhận cài đặt mới. Mặc định áp dụng cho nội dung mới; bài, quiz và khóa đã lưu không bị ghi đè. Giảm giới hạn không xóa tài liệu hoặc câu hỏi cũ; lần thêm tài liệu/lưu quiz tiếp theo dùng giới hạn mới.
 
 `GET /api/settings` và `PUT /api/settings` chỉ dành cho admin. Request lưu cần CSRF và `revision`; nếu hai admin sửa cùng lúc, lượt lưu từ phiên bản cũ trả HTTP 409 và giữ dữ liệu mới. `GET /api/auth/config` chỉ trả các cài đặt học tập cần cho giao diện công khai.
 
 Khóa học, học phí, chủ đề, trình độ và phân công giảng viên chỉnh trong quản lý khóa học. Tiêu đề bài, nội dung, `videoUrl` YouTube và timestamp chỉnh trong trình soạn bài. Đề, điểm đạt và câu hỏi chỉnh ở tab Quiz. Tài khoản chỉnh ở quản lý người dùng. Đây đều là bản ghi database, ứng dụng không lấy nội dung đang dùng từ file mẫu.
+
+## QR chuyển khoản
+
+Flyway V14 bổ sung `bank_bin`, mặc định để trống để giữ thông tin ngân hàng cũ. Admin điền mã BIN 6 chữ số đúng với ngân hàng nhận và tài khoản gồm 1–19 ký tự chữ/số để bật QR. Tra cứu mã tại [danh sách ngân hàng VietQR.io](https://www.vietqr.io/danh-sach-api/api-danh-sach-ngan-hang/); không dùng số tài khoản giả của demo để chuyển tiền.
+
+Hướng dẫn xuất hiện khi tạo yêu cầu ở trang khóa hoặc mở lại yêu cầu chờ trong Thanh toán của tôi. QR dùng số tiền đã lưu trên yêu cầu và mã chuyển khoản riêng `TT...`, không dùng học phí hiện tại của khóa. Chỉ yêu cầu PENDING, số tiền VND nguyên dương tối đa 13 chữ số và thông tin hợp lệ mới tạo QR; trường hợp khác vẫn hiển thị hướng dẫn thủ công. Quét mã không xác nhận đã nhận tiền; admin tiếp tục đối chiếu, xác nhận và mở quyền học theo luồng hiện có.
+
+Ảnh lấy từ dịch vụ bên ngoài theo [VietQR.io Quick Link](https://www.vietqr.io/danh-sach-api/link-tao-ma-nhanh/), gửi BIN, tài khoản, tên người nhận, số tiền và nội dung chuyển khoản; không gửi tên học viên hoặc khóa học. Cần Internet. Lỗi hoặc tải quá 15 giây có nút thử lại, các nút sao chép thông tin vẫn dùng được. Trên điện thoại có thể lưu ảnh QR rồi chọn từ thư viện trong ứng dụng ngân hàng hỗ trợ. Template `qr_only` dùng cho bản demo; tài liệu nhà cung cấp yêu cầu tạo template riêng khi dùng cho dự án chính thức.
 
 ## Khởi tạo demo
 

@@ -3350,6 +3350,11 @@ dialog > form {
 .lesson-article h2 { overflow-wrap: anywhere; scroll-margin-top: 24px; }
 
 .draft-status { margin: 16px 0; padding: 12px 16px; border-radius: 12px; background: var(--surface-soft, #f3f7f5); font-size: 13px; }
+.payment-qr { text-align: center; padding: 16px; margin-bottom: 20px; border: 1px solid var(--line); border-radius: 12px; }
+.payment-qr h3 { margin: 0 0 12px; }
+.payment-qr img { max-width: 100%; height: auto; background: white; }
+.payment-qr .hint { margin-bottom: 0; }
+.payment-qr button { margin-top: 12px; }
 .draft-status p { margin: 0 0 6px; }
 .lesson-history { margin-top: 20px; }
 .lesson-history summary { cursor: pointer; font-weight: 600; }

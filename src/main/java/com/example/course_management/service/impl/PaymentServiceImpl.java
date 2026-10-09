@@ -50,6 +50,7 @@ public class PaymentServiceImpl implements PaymentService {
     var bank = settings.current();
     return BankInfoResponse.builder()
         .bankName(bank.bankName())
+        .bankBin(bank.bankBin())
         .accountNumber(bank.bankAccount())
         .accountHolder(bank.bankHolder())
         .build();

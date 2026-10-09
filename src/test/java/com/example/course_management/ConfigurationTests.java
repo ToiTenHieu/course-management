@@ -65,7 +65,7 @@ class ConfigurationTests {
 
   private SaveSettingsRequest changed(long bytes, int resourceCount, int questions) {
     return new SaveSettingsRequest(settings.current().revision(), bytes, resourceCount, questions,
-        60, "Chủ đề từ database", "Trình độ từ database", "Database Bank", "DB-123", "DATABASE HOLDER");
+        60, "Chủ đề từ database", "Trình độ từ database", "Database Bank", "DB-123", "DATABASE HOLDER", "");
   }
 
   @Test
@@ -110,6 +110,39 @@ class ConfigurationTests {
     var created = courseService.createCourse(request);
     assertEquals("Chủ đề từ database", created.getCategory());
     assertEquals("Trình độ từ database", created.getLevel());
+  }
+
+  @Test
+  void bankQrConfigurationValidatesAndIsAvailableOnlyAfterSaving() throws Exception {
+    var admin = new CustomUserDetails(account(Role.ADMIN));
+    var student = new CustomUserDetails(account(Role.STUDENT));
+    var original = changed(1024, 1, 2);
+    var body = mapper.writeValueAsString(original);
+    assertEquals("", payments.getBankInfo().getBankBin());
+    // Legacy settings clients can omit the new optional field.
+    mvc.perform(put("/api/settings").with(user(admin)).with(csrf()).contentType("application/json")
+        .content(body.replace(",\"bankBin\":\"\"", ""))).andExpect(status().isOk());
+    var configured = new SaveSettingsRequest(settings.current().revision(), 1024L, 1, 2,
+        60, "Lập trình", "Cơ bản", "VietinBank", "113366668888", "TEST HOLDER", "970415");
+    String configuredBody = mapper.writeValueAsString(configured);
+    mvc.perform(put("/api/settings").with(user(admin)).with(csrf()).contentType("application/json")
+        .content(configuredBody.replace("970415", "97041"))).andExpect(status().isBadRequest());
+    mvc.perform(put("/api/settings").with(user(admin)).with(csrf()).contentType("application/json")
+        .content(configuredBody.replace("113366668888", "BAD/ACCOUNT"))).andExpect(status().isBadRequest());
+    assertEquals("", payments.getBankInfo().getBankBin());
+    mvc.perform(put("/api/settings").with(user(admin)).with(csrf()).contentType("application/json")
+        .content(configuredBody)).andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.bankBin").value("970415"));
+    mvc.perform(get("/api/payments/bank-info")).andExpect(status().isUnauthorized());
+    mvc.perform(get("/api/payments/bank-info").with(user(student))).andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.bankBin").value("970415"))
+        .andExpect(jsonPath("$.data.accountNumber").value("113366668888"));
+    var freshService = new LearningSettings(jdbc, DataSize.ofMegabytes(20), DataSize.ofMegabytes(21));
+    assertEquals("970415", freshService.current().bankBin());
+    mvc.perform(get("/api/auth/config")).andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.learning.bankBin").doesNotExist());
+    settings.save(changed(1024, 1, 2));
+    assertEquals("", payments.getBankInfo().getBankBin());
   }
 
   @Test

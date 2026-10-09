@@ -7,6 +7,7 @@ import lombok.Getter;
 @Builder
 public class BankInfoResponse {
   private String bankName;
+  private String bankBin;
   private String accountNumber;
   private String accountHolder;
 }

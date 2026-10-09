@@ -30,7 +30,7 @@ public class LearningSettings {
             row.getInt("max_resources_per_lesson"), row.getInt("max_quiz_questions"),
             row.getInt("default_pass_percentage"), row.getString("default_category"),
             row.getString("default_level"), row.getString("bank_name"),
-            row.getString("bank_account"), row.getString("bank_holder")));
+            row.getString("bank_account"), row.getString("bank_holder"), row.getString("bank_bin")));
   }
 
   public long maxFileBytes() { return Math.min(current().maxFileBytes(), uploadCeilingBytes); }
@@ -50,16 +50,21 @@ public class LearningSettings {
 
   @Transactional
   public SaveSettingsRequest save(SaveSettingsRequest value) {
+    String bankBin = value.bankBin() == null ? "" : value.bankBin();
+    if (!bankBin.matches("[0-9]{6}|"))
+      throw new BadRequestException("Mã BIN ngân hàng phải gồm 6 chữ số hoặc để trống");
+    if (!bankBin.isEmpty() && !value.bankAccount().trim().matches("[A-Za-z0-9]{1,19}"))
+      throw new BadRequestException("Tài khoản dùng cho QR phải gồm 1–19 ký tự chữ hoặc số");
     if (value.maxFileBytes() > uploadCeilingBytes)
       throw new BadRequestException("Dung lượng file vượt giới hạn máy chủ: " + uploadCeilingBytes + " byte");
     int changed = jdbc.update("""
         UPDATE application_settings SET revision = revision + 1, max_file_bytes = ?,
             max_resources_per_lesson = ?, max_quiz_questions = ?, default_pass_percentage = ?,
-            default_category = ?, default_level = ?, bank_name = ?, bank_account = ?, bank_holder = ?
+            default_category = ?, default_level = ?, bank_name = ?, bank_account = ?, bank_holder = ?, bank_bin = ?
         WHERE id = 1 AND revision = ?
         """, value.maxFileBytes(), value.maxResourcesPerLesson(), value.maxQuizQuestions(),
         value.defaultPassPercentage(), value.defaultCategory().trim(), value.defaultLevel().trim(),
-        value.bankName().trim(), value.bankAccount().trim(), value.bankHolder().trim(), value.revision());
+        value.bankName().trim(), value.bankAccount().trim(), value.bankHolder().trim(), bankBin, value.revision());
     if (changed != 1)
       throw new ConflictException("Cài đặt đã được thay đổi ở nơi khác. Tải lại trang trước khi lưu.");
     return current();

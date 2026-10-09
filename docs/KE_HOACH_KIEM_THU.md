@@ -231,3 +231,12 @@ Log: `target/local-demo/ux-detail-verify.log` (74 test đạt, bước đóng g�
 - Script demo kiểm tra cổng bị chiếm trước khi build; database hỏng không báo sẵn sàng, dọn tiến trình/PID riêng. Gọi lại khi sẵn sàng không tạo tiến trình trùng. Kiểm tra cổng khác và quay về 8080; `DB_URL` cũng được nhận ở profile demo.
 
 Log: `target/local-demo/full-polish-h2.log`, `full-polish-postgres.log`, `full-polish-final-package.log`, `full-polish-e2e.log`, `full-polish-browser-smoke.log`, `full-polish-fault-qa.log`, `full-polish-flow-qa.log`. Script QA `output/playwright/full-project-smoke.js`, `polish-fault-qa.js`, `polish-flow-qa.js`; fixture startup riêng ở `output/startup-qa`. Các bằng chứng được Git bỏ qua. T37–T45 bổ sung cách tái hiện vào tài liệu demo; lỗi mạng/độ trễ dùng mock có chủ đích, kiểm tra backend thật dùng database test riêng.
+
+### QR chuyển khoản — 09/10/2026
+
+- Flyway V14 thêm mã BIN ngân hàng để trống mặc định, giữ dữ liệu chuyển khoản cũ. Admin lưu BIN hợp lệ cùng tài khoản; request cũ thiếu BIN vẫn được hỗ trợ. BIN sai hoặc tài khoản không phù hợp QR bị từ chối, không ghi thay đổi.
+- 95/95 backend đạt trên H2 qua `mvnw verify`; 13/13 kiểm thử Node đạt. Ca mới kiểm tra lưu/đọc BIN, tương thích client cũ, quyền đọc thông tin ngân hàng; QR giữ số tiền yêu cầu và mã chuyển khoản, không làm tròn tiền hoặc tạo mã cho yêu cầu đã xử lý.
+- 6/6 E2E Chromium đạt trên demo PostgreSQL tại cổng 8081. Migration V14 áp dụng thành công khi khởi động demo.
+- Playwright CLI kiểm tra yêu cầu chờ thật với cấu hình demo chưa bật QR, vẫn hiện thông tin sao chép; mock bank-info bằng tài khoản mẫu công khai từ tài liệu VietQR.io để kiểm tra ảnh QR thật, không đổi tài khoản nhận trong database và không thực hiện chuyển tiền.
+- Mô phỏng dịch vụ ảnh HTTP 503: hiện lỗi/nút thử lại và giữ thông tin chuyển khoản. Bỏ mock, thử lại tải ảnh thật thành công; URL đúng 199000 VND và TT000024. Màn hình 390×844 không tràn ngang, QR hiển thị trong dialog có cuộn. Form admin báo lỗi khi BIN chỉ có 5 chữ số.
+- Ảnh kiểm tra: `output/playwright/payment-qr-desktop.png`, `payment-qr-mobile.png` (thư mục bị Git bỏ qua). Ảnh dùng dữ liệu kiểm thử, không dùng làm QR thanh toán thật. Kiểm tra thủ công thêm khi vận hành: ứng dụng ngân hàng điền đúng người nhận/số tiền/nội dung; dịch vụ ảnh tải chậm quá 15 giây hiện nút thử lại.

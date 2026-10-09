@@ -12,4 +12,5 @@ public record SaveSettingsRequest(
     @NotBlank @Size(max = 100) String defaultLevel,
     @NotBlank @Size(max = 255) String bankName,
     @NotBlank @Size(max = 255) String bankAccount,
-    @NotBlank @Size(max = 255) String bankHolder) {}
+    @NotBlank @Size(max = 255) String bankHolder,
+    @Pattern(regexp = "[0-9]{6}|", message = "Mã BIN ngân hàng phải gồm 6 chữ số hoặc để trống") String bankBin) {}

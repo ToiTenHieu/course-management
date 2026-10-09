@@ -1,4 +1,5 @@
 import { mountCourseStudents } from "./course-students.js";
+import { mountPaymentQr } from "./payment-qr.js";
 import { api, ApiError, appConfig } from "./api.js";
 import { mountQuestions } from "./questions.js";
 import { mountQuiz } from "./quiz.js";
@@ -1002,9 +1003,10 @@ async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
 }
 async function paymentInfo(payment) {
   const bank = await api("/payments/bank-info");
+  const qr = '<section class="payment-qr" aria-label="Mã QR chuyển khoản"><h3>Quét mã để chuyển khoản</h3><img hidden width="280" height="280" alt="Mã QR chuyển khoản cho yêu cầu này" referrerpolicy="no-referrer"><p class="hint" data-qr-status role="status" aria-live="polite"></p><button hidden type="button" class="btn secondary compact">Thử tải lại QR</button></section>';
   showDialog(
     "Hướng dẫn chuyển khoản",
-    `<ol class="payment-steps"><li class="done"><span>1</span><div><strong>Đã tạo yêu cầu</strong><small>${esc(payment.courseTitle || "Đăng ký khóa học")}</small></div></li><li class="current"><span>2</span><div><strong>Chuyển khoản theo thông tin dưới đây</strong><small>Nếu đã chuyển, không cần chuyển thêm.</small></div></li><li><span>3</span><div><strong>Chờ đối chiếu và mở quyền học</strong><small>Theo dõi trạng thái tại Thanh toán của tôi.</small></div></li></ol><div class="bank-info">${[
+    `<ol class="payment-steps"><li class="done"><span>1</span><div><strong>Đã tạo yêu cầu</strong><small>${esc(payment.courseTitle || "Đăng ký khóa học")}</small></div></li><li class="current"><span>2</span><div><strong>Chuyển khoản theo thông tin dưới đây</strong><small>Nếu đã chuyển, không cần chuyển thêm.</small></div></li><li><span>3</span><div><strong>Chờ đối chiếu và mở quyền học</strong><small>Theo dõi trạng thái tại Thanh toán của tôi.</small></div></li></ol>${qr}<div class="bank-info">${[
       ["Ngân hàng", bank.bankName],
       ["Số tài khoản", bank.accountNumber, bank.accountNumber],
       ["Chủ tài khoản", bank.accountHolder],
@@ -1017,10 +1019,12 @@ async function paymentInfo(payment) {
       )
       .join(
         "",
-      )}</div><p class="hint">Chuyển đúng số tiền và nội dung để việc đối chiếu thuận tiện hơn.</p>`,
+      )}</div><p class="hint">Chuyển đúng số tiền và nội dung để việc đối chiếu thuận tiện hơn. Quyền học được mở sau khi quản trị viên xác nhận đã nhận tiền.</p>`,
     async () => {},
     "Đã hiểu",
   );
+  const disposeQr = mountPaymentQr(modal.querySelector(".payment-qr"), bank, payment);
+  if (disposeQr) modal.addEventListener("close", disposeQr, { once: true });
   modal.querySelectorAll("[data-copy]").forEach((button) => {
     button.onclick = async () => {
       try {
@@ -1904,9 +1908,10 @@ async function settings() {
     </div><p class="hint">Máy chủ hiện hỗ trợ file tối đa ${(config.uploadCeilingBytes / mb).toLocaleString("vi-VN")} MB. Giá trị mặc định áp dụng khi tạo mới; nội dung đã lưu giữ nguyên.</p></section>
     <section class="panel"><h2>Thông tin chuyển khoản</h2><div class="form-grid">
     ${field("Ngân hàng", "bankName", values.bankName, "text", true, 'maxlength="255"')}
+    ${field("Mã BIN ngân hàng (cho QR)", "bankBin", values.bankBin || "", "text", false, 'inputmode="numeric" pattern="[0-9]{6}" maxlength="6" aria-describedby="bankQrHint"')}
     ${field("Số tài khoản", "bankAccount", values.bankAccount, "text", true, 'maxlength="255"')}
     ${field("Chủ tài khoản", "bankHolder", values.bankHolder, "text", true, 'maxlength="255"')}
-    </div></section><div id="settingsError" role="alert"></div><div class="row-actions"><button class="btn" type="submit">Lưu cài đặt</button><span class="hint" id="settingsStatus" role="status">Thay đổi có hiệu lực sau khi lưu. Tải lại các trang đang mở để nhận cài đặt mới.</span></div></form>`);
+    </div><p class="hint" id="bankQrHint">Nhập mã BIN 6 chữ số đúng với ngân hàng nhận để bật QR; để trống để dùng chuyển khoản thủ công. Tài khoản cho QR gồm 1–19 ký tự chữ hoặc số. Kiểm tra mã BIN và tài khoản trước khi lưu. Ảnh QR được tải từ VietQR.io bằng thông tin chuyển khoản.</p></section><div id="settingsError" role="alert"></div><div class="row-actions"><button class="btn" type="submit">Lưu cài đặt</button><span class="hint" id="settingsStatus" role="status">Thay đổi có hiệu lực sau khi lưu. Tải lại các trang đang mở để nhận cài đặt mới.</span></div></form>`);
   $("#settingsForm").onsubmit = event => {
     event.preventDefault();
     action(async () => {
