@@ -66,6 +66,7 @@ public class CourseStudentReportService {
     var lessonActivity = new HashMap<Integer,Activity>();
     var quizActivity = new HashMap<Integer,Activity>();
     var questions = new HashMap<Integer,Pending>();
+    var replyActivity = new HashMap<Integer,LocalDateTime>();
     if (!enrollments.isEmpty()) {
       parameters.put("enrollmentIds",enrollments.stream().map(Enrollment::id).toList());
       parameters.put("studentIds",enrollments.stream().map(Enrollment::studentId).toList());
@@ -89,12 +90,18 @@ public class CourseStudentReportService {
             WHERE l.course_id=:courseId AND q.is_hidden=FALSE AND q.student_id IN (:studentIds) GROUP BY q.student_id
           ) grouped LEFT JOIN lesson_questions first_question ON first_question.question_id=grouped.first_id
           """, parameters, (org.springframework.jdbc.core.RowCallbackHandler)r -> questions.put(r.getInt(1),new Pending(r.getLong(2),(Integer)r.getObject(3),(Integer)r.getObject(4),time(r,5))));
+      named.query("""
+          SELECT r.author_id,MAX(r.created_at)
+          FROM question_replies r JOIN lesson_questions q ON q.question_id=r.question_id JOIN lessons l ON l.lesson_id=q.lesson_id
+          WHERE l.course_id=:courseId AND q.is_hidden=FALSE AND r.is_hidden=FALSE AND r.author_id IN (:studentIds)
+          GROUP BY r.author_id
+          """, parameters, (org.springframework.jdbc.core.RowCallbackHandler)r -> replyActivity.put(r.getInt(1),time(r,2)));
     }
     var rows = enrollments.stream().map(e -> {
       var p = lessonActivity.getOrDefault(e.id(),new Activity(0,null,null,null));
       var q = quizActivity.getOrDefault(e.studentId(),new Activity(0,null,null,null));
       var pending = questions.getOrDefault(e.studentId(),new Pending(0,null,null,null));
-      var last = java.util.stream.Stream.of(p.at(),q.at(),pending.at()).filter(Objects::nonNull).max(Comparator.naturalOrder()).orElse(null);
+      var last = java.util.stream.Stream.of(p.at(),q.at(),pending.at(),replyActivity.get(e.studentId())).filter(Objects::nonNull).max(Comparator.naturalOrder()).orElse(null);
       return new Student(e.id(),e.studentId(),e.name(),e.username(),e.status(),e.progress(),p.count(),q.count(),q.average(),q.best(),last,pending.count(),pending.questionId(),pending.lessonId());
     }).toList();
     return new Report(new Summary(summary[0],summary[1],summary[2],summary[3],published,pendingTotal),

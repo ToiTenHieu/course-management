@@ -100,12 +100,13 @@ Bản nháp này áp dụng cho trình soạn **nội dung bài học**. Trình 
 
 **Mong đợi:** backend tự chấm; sau nộp mới có đáp án/giải thích. Thống kê phiên bản đã làm ghi nhận hai lượt và câu trả lời sai. Lịch sử cũ vẫn gắn với đề cũ. Đạt quiz không tự đánh dấu bài học hoàn thành.
 
-### D07. Hỏi đáp và thông báo tới đúng câu hỏi — 2 phút
+### D07. Hỏi đáp nhiều lượt và thông báo tới đúng câu hỏi — 3 phút
 
 1. Học viên chọn bài, gửi câu “Em nên kiểm tra kết quả bài thực hành thế nào?”.
-2. Giảng viên mở **Thông báo**, chọn thông báo câu hỏi mới; trả lời trong tab **Hỏi đáp**.
-3. Học viên mở thông báo phản hồi, đọc câu hỏi đã được đánh dấu.
-4. Giảng viên ẩn câu hỏi; học viên tải lại danh sách; sau đó giảng viên hiện lại.
+2. Học viên thứ hai đã đăng ký khóa chọn **Xem trao đổi**, viết **Phản hồi của bạn** và gửi; câu hỏi vẫn **Chờ giảng viên**.
+3. Giảng viên mở **Thông báo**, chọn thông báo câu hỏi mới, gửi phản hồi trong hội thoại; phản hồi có nhãn **Giảng viên**.
+4. Học viên mở thông báo phản hồi, đọc hội thoại đã được mở và gửi câu hỏi tiếp trong cùng hội thoại.
+5. Giảng viên ẩn một phản hồi; học viên tải lại để kiểm tra không nhận nội dung đó, sau đó giảng viên hiện lại. Có thể ẩn/hiện cả câu hỏi.
 
 **Mong đợi:** thông báo tới đúng bài/câu hỏi, kể cả ngoài trang đầu. Câu bị ẩn không xuất hiện với học viên; người quản lý vẫn thấy và hiện lại được. Lỗi gửi không xóa văn bản đang nhập.
 
@@ -203,6 +204,12 @@ Ghi mỗi ca: người chạy, thời điểm, dữ liệu, Pass/Fail và screen
 | T43 | Bản nộp quiz trong sessionStorage hỏng; tải thống kê cũ chậm khi lưu đề mới; lỗi tải đề sau 409 | Bỏ bản hỏng và cho làm bài; giữ thống kê phiên bản mới; lỗi tải đề giữ bản soạn và nút thử lại |
 | T44 | Khóa đã ngừng học; thông báo có hash/query mã hóa; username/email quá giới hạn | Giải thích trạng thái ngừng học, không cho đăng ký trùng; nhận link nội bộ hợp lệ, chặn dữ liệu quá giới hạn |
 | T45 | Khởi động demo khi cổng bị chiếm/database hỏng; chạy lại script khi demo sẵn sàng | Lỗi có hướng dẫn; không báo sẵn sàng giả, dọn tiến trình/PID khi thất bại; chạy lại không tạo tiến trình trùng |
+| T46 | Học viên thứ hai trả lời, giảng viên giải đáp, tác giả hỏi tiếp | Hội thoại giữ mọi lượt; nhãn vai trò đúng; chỉ phản hồi chính thức làm hết hàng chờ |
+| T47 | Gửi phản hồi thành công ở server rồi ngắt kết nối trước khi browser nhận; gửi lại cùng UUID | Chỉ một phản hồi và một bộ thông báo; nội dung đang nhập giữ lại khi lỗi |
+| T48 | Ẩn phản hồi thường hoặc chính thức, đọc bằng tài khoản học viên và API | Nội dung/số lượng ẩn không lộ; khi hết phản hồi chính thức, câu hỏi trở lại hàng chờ |
+| T49 | Mở hội thoại hơn 10 phản hồi, đổi trang cũ/mới, kiểm tra mobile | Phân trang ổn định, mỗi trang theo thứ tự hội thoại, không tràn ngang |
+| T50 | Người chưa đăng ký/ngừng học, giảng viên không phụ trách, bài nháp và câu hỏi ẩn | Đọc/ghi bị chặn theo quyền; thao tác ghi cần CSRF |
+| T51 | Migration từ dữ liệu cũ; xóa bài có hội thoại | Phản hồi cũ giữ nội dung/thời điểm; xóa bài xóa phản hồi, giữ lịch sử nếu chỉ ẩn bài |
 
 T05/T06/T10/T20/T30 nên kiểm tra thêm bằng API hoặc bộ test tự động, vì chỉ bấm UI không chứng minh được tình huống đồng thời/CSRF/idempotency. Bộ lọc tab Học viên giữ trong phiên trang; không yêu cầu giữ qua reload như danh mục khóa học.
 
@@ -226,7 +233,7 @@ $env:E2E_BASE_URL = 'http://127.0.0.1:8080'
 npm run test:e2e
 ```
 
-Chỉ khởi động demo nếu Maven thành công. Lần kiểm tra gần nhất: 90 backend trên H2/PostgreSQL, 8 kiểm thử Node và 6 E2E đạt. Playwright CLI kiểm tra 26 trang ở bốn kích thước, cùng các tình huống lỗi bản nháp, tải lại sau ghi và phản hồi quiz về sai thứ tự. Đây là kết quả đã ghi nhận, không phải lần chạy mới từ tài liệu này.
+Chỉ khởi động demo nếu Maven thành công. Lần kiểm tra gần nhất: 103 backend trên H2, 15 kiểm thử Node và 6 E2E trên PostgreSQL demo đạt; các ca nghiệp vụ trước đó cũng đã chạy trên PostgreSQL test. Playwright CLI kiểm tra 26 trang ở bốn kích thước, cùng các tình huống lỗi bản nháp, tải lại sau ghi và phản hồi quiz về sai thứ tự. Đây là kết quả đã ghi nhận, không phải lần chạy mới từ tài liệu này.
 
 Maven mặc định dùng H2 profile test. Để chạy PostgreSQL thật, tạo database kiểm thử riêng `course_management_test`, rồi cấu hình `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, `SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver` trước khi chạy Maven test. Backend test xóa dữ liệu trước mỗi ca, không trỏ vào database demo. Khi quay lại H2, gỡ các biến `SPRING_DATASOURCE_*` đã đặt.
 

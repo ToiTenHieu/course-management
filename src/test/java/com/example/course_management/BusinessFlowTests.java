@@ -46,6 +46,7 @@ class BusinessFlowTests {
   @Autowired ReviewRepository reviews;
   @Autowired LessonQuestionService questionService;
   @Autowired LessonQuestionRepository questions;
+  @Autowired QuestionReplyRepository questionReplies;
   @Autowired LessonQuizService quizService;
   @Autowired LessonQuizRepository quizzes;
   @Autowired QuizAttemptRepository quizAttempts;
@@ -848,6 +849,145 @@ class BusinessFlowTests {
     assertEquals(0, quizAttempts.count());
     assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM quiz_answers", Integer.class));
     assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM quiz_questions", Integer.class));
+  }
+
+  @Test
+  void learnersAndManagersExchangeMultipleRepliesWithOfficialRoleLabelsAndNotifications() {
+    enrollForQuestions(student);
+    var peer = user("peer", Role.STUDENT); enrollForQuestions(peer);
+    var q = questionService.ask(first.getLessonId(), "Help", actor(student));
+    long teacherNotices = notifications.findByUser_UserIdOrderByCreatedAtDesc(teacher.getUserId()).size();
+    var peerReply = questionService.reply(q.questionId(), "  Try an example  ", java.util.UUID.randomUUID().toString(), actor(peer));
+    assertEquals("Try an example", peerReply.body()); assertEquals(Role.STUDENT, peerReply.authorRole());
+    assertNull(questionService.get(q.questionId(), actor(student)).answer());
+    assertEquals(1, courseStudentReports.get(free.getCourseId(), "", null, "name", 0, 10, actor(teacher)).summary().pendingQuestions());
+    assertEquals(1, notifications.findByUser_UserIdOrderByCreatedAtDesc(student.getUserId()).size());
+    assertEquals(teacherNotices + 1, notifications.findByUser_UserIdOrderByCreatedAtDesc(teacher.getUserId()).size());
+    assertEquals(0, notifications.findByUser_UserIdOrderByCreatedAtDesc(peer.getUserId()).size());
+    var official = questionService.reply(q.questionId(), "Teacher explanation", java.util.UUID.randomUUID().toString(), actor(teacher));
+    questionService.reply(q.questionId(), "Follow-up", java.util.UUID.randomUUID().toString(), actor(student));
+    assertEquals(Role.TEACHER, official.authorRole());
+    var summary = questionService.get(q.questionId(), actor(peer));
+    assertEquals(3, summary.replyCount()); assertEquals("Teacher explanation", summary.answer());
+    var history = questionService.listReplies(q.questionId(), 0, 10, actor(student));
+    assertEquals(3, history.totalElements()); assertEquals("Follow-up", history.content().getFirst().body());
+    assertEquals("Try an example", history.content().getLast().body());
+    assertTrue(notifications.findByUser_UserIdOrderByCreatedAtDesc(student.getUserId()).stream()
+        .allMatch(n -> n.getTargetUrl().contains("&questionId=" + q.questionId())));
+  }
+
+  @Test
+  void hiddenRepliesNeverLeakThroughTotalsSummariesOrTeacherPendingReports() {
+    enrollForQuestions(student);
+    var q = questionService.ask(first.getLessonId(), "Help", actor(student));
+    var original = questionService.reply(q.questionId(), "Original official", java.util.UUID.randomUUID().toString(), actor(teacher));
+    var updated = questionService.reply(q.questionId(), "New official", java.util.UUID.randomUUID().toString(), actor(admin));
+    assertThrows(ForbiddenException.class, () -> questionService.replyVisibility(updated.replyId(), true, actor(student)));
+    assertThrows(ForbiddenException.class, () -> questionService.replyVisibility(updated.replyId(), true, actor(outsider)));
+    questionService.replyVisibility(updated.replyId(), true, actor(teacher));
+    var summary = questionService.get(q.questionId(), actor(student));
+    assertEquals("Original official", summary.answer()); assertEquals(1, summary.replyCount());
+    assertEquals(1, questionService.list(first.getLessonId(), 0, 10, actor(student)).content().getFirst().replyCount());
+    assertEquals(1, questionService.listReplies(q.questionId(), 0, 1, actor(student)).totalElements());
+    assertEquals(2, questionService.listReplies(q.questionId(), 0, 10, actor(teacher)).totalElements());
+    questionService.replyVisibility(original.replyId(), true, actor(admin));
+    assertNull(questionService.get(q.questionId(), actor(student)).answer());
+    assertEquals(1, courseStudentReports.get(free.getCourseId(), "", null, "name", 0, 10, actor(teacher)).summary().pendingQuestions());
+    questionService.replyVisibility(updated.replyId(), false, actor(teacher));
+    assertEquals("New official", questionService.get(q.questionId(), actor(student)).answer());
+    assertEquals(0, courseStudentReports.get(free.getCourseId(), "", null, "name", 0, 10, actor(teacher)).summary().pendingQuestions());
+    questionService.visibility(q.questionId(), true, actor(teacher));
+    assertThrows(ResourceNotFoundException.class, () -> questionService.listReplies(q.questionId(), 0, 10, actor(student)));
+    assertThrows(ResourceNotFoundException.class, () -> questionService.reply(q.questionId(), "Hidden", java.util.UUID.randomUUID().toString(), actor(student)));
+    assertThrows(BadRequestException.class, () -> questionService.reply(q.questionId(), "Hidden", java.util.UUID.randomUUID().toString(), actor(teacher)));
+  }
+
+  @Test
+  void replyEndpointsCheckEnrollmentDraftLessonsCsrfAndBodyValidation() throws Exception {
+    enrollForQuestions(student);
+    var q = questionService.ask(first.getLessonId(), "Help", actor(student));
+    String path = "/api/questions/" + q.questionId() + "/replies";
+    String body = "{\"body\":\"Answer\",\"clientRequestId\":\"" + java.util.UUID.randomUUID() + "\"}";
+    mvc.perform(get(path)).andExpect(status().isUnauthorized());
+    var session = login(student);
+    mvc.perform(post(path).session(session).contentType("application/json").content(body)).andExpect(status().isForbidden());
+    for (String invalid : new String[]{"{}", body.replace("Answer", "   "), body.replace("Answer", "x".repeat(5001)), body.replace("clientRequestId", "missingId")})
+      mvc.perform(post(path).session(session).with(csrf()).contentType("application/json").content(invalid)).andExpect(status().isBadRequest());
+    var stranger = user("stranger", Role.STUDENT);
+    assertThrows(ForbiddenException.class, () -> questionService.listReplies(q.questionId(), 0, 10, actor(stranger)));
+    mvc.perform(post(path).session(login(stranger)).with(csrf()).contentType("application/json").content(body)).andExpect(status().isForbidden());
+    mvc.perform(post(path).session(login(outsider)).with(csrf()).contentType("application/json").content(body)).andExpect(status().isForbidden());
+    mvc.perform(post(path).session(session).with(csrf()).contentType("application/json").content(body))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.authorRole").value("STUDENT"));
+    var draft = lesson(free, "Draft conversation", 3, false);
+    var draftQuestion = new LessonQuestion(); draftQuestion.setLesson(draft); draftQuestion.setStudent(student); draftQuestion.setBody("Draft");
+    questions.saveAndFlush(draftQuestion);
+    assertThrows(ResourceNotFoundException.class, () -> questionService.listReplies(draftQuestion.getQuestionId(), 0, 10, actor(student)));
+    var enrollment = enrollments.findByStudent_UserIdAndCourse_CourseId(student.getUserId(), free.getCourseId()).orElseThrow();
+    enrollment.setStatus(EnrollmentStatus.DROPPED); enrollments.saveAndFlush(enrollment);
+    mvc.perform(get(path).session(session)).andExpect(status().isForbidden());
+    mvc.perform(post(path).session(session).with(csrf()).contentType("application/json").content(body)).andExpect(status().isForbidden());
+  }
+
+  @Test
+  void repliesPaginateAndRetriesDoNotDuplicateMessagesOrNotifications() {
+    enrollForQuestions(student);
+    var q = questionService.ask(first.getLessonId(), "Help", actor(student));
+    String key = java.util.UUID.randomUUID().toString();
+    var firstReply = questionService.reply(q.questionId(), "First", key, actor(student));
+    long notices = notifications.count();
+    assertEquals(firstReply.replyId(), questionService.reply(q.questionId(), "First", key.toUpperCase(), actor(student)).replyId());
+    assertEquals(notices, notifications.count()); assertEquals(1, questionReplies.count());
+    assertThrows(ConflictException.class, () -> questionService.reply(q.questionId(), "Changed", key, actor(student)));
+    var other = questionService.ask(second.getLessonId(), "Other", actor(student));
+    assertThrows(ConflictException.class, () -> questionService.reply(other.questionId(), "First", key, actor(student)));
+    for (int i = 0; i < 12; i++) questionService.reply(q.questionId(), "Reply " + i, java.util.UUID.randomUUID().toString(), actor(student));
+    var page = questionService.listReplies(q.questionId(), 0, 10, actor(student));
+    assertEquals(13, page.totalElements()); assertEquals(2, page.totalPages());
+    assertEquals("Reply 11", page.content().getFirst().body());
+    var tail = questionService.listReplies(q.questionId(), 1, 10, actor(student));
+    assertEquals("First", tail.content().getLast().body());
+    assertEquals(0, questionService.listReplies(other.questionId(), 0, 10, actor(student)).totalElements());
+    for (int[] invalid : new int[][]{{-1,10},{0,0},{0,51}})
+      assertThrows(BadRequestException.class, () -> questionService.listReplies(q.questionId(), invalid[0], invalid[1], actor(student)));
+  }
+
+  @Test
+  void replyNotificationsRollbackMessagesAndOfficialSummaryTogether() {
+    enrollForQuestions(student);
+    var q = questionService.ask(first.getLessonId(), "Help", actor(student));
+    doThrow(new IllegalStateException("Notification failed")).when(notifications).save(any(Notification.class));
+    assertThrows(IllegalStateException.class, () -> questionService.reply(q.questionId(), "Reply", java.util.UUID.randomUUID().toString(), actor(teacher)));
+    assertEquals(0, questionReplies.count()); assertNull(questionService.get(q.questionId(), actor(student)).answer());
+  }
+
+  @Test
+  void concurrentReplyRetrySavesOneMessageAndOneNotification() throws Exception {
+    enrollForQuestions(student);
+    var q = questionService.ask(first.getLessonId(), "Help", actor(student));
+    String key = java.util.UUID.randomUUID().toString();
+    long notices = notifications.count();
+    try (var pool = Executors.newFixedThreadPool(2)) {
+      var start = new CountDownLatch(1);
+      var task = (Callable<Integer>) () -> { start.await(); return questionService.reply(q.questionId(), "Concurrent", key, actor(student)).replyId(); };
+      var one = pool.submit(task); var two = pool.submit(task); start.countDown();
+      assertEquals(one.get(15, TimeUnit.SECONDS), two.get(15, TimeUnit.SECONDS));
+    }
+    assertEquals(1, questionReplies.count()); assertEquals(notices + 1, notifications.count());
+  }
+
+  @Test
+  void repliesCascadeWithLessonsAndCountAsStudentActivity() {
+    enrollForQuestions(student);
+    var peer = user("activity_peer", Role.STUDENT); enrollForQuestions(peer);
+    var q = questionService.ask(first.getLessonId(), "Help", actor(student));
+    var reply = questionService.reply(q.questionId(), "Peer help", java.util.UUID.randomUUID().toString(), actor(peer));
+    var latest = java.time.LocalDateTime.of(2031, 1, 1, 12, 0);
+    jdbc.update("UPDATE question_replies SET created_at=? WHERE reply_id=?", latest, reply.replyId());
+    var row = courseStudentReports.get(free.getCourseId(), "activity_peer", null, "name", 0, 10, actor(teacher)).students().content().getFirst();
+    assertEquals(latest, row.lastActivity());
+    lessonService.deleteLesson(first.getLessonId(), actor(teacher));
+    assertEquals(0, questionReplies.count()); assertEquals(0, questions.count());
   }
 
   @Test

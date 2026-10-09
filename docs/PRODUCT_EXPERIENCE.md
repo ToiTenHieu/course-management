@@ -86,7 +86,7 @@ Flyway V7 thêm bảng phiên bản, câu hỏi, lần làm và đáp án; giữ
 
 ### Nâng cấp hỏi đáp theo bài — 07/10/2026
 
-Học viên đặt câu hỏi trong phòng học hoặc chọn bài tại trang khóa học. Các học viên đã đăng ký có thể đọc câu hỏi công khai trong khóa. Giảng viên phụ trách/admin đọc, trả lời, cập nhật phản hồi và ẩn/hiện câu hỏi ở trang khóa học. Danh sách lấy từng trang 10 câu; backend loại câu hỏi ẩn trước khi tính tổng và phân trang cho học viên. Bản này hỗ trợ một phản hồi hiện tại cho mỗi câu hỏi; trao đổi nhiều tầng và lịch sử sửa phản hồi thuộc giai đoạn sau.
+Học viên đặt câu hỏi trong phòng học hoặc chọn bài tại trang khóa học. Các học viên đã đăng ký có thể đọc câu hỏi công khai trong khóa. Giảng viên phụ trách/admin đọc, trả lời, cập nhật phản hồi và ẩn/hiện câu hỏi ở trang khóa học. Danh sách lấy từng trang 10 câu; backend loại câu hỏi ẩn trước khi tính tổng và phân trang cho học viên. Bản 07/10 hỗ trợ một phản hồi hiện tại cho mỗi câu hỏi. Hội thoại nhiều lượt đã được bổ sung ngày 09/10 như mô tả bên dưới.
 
 Thông báo cho giảng viên khi có câu hỏi, cho tác giả khi có phản hồi; liên kết mang courseId, lessonId và questionId. Giao diện tải thêm câu hỏi được liên kết nếu nó không nằm ở trang đầu, rồi đưa người dùng tới đúng nội dung. Lỗi gửi giữ nguyên văn bản để thử lại, đổi bài giữ bản nháp trong phiên trang đang mở. Bản nháp chưa gửi không được lưu trên máy chủ.
 
@@ -117,3 +117,11 @@ Phòng học đặt tài liệu ngay sau nội dung, trước nút hoàn thành;
 Đóng trình soạn bài chờ lưu bản nháp; lỗi mạng giữ dialog và văn bản. Dùng nội dung hiện tại chỉ bỏ nháp sau khi tải bài gốc thành công; bài mới giữ thứ tự mặc định. Admin lưu hồ sơ và vai trò trong một thao tác, tránh thành công một phần. Sau khi ghi đã thành công, lỗi tải màn hình được thông báo riêng với nút tải lại.
 
 Đăng nhập quay về cả tab vừa chọn. Lượt đã ngừng học có hướng dẫn liên hệ quản trị viên. Quiz bỏ bản nộp hỏng trong phiên, giữ kết quả/thống kê mới khi phản hồi cũ về chậm, giữ nút làm lại sau xem lịch sử và cho thử tải đề khi lỗi. Form quiz/hỏi đáp dùng cùng kiểm tra sát ô nhập. API giữ mã HTTP khi nhận trang HTML lỗi, giúp xử lý phiên hết hạn và tệp quá lớn đúng nghĩa.
+
+### Hội thoại theo bài — 09/10/2026
+
+Học viên còn đăng ký trả lời nhau và trao đổi nhiều lượt với giảng viên trong cùng câu hỏi. Nhãn Học viên/Giảng viên/Quản trị viên lấy từ vai trò ở thời điểm gửi. Hội thoại tải từng trang 10 phản hồi, mới nhất trước; các mục trên mỗi trang hiển thị theo thứ tự thời gian gửi. Thông báo tới tác giả câu hỏi và giảng viên phụ trách, không gửi cho chính người vừa trả lời.
+
+Giảng viên phụ trách/admin ẩn hoặc hiện từng phản hồi hoặc cả câu hỏi. Backend loại phản hồi ẩn trước khi tính tổng/phân trang cho học viên và đồng bộ tóm tắt chính thức để báo cáo không lộ nội dung ẩn. Học viên hỗ trợ nhau không tự làm mất câu hỏi khỏi hàng chờ giảng viên. Phản hồi tính vào hoạt động gần nhất trong báo cáo học viên.
+
+Flyway V15 chuyển phản hồi cũ vào hội thoại, giữ nội dung/thời điểm. UUID cho mỗi lượt gửi giúp thử lại sau mất phản hồi mạng không tạo bản ghi/thông báo trùng. Gửi lỗi giữ văn bản trong phiên trang; đổi bài hoặc phản hồi về chậm không ghi đè vùng hội thoại mới. Chưa hỗ trợ chat riêng, hội thoại phân nhánh hoặc sửa nội dung một phản hồi đã gửi.

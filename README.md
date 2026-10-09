@@ -6,7 +6,7 @@ Nền tảng quản lý khóa học trực tuyến phục vụ đồ án/demo. B
 
 - Khách: tìm khóa từ trang chủ, khám phá chủ đề, xem kết quả học tập/chương trình/học phí trước khi đăng nhập; giữ khóa đã chọn qua đăng nhập.
 - Học viên: dashboard tiếp tục học, tìm/lọc khóa đã đăng ký, đăng ký và thanh toán, học từng bài với chế độ tập trung, lưu ghi chú riêng và vị trí học trên máy chủ, theo dõi tiến độ, đánh giá, thông báo và hồ sơ.
-- Hỏi đáp theo bài: học viên đã đăng ký đặt câu hỏi và đọc trao đổi trong khóa; giảng viên phụ trách/admin trả lời, cập nhật phản hồi, ẩn/hiện câu hỏi. Thông báo dẫn tới đúng bài và câu hỏi, kể cả câu hỏi nằm ngoài trang đầu.
+- Hỏi đáp theo bài: học viên đã đăng ký đặt câu hỏi, trả lời nhau và trao đổi nhiều lượt với giảng viên. Phản hồi có nhãn vai trò, phân trang và chống gửi trùng; giảng viên phụ trách/admin ẩn/hiện câu hỏi hoặc từng phản hồi. Thông báo dẫn tới đúng bài và câu hỏi, kể cả câu hỏi nằm ngoài trang đầu.
 - Quiz theo bài: giảng viên soạn 1–20 câu trắc nghiệm bốn lựa chọn, đáp án và giải thích; lưu nháp/xuất bản, đặt mức đạt. Học viên nhận điểm và phản hồi từng câu, xem lịch sử phân trang; giảng viên xem thống kê câu hay sai của phiên bản hiện tại. Mỗi lần sửa giữ đề cũ để lịch sử luôn đúng.
 - Giảng viên: dashboard riêng và checklist chuẩn bị khóa, sửa thông tin/mục tiêu của khóa phụ trách, thêm/sửa/xóa bài học, xuất bản/ẩn bài học. Học phí/phân công và xuất bản khóa do admin quản lý.
 - Chi tiết thao tác: lỗi ngay dưới ô nhập, hiện/ẩn mật khẩu, số ký tự nội dung, trạng thái đang lưu; cảnh báo khi đóng hộp soạn có thay đổi chưa lưu. Giảng viên xem trước bài trước khi lưu. Menu điện thoại có nền che, hỗ trợ Escape và giữ focus trong điều hướng.
@@ -76,7 +76,7 @@ node --check src/main/resources/static/js/questions.js
 node --check src/main/resources/static/js/quiz.js
 ```
 
-Bộ backend có 95 kiểm thử (90 ca nghiệp vụ/API, bốn ca cấu hình và một ca khởi động), dùng migration thật. Bộ đầy đủ đạt trên H2; các ca nghiệp vụ trước đó đã chạy trên PostgreSQL. Bao gồm lưu hồ sơ/vai trò đồng thời, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 103 kiểm thử (97 ca nghiệp vụ/API, bốn ca cấu hình, một ca migration và một ca khởi động), dùng migration thật. Bộ đầy đủ đạt trên H2; các ca nghiệp vụ trước đó đã chạy trên PostgreSQL. Bao gồm lưu hồ sơ/vai trò đồng thời, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
 Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
 
@@ -153,7 +153,7 @@ Lưu bài nháp trước để tải file từ trình soạn. Mỗi bài tối �
 - `GET/POST /api/lessons/{id}/resources`: danh sách metadata hoặc upload multipart `file`; upload chỉ dành cho admin/giảng viên phụ trách và yêu cầu CSRF.
 - `GET /api/lesson-resources/{id}/content`: chỉ người quản lý hoặc học viên còn đăng ký và bài published. PDF/TXT tải xuống, ảnh được hiển thị inline; response không cache và có nosniff/sandbox.
 - `DELETE /api/lesson-resources/{id}`: người quản lý khóa, yêu cầu CSRF. Xóa bài xóa tài liệu của bài qua khóa ngoại.
-- `node --test tests/unit/*.test.mjs`: 13 kiểm thử bộ hiển thị/URL, API và QR thanh toán; giữ mã HTTP khi máy chủ trả HTML, kiểm tra CSRF trước khi gửi dữ liệu và làm mới token sau lỗi quyền; giữ mốc thời gian YouTube trong player và link dự phòng.
+- `node --test tests/unit/*.test.mjs`: 15 kiểm thử bộ hiển thị/URL, API, QR thanh toán và phản hồi hội thoại; giữ mã HTTP khi máy chủ trả HTML, kiểm tra CSRF trước khi gửi dữ liệu và làm mới token sau lỗi quyền; giữ mốc thời gian YouTube trong player và link dự phòng.
 
 ## Hồ sơ quản trị và thông báo
 
@@ -177,10 +177,13 @@ Chỉ học viên có đăng ký còn hiệu lực và bài xuất bản đượ
 - `GET /api/lessons/{lessonId}/questions?page=0&size=10`: phân trang từ 0, size 1–50, mới nhất trước. Học viên phải có đăng ký còn hiệu lực và bài đã xuất bản; người quản lý khóa xem được bài nháp. Câu hỏi bị ẩn không được tính vào tổng/trang của học viên.
 - `POST /api/lessons/{lessonId}/questions`: học viên gửi `{ "body": "Câu hỏi" }`, 1–5000 ký tự, không chấp nhận chỉ khoảng trắng; tạo thông báo cho giảng viên trong cùng transaction.
 - `GET /api/questions/{id}`: đọc một câu hỏi theo quyền, hỗ trợ liên kết thông báo. Câu hỏi bị ẩn trả 404 cho học viên.
-- `PUT /api/questions/{id}/answer`: giảng viên phụ trách/admin gửi `{ "body": "Phản hồi" }`; lưu phản hồi hiện tại, người trả lời và thời điểm, đồng thời thông báo cho tác giả. Cập nhật thay phản hồi cũ; chưa có lịch sử phiên bản hay trao đổi nhiều tầng.
+- `GET /api/questions/{id}/replies?page=0&size=10`: đọc hội thoại, mới nhất trước, size 1–50; học viên chỉ nhận phản hồi chưa bị ẩn và số tổng đã lọc. Giao diện hiển thị mỗi trang theo thứ tự hội thoại, có nút xem phản hồi cũ/mới hơn.
+- `POST /api/questions/{id}/replies`: học viên còn đăng ký/giảng viên phụ trách/admin gửi `{ "body": "Phản hồi", "clientRequestId": "UUID" }`, 1–5000 ký tự. UUID được giữ khi gửi lại cùng nội dung sau lỗi mạng; không tạo thêm phản hồi/thông báo. Cùng UUID nhưng khác nội dung hoặc câu hỏi trả 409. Vai trò tác giả lấy từ phiên và lưu theo thời điểm gửi.
+- `PUT /api/question-replies/{id}/visibility`: giảng viên phụ trách/admin gửi `{ "hidden": true }` hoặc `false` để ẩn/hiện một phản hồi. Học viên không thấy nội dung ẩn hoặc số lượng của chúng. Khi ẩn phản hồi chính thức cuối cùng, câu hỏi trở về hàng chờ giảng viên; hiện lại khôi phục trạng thái.
+- `PUT /api/questions/{id}/answer`: API tương thích cho giảng viên phụ trách/admin gửi `{ "body": "Phản hồi" }`; từ V15, thêm một phản hồi chính thức vào hội thoại và cập nhật các trường tóm tắt `answer`, `answeredByName`, `answeredAt`, giữ các phản hồi trước.
 - `PUT /api/questions/{id}/visibility`: giảng viên phụ trách/admin gửi `{ "hidden": true }` để ẩn hoặc `false` để hiện lại. Phải hiện câu hỏi trước khi trả lời.
 
-Mọi thao tác ghi yêu cầu CSRF. Flyway V6 thêm bảng hỏi đáp, giữ dữ liệu hiện có. Xóa bài học sẽ xóa hỏi đáp của bài; ẩn bài giữ hỏi đáp nhưng chặn học viên đọc. Nội dung được hiển thị như văn bản, không thực thi HTML.
+Mọi thao tác ghi yêu cầu CSRF. Flyway V15 thêm bảng phản hồi và chuyển câu trả lời cũ thành mục đầu tiên trong hội thoại, giữ nội dung/thời điểm. `replyCount` trên câu hỏi chỉ tính những phản hồi người đó có quyền xem. Phản hồi mới thông báo cho tác giả câu hỏi và giảng viên phụ trách, trừ người gửi; lưu phản hồi, tóm tắt chính thức và thông báo cùng transaction. Học viên trả lời nhau không tự đánh dấu đã được giảng viên giải đáp. Xóa bài học xóa hỏi đáp và phản hồi qua khóa ngoại; ẩn bài giữ dữ liệu nhưng chặn học viên đọc. Nội dung hiển thị như văn bản, không thực thi HTML. Bản nháp phản hồi được giữ trong phiên trang khi tải/gửi lỗi; không lưu qua tải lại toàn bộ trang. Hiện hỗ trợ hội thoại phẳng, chưa có chat riêng hoặc cập nhật thời gian thực.
 
 ### Bản nháp và lịch sử bài học
 

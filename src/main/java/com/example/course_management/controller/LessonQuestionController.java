@@ -59,4 +59,32 @@ public class LessonQuestionController {
     return ApiResponse.success(
         "Đã cập nhật câu hỏi", service.visibility(id, request.hidden(), actor));
   }
+
+  @GetMapping("/api/questions/{id}/replies")
+  public ApiResponse<PageResponse<QuestionReplyResponse>> replies(
+      @PathVariable Integer id,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @AuthenticationPrincipal CustomUserDetails actor) {
+    return ApiResponse.success("OK", service.listReplies(id, page, size, actor));
+  }
+
+  @PostMapping("/api/questions/{id}/replies")
+  @PreAuthorize("hasAnyRole('STUDENT','TEACHER','ADMIN')")
+  public ApiResponse<QuestionReplyResponse> reply(
+      @PathVariable Integer id,
+      @Valid @RequestBody CreateQuestionReplyRequest request,
+      @AuthenticationPrincipal CustomUserDetails actor) {
+    return ApiResponse.success("Đã gửi phản hồi",
+        service.reply(id, request.body(), request.clientRequestId(), actor));
+  }
+
+  @PutMapping("/api/question-replies/{id}/visibility")
+  @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+  public ApiResponse<QuestionReplyResponse> replyVisibility(
+      @PathVariable Integer id,
+      @Valid @RequestBody QuestionVisibilityRequest request,
+      @AuthenticationPrincipal CustomUserDetails actor) {
+    return ApiResponse.success("Đã cập nhật phản hồi", service.replyVisibility(id, request.hidden(), actor));
+  }
 }

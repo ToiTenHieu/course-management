@@ -12,4 +12,5 @@ public record LessonQuestionResponse(
     String answeredByName,
     LocalDateTime answeredAt,
     boolean hidden,
-    LocalDateTime createdAt) {}
+    LocalDateTime createdAt,
+    long replyCount) {}

@@ -2843,12 +2843,14 @@ html {
   margin: 8px 0 0;
 }
 .question-form,
-.answer-form {
+.answer-form,
+.reply-form {
   display: grid;
   gap: 12px;
 }
 .question-form button,
-.answer-form button {
+.answer-form button,
+.reply-form button {
   justify-self: start;
 }
 .question-status {
@@ -2880,6 +2882,14 @@ html {
   background: #edf5f0;
   border-radius: 12px;
 }
+.question-thread { margin-top: 16px; padding: 16px; background: #f7faf8; border: 1px solid #dfe7e2; border-radius: 12px; }
+.question-reply { padding: 16px; margin-bottom: 12px; border: 1px solid #dfe7e2; border-radius: 10px; background: white; }
+.reply-official { background: #edf5f0; border-left: 4px solid #165d4b; }
+.reply-status { font-size: .9rem; color: #53695d; }
+.reply-form { margin-top: 16px; }
+.reply-form textarea { width: 100%; max-width: 100%; }
+.question-thread .reply-pages:empty { display: none; }
+@media (max-width: 600px) { .question-thread, .question-reply { padding: 12px; } }
 .question-tools {
   display: grid;
   gap: 16px;
