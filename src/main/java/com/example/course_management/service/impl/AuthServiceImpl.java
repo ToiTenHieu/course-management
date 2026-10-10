@@ -26,6 +26,8 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public UserProfileResponse login(LoginRequest request, HttpServletRequest httpRequest) {
+    if (!com.example.course_management.security.PasswordPolicy.fitsBcrypt(request.getPassword()))
+      throw new org.springframework.security.authentication.BadCredentialsException("Sai username hoặc password");
     Authentication auth =
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));

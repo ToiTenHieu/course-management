@@ -22,6 +22,8 @@ if ($Port -lt 1 -or $Port -gt 65535) { throw 'PORT must be between 1 and 65535.'
 $taskUrl = "http://127.0.0.1:$Port"
 function Test-DemoReady {
     try {
+        $taskReady = Invoke-RestMethod "$taskUrl/api/auth/ready" -TimeoutSec 2
+        if (-not ($taskReady.success -and $taskReady.data.ready -eq $true)) { return $false }
         $taskResponse = Invoke-RestMethod "$taskUrl/api/auth/config" -TimeoutSec 2
         return $taskResponse.success -and $taskResponse.data.demo -eq $true
     } catch { return $false }

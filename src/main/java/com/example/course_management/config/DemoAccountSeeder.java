@@ -62,7 +62,7 @@ public class DemoAccountSeeder {
       var user = account(spec.key());
       jdbc.update("INSERT INTO demo_login_accounts (user_id) VALUES (?)", user.getUserId());
     });
-    jdbc.update("INSERT INTO demo_seed_runs (dataset_key) VALUES (?)", key);
+    jdbc.update("INSERT INTO demo_seed_runs (dataset_key, completed_at) VALUES (?, ?)", key, com.example.course_management.time.ApplicationTime.now());
   }
 
   public record LoginAccount(String username, Role role, String password) {}

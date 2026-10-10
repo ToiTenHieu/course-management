@@ -13,6 +13,7 @@ module.exports = defineConfig({
   outputDir: "output/e2e-results",
   use: {
     baseURL: process.env.E2E_BASE_URL || "http://127.0.0.1:8080",
+    timezoneId: "UTC",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
@@ -22,7 +23,7 @@ module.exports = defineConfig({
     : {
         command:
           "java -jar target/course_management-0.0.1-SNAPSHOT.jar --spring.profiles.active=demo",
-        url: "http://127.0.0.1:8080/api/auth/config",
+        url: "http://127.0.0.1:8080/api/auth/ready",
         reuseExistingServer: false,
         timeout: 120000,
       },

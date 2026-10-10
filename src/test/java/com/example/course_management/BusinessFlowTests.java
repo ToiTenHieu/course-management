@@ -112,6 +112,72 @@ class BusinessFlowTests {
   }
 
   @Test
+  void unicodePasswordsHaveOneByteLimitAcrossAccountApis() throws Exception {
+    var oversized = "ắ".repeat(25);
+    String payload = "{\"username\":\"unicode_boundary\",\"email\":\"unicode@example.invalid\",\"fullName\":\"Unicode\",\"password\":\""+oversized+"\"}";
+    mvc.perform(post("/api/auth/register").with(csrf()).contentType("application/json").content(payload))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("72 byte")));
+    mvc.perform(post("/api/users").session(login(admin)).with(csrf()).contentType("application/json")
+        .content(payload.replace("}",",\"role\":\"STUDENT\"}"))).andExpect(status().isBadRequest());
+    String originalHash=users.findById(student.getUserId()).orElseThrow().getPasswordHash();
+    mvc.perform(put("/api/users/"+student.getUserId()+"/password").session(login(admin)).with(csrf())
+        .contentType("application/json").content("{\"newPassword\":\""+oversized+"\"}"))
+        .andExpect(status().isBadRequest());
+    assertEquals(originalHash,users.findById(student.getUserId()).orElseThrow().getPasswordHash());
+    mvc.perform(post("/api/auth/register").with(csrf()).contentType("application/json")
+        .content(payload.replace(oversized,"ắ".repeat(24)))).andExpect(status().isOk());
+    mvc.perform(post("/api/auth/login").with(csrf()).contentType("application/json")
+        .content("{\"username\":\"unicode_boundary\",\"password\":\""+"ắ".repeat(24)+"\"}"))
+        .andExpect(status().isOk());
+    mvc.perform(post("/api/auth/login").with(csrf()).contentType("application/json")
+        .content("{\"username\":\"unicode_boundary\",\"password\":\""+oversized+"\"}"))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void curriculumNormalizesUngroupedLessonsBeforePersistingOrder() {
+    int revision=courses.findById(free.getCourseId()).orElseThrow().getCurriculumRevision();
+    var saved=curriculumService.save(free.getCourseId(),new CurriculumService.Plan(revision,java.util.List.of(
+        new CurriculumService.Group(null,"",java.util.List.of(first.getLessonId())),
+        new CurriculumService.Group(null,"Chapter",java.util.List.of(second.getLessonId())))),actor(teacher));
+    var expected=java.util.List.of(second.getLessonId(),first.getLessonId());
+    assertEquals(expected,saved.groups().stream().flatMap(g->g.lessonIds().stream()).toList());
+    assertEquals(expected,lessons.findByCourse_CourseIdOrderByOrderIndex(free.getCourseId()).stream().map(Lesson::getLessonId).toList());
+    assertEquals(saved,curriculumService.get(free.getCourseId(),actor(teacher)));
+  }
+
+  @Test
+  void finalActiveAdministratorCannotBeDeletedOrDisabled() throws Exception {
+    var disabled=new UpdateStatusRequest();disabled.setIsActive(false);
+    assertThrows(ConflictException.class,()->userService.updateStatus(admin.getUserId(),disabled));
+    assertThrows(ConflictException.class,()->userService.deleteUser(admin.getUserId()));
+    mvc.perform(put("/api/users/"+admin.getUserId()+"/status").session(login(admin)).with(csrf())
+        .contentType("application/json").content("{\"isActive\":false}")).andExpect(status().isConflict());
+    assertEquals(1,users.countByRoleAndIsActiveTrue(Role.ADMIN));
+    assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM audit_logs",Integer.class));
+    var backup=user("backup_admin",Role.ADMIN);
+    userService.updateStatus(backup.getUserId(),disabled);
+    assertFalse(users.findById(backup.getUserId()).orElseThrow().getIsActive());
+    assertThrows(ConflictException.class,()->userService.updateStatus(admin.getUserId(),disabled));
+    userService.deleteUser(backup.getUserId());
+  }
+
+  @Test
+  void concurrentAdministratorDeactivationKeepsOneActiveAccount() throws Exception {
+    var backup=user("concurrent_admin",Role.ADMIN);
+    var start=new CountDownLatch(1);
+    try(var pool=Executors.newFixedThreadPool(2)) {
+      java.util.function.Function<Integer,Callable<Boolean>> deactivate=id->()->{
+        start.await();var request=new UpdateStatusRequest();request.setIsActive(false);
+        try {userService.updateStatus(id,request);return true;}catch(ConflictException expected){return false;}
+      };
+      var a=pool.submit(deactivate.apply(admin.getUserId()));var b=pool.submit(deactivate.apply(backup.getUserId()));
+      start.countDown();assertNotEquals(a.get(10,TimeUnit.SECONDS),b.get(10,TimeUnit.SECONDS));
+      assertEquals(1,users.countByRoleAndIsActiveTrue(Role.ADMIN));
+    }
+  }
+
+  @Test
   void weeklyGoalCountsFirstCompletionsAndPreservesHistoryAcrossContentChanges() throws Exception {
     enrollForQuestions(student);
     var e=enrollments.findByStudent_UserIdAndCourse_CourseId(student.getUserId(),free.getCourseId()).orElseThrow();

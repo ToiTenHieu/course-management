@@ -23,18 +23,16 @@ jobs:
           cache: maven
       - name: Kiểm tra và đóng gói
         run: bash ./mvnw -B -ntp verify
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
       - name: Kiểm tra cú pháp JavaScript
         run: |
-          node --check src/main/resources/static/js/api.js
-          node --check src/main/resources/static/js/app.js
-          node --check src/main/resources/static/js/experience.js
-          node --check src/main/resources/static/js/course-students.js
-          node --check src/main/resources/static/js/lesson-drafts.js
-          node --check src/main/resources/static/js/lesson-content.js
+          for file in src/main/resources/static/js/*.js; do node --check "$file"; done
           node --test tests/unit/*.test.mjs
-          node --check src/main/resources/static/js/lists.js
-          node --check src/main/resources/static/js/questions.js
-          node --check src/main/resources/static/js/quiz.js
+      - name: Kiểm thử bộ nhập nội dung Python
+        run: python3 -m unittest discover -s tests/unit -p 'test_*.py'
       - name: Kiểm thử backend trên PostgreSQL thật
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/course_management_test
@@ -44,10 +42,6 @@ jobs:
         run: |
           docker exec ${{ job.services.postgres.id }} psql -U postgres -c 'CREATE DATABASE course_management_test'
           bash ./mvnw -B -ntp test
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
       - name: Cài công cụ kiểm thử giao diện
         run: |
           npm ci

@@ -41,7 +41,7 @@ $env:DB_PASSWORD = 'mat-khau-postgresql-tren-may-ban'
 .\scripts\start-demo.ps1
 ```
 
-Mở http://127.0.0.1:8080. Script khởi động Java nền, chỉ báo sẵn sàng sau khi API cấu hình demo trả lời, ghi log/PID vào `target/local-demo`. Dừng bằng `scripts/stop-demo.ps1`. Khi thay source, dừng demo, build lại rồi khởi động. Dùng `-SkipBuild` nếu đã đóng gói; `-Port 8081` để đổi cổng, `-StartupTimeoutSeconds 120` để tăng thời gian chờ. Cổng được chọn theo thứ tự tham số `-Port`, biến `PORT`, file cục bộ, mặc định 8080. Cổng bị chiếm hoặc tiến trình đang chạy chưa sẵn sàng được báo rõ; khởi động thất bại dọn tiến trình vừa tạo và PID. Trên máy đang làm việc, cấu hình database cục bộ có thể được đọc từ `target/local-demo/application-local.properties`; file này nằm trong thư mục bị Git bỏ qua.
+Mở http://127.0.0.1:8080. Script khởi động Java nền, chỉ báo sẵn sàng khi `/api/auth/ready` trả HTTP 200 sau khi hoàn tất tạo dữ liệu demo, ghi log/PID vào `target/local-demo`. Dừng bằng `scripts/stop-demo.ps1`. Khi thay source, dừng demo, build lại rồi khởi động. Dùng `-SkipBuild` nếu đã đóng gói; `-Port 8081` để đổi cổng, `-StartupTimeoutSeconds 120` để tăng thời gian chờ. Cổng được chọn theo thứ tự tham số `-Port`, biến `PORT`, file cục bộ, mặc định 8080. Cổng bị chiếm hoặc tiến trình đang chạy chưa sẵn sàng được báo rõ; khởi động thất bại dọn tiến trình vừa tạo và PID. Trên máy đang làm việc, cấu hình database cục bộ có thể được đọc từ `target/local-demo/application-local.properties`; file này nằm trong thư mục bị Git bỏ qua.
 
 Linux/macOS hoặc chạy foreground:
 
@@ -79,16 +79,14 @@ Flyway quản lý schema qua `src/main/resources/db/migration`, Hibernate chỉ 
 
 ```powershell
 .\mvnw.cmd -B -ntp verify
-node --check src/main/resources/static/js/api.js
-node --check src/main/resources/static/js/app.js
-node --check src/main/resources/static/js/experience.js
-node --check src/main/resources/static/js/questions.js
-node --check src/main/resources/static/js/quiz.js
+Get-ChildItem src/main/resources/static/js/*.js | ForEach-Object { node --check $_.FullName }
+node --test tests/unit/*.test.mjs
+python -m unittest discover -s tests/unit -p 'test_*.py'
 ```
 
-Bộ backend có 138 kiểm thử (125 ca nghiệp vụ/API, mười ca cấu hình, hai ca migration và một ca khởi động), dùng migration thật. Bộ đầy đủ đạt trên H2; các ca nghiệp vụ trước đó đã chạy trên PostgreSQL. Bao gồm lấy lại mật khẩu/token băm/thời hạn/dùng một lần/gửi lỗi/phiên cũ/đổi đồng thời, mục tiêu tuần/lưu đồng thời/lịch sử hoàn thành, lịch sử admin/quyền/bộ lọc/rollback, lưu hồ sơ/vai trò đồng thời, hồ sơ giảng viên công khai và đối tượng/yêu cầu khóa học, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 146 kiểm thử (129 ca nghiệp vụ/API, mười ca cấu hình, bốn ca thời gian/readiness/giới hạn đăng nhập, hai ca migration và một ca khởi động), dùng migration thật. Bộ đầy đủ đạt với H2 và datasource PostgreSQL; các ca cấu hình/migration giữ H2 hoặc mock riêng. Bao gồm lấy lại mật khẩu/token băm/thời hạn/dùng một lần/gửi lỗi/phiên cũ/đổi đồng thời, mục tiêu tuần/lưu đồng thời/lịch sử hoàn thành, lịch sử admin/quyền/bộ lọc/rollback, lưu hồ sơ/vai trò đồng thời, hồ sơ giảng viên công khai và đối tượng/yêu cầu khóa học, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
-Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
+Mười hành trình Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại, soạn bài, mật khẩu Unicode, chương công khai/khóa quan tâm, nộp và tải tệp/chấm điểm/mục tiêu tuần/lịch sử admin, lấy lại mật khẩu và thu hồi phiên cũ.
 
 ```powershell
 npm ci
@@ -169,11 +167,11 @@ Lưu bài nháp trước để tải file từ trình soạn. Mỗi bài tối �
 - `GET/POST /api/lessons/{id}/resources`: danh sách metadata hoặc upload multipart `file`; upload chỉ dành cho admin/giảng viên phụ trách và yêu cầu CSRF.
 - `GET /api/lesson-resources/{id}/content`: chỉ người quản lý hoặc học viên còn đăng ký và bài published. PDF/TXT tải xuống, ảnh được hiển thị inline; response không cache và có nosniff/sandbox.
 - `DELETE /api/lesson-resources/{id}`: người quản lý khóa, yêu cầu CSRF. Xóa bài xóa tài liệu của bài qua khóa ngoại.
-- `node --test tests/unit/*.test.mjs`: 15 kiểm thử bộ hiển thị/URL, API, QR thanh toán và phản hồi hội thoại; giữ mã HTTP khi máy chủ trả HTML, kiểm tra CSRF trước khi gửi dữ liệu và làm mới token sau lỗi quyền; giữ mốc thời gian YouTube trong player và link dự phòng.
+- `node --test tests/unit/*.test.mjs`: 22 kiểm thử bộ hiển thị/URL, API, QR thanh toán, phản hồi hội thoại, khóa quan tâm, mật khẩu Unicode và thời gian Việt Nam; giữ mã HTTP khi máy chủ trả HTML, kiểm tra CSRF trước khi gửi dữ liệu và làm mới token sau lỗi quyền; giữ mốc thời gian YouTube trong player và link dự phòng.
 
 ## Hồ sơ quản trị và thông báo
 
-`PUT /api/users/{id}/management` dành cho admin, nhận `{fullName,email,role}` và yêu cầu CSRF. Cả ba trường được lưu trong cùng transaction; lỗi email hoặc đổi vai trò admin giữ nguyên hồ sơ. Đổi vai trò làm phiên cũ hết hiệu lực. `PUT /api/users/{id}` vẫn dùng cho cập nhật hồ sơ theo quyền hiện có. Tạo tài khoản ở đăng ký/admin cùng giới hạn username 3–40 ký tự chữ, số, `_`, `.`, `-`; email tối đa 100 ký tự.
+`PUT /api/users/{id}/management` dành cho admin, nhận `{fullName,email,role}` và yêu cầu CSRF. Cả ba trường được lưu trong cùng transaction; lỗi email hoặc đổi vai trò admin giữ nguyên hồ sơ. Đổi vai trò làm phiên cũ hết hiệu lực. `PUT /api/users/{id}` vẫn dùng cho cập nhật hồ sơ theo quyền hiện có. Tạo tài khoản ở đăng ký/admin cùng giới hạn username 3–40 ký tự chữ, số, `_`, `.`, `-`; email tối đa 100 ký tự. Mật khẩu mới ở mọi luồng phải từ 8–64 ký tự, không chỉ khoảng trắng và tối đa 72 byte UTF-8 (ví dụ 24 ký tự `ắ` vừa đủ 72 byte). Khóa hoặc xóa admin hoạt động cuối cùng trả HTTP 409; khóa quản lý tài khoản trong Flyway V21 bảo vệ cả hai thao tác đồng thời.
 
 Thông báo tự tạo giới hạn nội dung 5000, loại 50, liên kết 500 ký tự. `targetUrl` nhận đường dẫn trang nội bộ `.html`, query có mã hóa và hash tab, ví dụ `/course-detail.html?id=5#curriculum`; từ chối địa chỉ ngoài hệ thống. Sau khi thao tác ghi thành công mà tải lại màn hình bị lỗi, giao diện báo thao tác đã lưu và cho tải lại trang.
 
@@ -214,3 +212,13 @@ Giao diện gửi `expectedRevision` và `draftRevision` để tránh ghi đè t
 Giảng viên phụ trách và quản trị viên có tab **Học viên** trong chi tiết khóa học. Tab hiển thị tổng toàn khóa, trạng thái/tiến độ, số bài đã hoàn thành đang xuất bản, số lượt nộp quiz, điểm trung bình/cao nhất, hoạt động gần nhất và liên kết tới câu hỏi chờ phản hồi đầu tiên. Ghi chú riêng và email không được đưa vào báo cáo.
 
 `GET /api/courses/{id}/students?search=&status=&sort=name&page=0&size=10` trả summary toàn khóa và trang học viên. Tìm theo tên hoặc tài khoản; trạng thái gồm ENROLLED/COMPLETED/DROPPED; thứ tự name/progress; trang bắt đầu từ 0, kích thước tối đa 100. Giao diện hiển thị 10 học viên/trang, giữ bộ lọc trong phiên trang. Điểm quiz bao gồm mọi lượt nộp còn lưu trong khóa, kể cả phiên bản cũ. Chỉ câu hỏi chưa trả lời và chưa bị ẩn được tính vào hàng chờ. Các truy vấn tổng hợp lấy theo nhóm học viên của trang, không truy vấn riêng từng dòng. Flyway V12 bổ sung index cho báo cáo.
+
+## Thời gian, readiness và giới hạn yêu cầu
+
+Thời điểm mới ghi vào các cột `TIMESTAMP` theo giờ Việt Nam (`Asia/Ho_Chi_Minh`), độc lập với múi giờ JVM/database. Giao diện diễn giải timestamp không có offset theo cùng quy ước, hiển thị giờ Việt Nam; bộ lọc ngày/mục tiêu tuần dùng ngày Việt Nam. Không đổi hàng loạt thời điểm cũ vì dữ liệu không chứa thông tin múi giờ ban đầu.
+
+`GET /api/auth/ready` công khai trả 503 khi khởi động chưa hoàn tất, 200 với `data.ready=true` sau `ApplicationReadyEvent`; không lưu cache. Script demo và Playwright dùng endpoint này để đợi toàn bộ runner, bao gồm seed dữ liệu.
+
+Đăng ký giới hạn 20 yêu cầu trong 15 phút; đăng nhập giới hạn 30 lần xác thực thất bại trong một phút. Đăng nhập thành công không tăng bộ đếm. Bộ đếm riêng theo địa chỉ kết nối trực tiếp, tối đa 10.000 khóa trong bộ nhớ, hết hạn tự dọn; không tin header forwarded do khách gửi. Vượt giới hạn trả 429. Chạy nhiều instance cần giới hạn dùng chung tại gateway/proxy tin cậy; bộ đếm hiện tại được đặt lại khi khởi động ứng dụng.
+
+Chi tiết khắc phục sau đánh giá: [biên bản sửa lỗi 10/10/2026](docs/SUA_LOI_DANH_GIA_2026_10_10.md).

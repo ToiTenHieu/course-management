@@ -89,7 +89,7 @@ public class DemoScenarioSeeder {
         n.setType(scenario.notificationType()); n.setIsRead(i % 3 == 0); n.setTargetUrl(scenario.notificationTarget()); notifications.save(n);
       }
     }
-    jdbc.update("INSERT INTO demo_seed_runs (dataset_key) VALUES (?)", KEY);
+    jdbc.update("INSERT INTO demo_seed_runs (dataset_key, completed_at) VALUES (?, ?)", KEY, com.example.course_management.time.ApplicationTime.now());
   }
 
   private Enrollment enroll(User student, Course course, User admin) {

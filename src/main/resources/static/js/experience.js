@@ -1,4 +1,5 @@
 import { markdown, video } from "./lesson-content.js";
+import { newPasswordError } from "./password-policy.js";
 // Shared interaction details for forms and the mobile workspace.
 let fieldSequence = 0;
 const pendingContent = new WeakMap();
@@ -68,6 +69,8 @@ export function enhanceForms(root) {
         input.setAttribute("aria-describedby", input.getAttribute("aria-describedby") + " " + counter.id);
       }
       const validate = (reveal = false) => {
+        if (isPassword && input.minLength >= 8 && input.name !== "confirmPassword")
+          input.setCustomValidity(newPasswordError(input.value));
         // Passwords retain literal whitespace; text fields cannot be only whitespace.
         if (input.required && !input.readOnly && !isPassword && ["text", "textarea"].includes(input.type))
           input.setCustomValidity(input.value && !input.value.trim() ? "Vui lòng nhập nội dung, không chỉ khoảng trắng." : "");

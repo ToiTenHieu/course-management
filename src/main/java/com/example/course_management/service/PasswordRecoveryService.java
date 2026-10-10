@@ -1,5 +1,6 @@
 package com.example.course_management.service;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.config.PasswordRecoverySettings;
 import com.example.course_management.entity.Notification;
 import com.example.course_management.exception.*;
@@ -60,7 +61,7 @@ public class PasswordRecoveryService {
       if(ids.size()!=1)return null;
       var account=users.findLockedById(ids.getFirst()).orElse(null);
       if(account==null||!Boolean.TRUE.equals(account.getIsActive())||!account.getEmail().equalsIgnoreCase(email))return null;
-      var now=LocalDateTime.now(WeeklyGoalService.ZONE);
+      var now=ApplicationTime.now();
       jdbc.update("DELETE FROM password_reset_tokens WHERE expires_at<=?",now);
       var last=jdbc.query("SELECT created_at FROM password_reset_tokens WHERE user_id=? ORDER BY created_at DESC LIMIT 1",(r,n)->r.getTimestamp(1).toLocalDateTime(),account.getUserId());
       if(!last.isEmpty()&&last.getFirst().isAfter(now.minusSeconds(60)))return null;
@@ -79,14 +80,13 @@ public class PasswordRecoveryService {
   public void reset(String token,String password,String remoteAddress) {
     requireEnabled();limit("reset:"+remoteAddress,30);
     if(token==null||!token.matches("[A-Za-z0-9_-]{43}"))throw new BadRequestException(INVALID);
-    if(password==null||password.isBlank()||password.length()<8||password.length()>64||password.getBytes(StandardCharsets.UTF_8).length>72)
-      throw new BadRequestException("Mật khẩu phải từ 8 đến 64 ký tự và tối đa 72 byte UTF-8");
+    com.example.course_management.security.PasswordPolicy.validateNewPassword(password);
     String tokenHash=hash(token);
     transaction.executeWithoutResult(tx->{
       var rows=tokens(tokenHash);if(rows.isEmpty())throw new BadRequestException(INVALID);
       var account=users.findLockedById(rows.getFirst().userId()).orElseThrow(()->new BadRequestException(INVALID));
       // Re-read after the account lock: a concurrent reset can consume all tokens while we wait.
-      rows=tokens(tokenHash);var now=LocalDateTime.now(WeeklyGoalService.ZONE);
+      rows=tokens(tokenHash);var now=ApplicationTime.now();
       if(rows.isEmpty()||!Boolean.TRUE.equals(account.getIsActive())||rows.getFirst().version()!=account.getAuthVersion()
           ||!rows.getFirst().email().equals(account.getEmail())||!rows.getFirst().expiresAt().isAfter(now))throw new BadRequestException(INVALID);
       account.setPasswordHash(encoder.encode(password));account.setAuthVersion(account.getAuthVersion()+1);account.setUpdatedAt(now);users.saveAndFlush(account);

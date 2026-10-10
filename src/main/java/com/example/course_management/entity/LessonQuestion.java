@@ -1,5 +1,6 @@
 package com.example.course_management.entity;
 
+import com.example.course_management.time.ApplicationTime;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -38,5 +39,5 @@ public class LessonQuestion {
   private Boolean isHidden = false;
 
   @Column(nullable = false)
-  private LocalDateTime createdAt = LocalDateTime.now();
+  private LocalDateTime createdAt = ApplicationTime.now();
 }

@@ -1,5 +1,6 @@
 package com.example.course_management.service.impl;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.dto.request.CreateNotificationRequest;
 import com.example.course_management.dto.response.NotificationResponse;
 import com.example.course_management.entity.Notification;
@@ -57,7 +58,7 @@ public class NotificationServiceImpl implements NotificationService {
     n.setType(req.getType());
     n.setTargetUrl(req.getTargetUrl());
     n.setIsRead(false);
-    n.setCreatedAt(LocalDateTime.now());
+    n.setCreatedAt(ApplicationTime.now());
     return toResponse(notificationRepository.save(n));
   }
 

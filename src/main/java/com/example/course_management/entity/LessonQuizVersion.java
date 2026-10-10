@@ -1,5 +1,6 @@
 package com.example.course_management.entity;
 
+import com.example.course_management.time.ApplicationTime;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class LessonQuizVersion {
   private Boolean isPublished = false;
 
   @Column(nullable = false)
-  private LocalDateTime createdAt = LocalDateTime.now();
+  private LocalDateTime createdAt = ApplicationTime.now();
 
   @OneToMany(mappedBy = "quizVersion", cascade = CascadeType.ALL)
   @OrderBy("orderIndex ASC")

@@ -1,3 +1,4 @@
+import { dateTime } from './dates.js';
 import { api } from "./api.js";
 import { enhanceForms } from "./experience.js";
 
@@ -5,7 +6,7 @@ const escape = (value) => String(value ?? "").replace(/[&<>"']/g,
   (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const drafts = new Map();
 const replyDrafts = new Map();
-const date = (value) => new Date(value).toLocaleString("vi-VN");
+const date = dateTime;
 
 export function replyMarkup(reply, manager) {
   const label = { STUDENT: "Học viên", TEACHER: "Giảng viên", ADMIN: "Quản trị viên" }[reply.authorRole] || "Thành viên";

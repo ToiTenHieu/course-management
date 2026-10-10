@@ -1,5 +1,7 @@
 # Đánh giá toàn bộ dự án — 10/10/2026
 
+> Cập nhật sau đánh giá: sáu phát hiện bên dưới đã được khắc phục, cùng bảo vệ admin cuối cùng, giới hạn đăng nhập/đăng ký và bổ sung CI/E2E. Xem [biên bản sửa lỗi](SUA_LOI_DANH_GIA_2026_10_10.md). Báo cáo này giữ nguyên bằng chứng của trạng thái trước khi sửa.
+
 ## Kết luận
 
 Dự án có mức hoàn thiện tốt cho đồ án và trình diễn LMS: ba vai trò rõ ràng, luồng học và thanh toán chạy xuyên suốt, nội dung phong phú, dữ liệu được lưu trên máy chủ và nhiều tình huống xung đột/rollback đã có kiểm thử. Toàn bộ kiểm thử hiện có đạt trong lần đánh giá này. Tuy nhiên, vẫn có lỗi ở đầu vào mật khẩu, thứ tự chương trình và trạng thái sẵn sàng của demo; cùng các điểm cần cải thiện về hiệu năng, múi giờ và tự động hóa kiểm thử trước khi vận hành thực tế.

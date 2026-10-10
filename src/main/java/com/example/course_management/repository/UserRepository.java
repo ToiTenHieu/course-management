@@ -18,6 +18,7 @@ public interface UserRepository
   boolean existsByUsername(String username);
 
   boolean existsByEmail(String email);
+  long countByRoleAndIsActiveTrue(Role role);
 
   @Query(
       "SELECT u FROM User u WHERE (:role IS NULL OR u.role = :role) AND (:isActive IS NULL OR"

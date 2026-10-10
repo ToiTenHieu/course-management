@@ -1,4 +1,6 @@
+import { dateTime } from './dates.js';
 import { api } from './api.js';
+import { newPasswordError } from './password-policy.js';
 import { enhanceForms, setPending } from './experience.js';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const accepted='Nếu email thuộc tài khoản đang hoạt động, bạn sẽ nhận được liên kết đặt lại mật khẩu. Vui lòng kiểm tra thư đến và thư rác.';
@@ -16,7 +18,7 @@ export async function mountPasswordRecovery(root,config) {
   const password=form.elements.newPassword,confirmation=form.elements.confirmPassword;
   if(password) {
     const validate=()=>{
-      password.setCustomValidity(new TextEncoder().encode(password.value).length>72?'Mật khẩu tối đa 72 byte UTF-8.':'' );
+      password.setCustomValidity(newPasswordError(password.value));
       confirmation.setCustomValidity(confirmation.value&&confirmation.value!==password.value?'Mật khẩu nhập lại chưa khớp.':'');
     };
     password.addEventListener('input',validate);confirmation.addEventListener('input',validate);
@@ -54,7 +56,7 @@ export async function mountRecoveryMailbox(root) {
       const messages=await api('/demo/recovery-mailbox');status.textContent=`${messages.length} thư còn trong hộp thư thử nghiệm`;
       root.querySelector('[data-mails]').innerHTML=messages.length?messages.map(message=>{
         let link='';try{const url=new URL(message.resetUrl);if(['http:','https:'].includes(url.protocol)&&url.pathname==='/password-recovery.html'&&/^#token=[A-Za-z0-9_-]{43}$/.test(url.hash))link=url.href;}catch{}
-        return `<article class="recovery-mail"><div class="section-heading"><div><span class="eyebrow">${esc(message.recipient)}</span><h2>${esc(message.subject)}</h2></div><small>Hết hạn ${esc(new Date(message.expiresAt+'+07:00').toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'}))}</small></div><p>Liên kết dùng một lần. Sao chép liên kết hoặc mở trong tab mới để thử quy trình đặt lại mật khẩu.</p>${link?`<a class="btn compact" href="${esc(link)}" target="_blank" rel="noopener noreferrer">Mở liên kết đặt lại ↗</a><button class="btn secondary compact" data-copy="${esc(link)}">Sao chép liên kết</button>`:''}<p data-copy-status role="status" aria-live="polite"></p></article>`;
+        return `<article class="recovery-mail"><div class="section-heading"><div><span class="eyebrow">${esc(message.recipient)}</span><h2>${esc(message.subject)}</h2></div><small>Hết hạn ${esc(dateTime(message.expiresAt))}</small></div><p>Liên kết dùng một lần. Sao chép liên kết hoặc mở trong tab mới để thử quy trình đặt lại mật khẩu.</p>${link?`<a class="btn compact" href="${esc(link)}" target="_blank" rel="noopener noreferrer">Mở liên kết đặt lại ↗</a><button class="btn secondary compact" data-copy="${esc(link)}">Sao chép liên kết</button>`:''}<p data-copy-status role="status" aria-live="polite"></p></article>`;
       }).join(''):'<p class="muted-text">Chưa có thư. Gửi yêu cầu tại trang Lấy lại mật khẩu rồi làm mới tại đây.</p>';
       root.querySelectorAll('[data-copy]').forEach(copy=>copy.onclick=async()=>{
         const status=copy.closest('article').querySelector('[data-copy-status]');

@@ -1,5 +1,6 @@
 package com.example.course_management.service;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.dto.response.PageResponse;
 import com.example.course_management.exception.BadRequestException;
 import com.example.course_management.security.CustomUserDetails;
@@ -27,7 +28,7 @@ public class AuditLogService {
   public void record(CustomUserDetails actor,String action,String type,int id,String name,String before,String after) {
     if(Objects.equals(before,after)) return;
     jdbc.update("INSERT INTO audit_logs(occurred_at,actor_id,actor_username,actor_role,action,target_type,target_id,target_name,before_value,after_value) VALUES(?,?,?,?,?,?,?,?,?,?)",
-        LocalDateTime.now(WeeklyGoalService.ZONE),actor==null?null:actor.getUser().getUserId(),
+        ApplicationTime.now(),actor==null?null:actor.getUser().getUserId(),
         actor==null?"system":actor.getUsername(),actor==null?"SYSTEM":actor.getUser().getRole().name(),action,type,id,name,before,after);
   }
   @Transactional(readOnly=true)

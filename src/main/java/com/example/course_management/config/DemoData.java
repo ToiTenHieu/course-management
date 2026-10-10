@@ -31,6 +31,6 @@ public class DemoData implements CommandLineRunner {
     if (jdbc.queryForObject("SELECT COUNT(*) FROM demo_seed_runs WHERE dataset_key = ?", Integer.class, KEY) > 0) return;
     // Existing demo databases keep their current courses, including instructor edits.
     if (courses.count() == 0) catalog.data().baseCourses().forEach(seeder::create);
-    jdbc.update("INSERT INTO demo_seed_runs (dataset_key) VALUES (?)", KEY);
+    jdbc.update("INSERT INTO demo_seed_runs (dataset_key, completed_at) VALUES (?, ?)", KEY, com.example.course_management.time.ApplicationTime.now());
   }
 }

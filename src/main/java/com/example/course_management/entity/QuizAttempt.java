@@ -1,5 +1,6 @@
 package com.example.course_management.entity;
 
+import com.example.course_management.time.ApplicationTime;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class QuizAttempt {
   private Boolean passed;
 
   @Column(nullable = false)
-  private LocalDateTime submittedAt = LocalDateTime.now();
+  private LocalDateTime submittedAt = ApplicationTime.now();
 
   @OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL)
   private List<QuizAnswer> answers = new ArrayList<>();

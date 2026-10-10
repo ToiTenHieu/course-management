@@ -1,5 +1,6 @@
 package com.example.course_management.service.impl;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.dto.request.ReviewRequest;
 import com.example.course_management.dto.response.ReviewResponse;
 import com.example.course_management.entity.Course;
@@ -65,8 +66,8 @@ public class ReviewServiceImpl implements ReviewService {
     r.setStudent(actor.getUser());
     r.setRating(req.getRating());
     r.setComment(req.getComment());
-    r.setCreatedAt(LocalDateTime.now());
-    r.setUpdatedAt(LocalDateTime.now());
+    r.setCreatedAt(ApplicationTime.now());
+    r.setUpdatedAt(ApplicationTime.now());
     return toResponse(reviewRepository.save(r));
   }
 
@@ -76,7 +77,7 @@ public class ReviewServiceImpl implements ReviewService {
     requireOwnerOrAdmin(r, actor);
     r.setRating(req.getRating());
     r.setComment(req.getComment());
-    r.setUpdatedAt(LocalDateTime.now());
+    r.setUpdatedAt(ApplicationTime.now());
     return toResponse(reviewRepository.save(r));
   }
 

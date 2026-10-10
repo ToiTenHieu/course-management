@@ -1,5 +1,6 @@
 package com.example.course_management.entity;
 
+import com.example.course_management.time.ApplicationTime;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -46,6 +47,6 @@ public class User {
   @Column(nullable = false)
   private long authVersion = 0;
 
-  private LocalDateTime createdAt = LocalDateTime.now();
-  private LocalDateTime updatedAt = LocalDateTime.now();
+  private LocalDateTime createdAt = ApplicationTime.now();
+  private LocalDateTime updatedAt = ApplicationTime.now();
 }

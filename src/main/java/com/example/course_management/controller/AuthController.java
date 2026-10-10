@@ -23,6 +23,7 @@ public class AuthController {
   private final com.example.course_management.config.LearningSettings settings;
   private final com.example.course_management.config.DemoAccountSeeder demoAccounts;
   private final com.example.course_management.config.PasswordRecoverySettings recovery;
+  private final com.example.course_management.security.AuthRequestLimiter limiter;
 
   @Value("${app.demo.enabled:false}")
   private boolean demo;
@@ -30,7 +31,9 @@ public class AuthController {
   public AuthController(AuthService authService, UserService userService,
       com.example.course_management.config.LearningSettings settings,
       com.example.course_management.config.DemoAccountSeeder demoAccounts,
-      com.example.course_management.config.PasswordRecoverySettings recovery) {
+      com.example.course_management.config.PasswordRecoverySettings recovery,
+      com.example.course_management.security.AuthRequestLimiter limiter) {
+    this.limiter = limiter;
     this.recovery = recovery;
     this.authService = authService;
     this.userService = userService;
@@ -54,7 +57,8 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public ApiResponse<?> register(@Valid @RequestBody RegisterRequest request) {
+  public ApiResponse<?> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
+    limiter.check("register", httpRequest.getRemoteAddr());
     var user = new CreateUserRequest();
     user.setUsername(request.getUsername());
     user.setPassword(request.getPassword());
@@ -68,7 +72,14 @@ public class AuthController {
   @PostMapping("/login")
   public ApiResponse<UserProfileResponse> login(
       @Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-    UserProfileResponse profile = authService.login(request, httpRequest);
+    limiter.check("login", httpRequest.getRemoteAddr());
+    UserProfileResponse profile;
+    try {
+      profile = authService.login(request, httpRequest);
+    } catch (org.springframework.security.core.AuthenticationException failure) {
+      limiter.recordLoginFailure(httpRequest.getRemoteAddr());
+      throw failure;
+    }
     return ApiResponse.success("Đăng nhập thành công", profile);
   }
 

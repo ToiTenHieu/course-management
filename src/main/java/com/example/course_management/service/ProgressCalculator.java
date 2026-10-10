@@ -1,5 +1,6 @@
 package com.example.course_management.service;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.entity.*;
 import com.example.course_management.repository.*;
 import java.math.*;
@@ -45,7 +46,7 @@ public class ProgressCalculator {
     enrollment.setProgressPercentage(percentage);
     if (!ids.isEmpty() && done == ids.size()) {
       enrollment.setStatus(EnrollmentStatus.COMPLETED);
-      if (enrollment.getCompletionDate() == null) enrollment.setCompletionDate(LocalDateTime.now());
+      if (enrollment.getCompletionDate() == null) enrollment.setCompletionDate(ApplicationTime.now());
     } else {
       enrollment.setStatus(EnrollmentStatus.ENROLLED);
       enrollment.setCompletionDate(null);

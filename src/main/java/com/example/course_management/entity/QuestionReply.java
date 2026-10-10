@@ -1,5 +1,6 @@
 package com.example.course_management.entity;
 
+import com.example.course_management.time.ApplicationTime;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -36,5 +37,5 @@ public class QuestionReply {
   private String clientRequestId;
 
   @Column(nullable = false)
-  private LocalDateTime createdAt = LocalDateTime.now();
+  private LocalDateTime createdAt = ApplicationTime.now();
 }

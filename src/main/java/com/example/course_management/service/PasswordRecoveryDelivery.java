@@ -1,5 +1,6 @@
 package com.example.course_management.service;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.config.PasswordRecoverySettings;
 import com.example.course_management.exception.ResourceNotFoundException;
 import java.time.*;
@@ -22,7 +23,7 @@ public class PasswordRecoveryDelivery {
         +"\n\nLiên kết chỉ dùng một lần. Sau khi đổi mật khẩu, các phiên cũ sẽ hết hiệu lực. Nếu bạn không yêu cầu, hãy bỏ qua thư này.";
     if(settings.demoMailbox()) {
       prune();if(mailbox.size()>=100)mailbox.removeLast();
-      mailbox.addFirst(new Message(UUID.randomUUID().toString(),email,subject,body,resetUrl,expiresAt,LocalDateTime.now(WeeklyGoalService.ZONE)));
+      mailbox.addFirst(new Message(UUID.randomUUID().toString(),email,subject,body,resetUrl,expiresAt,ApplicationTime.now()));
     } else {
       var message=new SimpleMailMessage();message.setFrom(settings.from());message.setTo(email);message.setSubject(subject);message.setText(body);
       Objects.requireNonNull(sender.getIfAvailable(),"SMTP chưa được cấu hình").send(message);
@@ -32,5 +33,5 @@ public class PasswordRecoveryDelivery {
     if(!settings.demoMailbox())throw new ResourceNotFoundException("Hộp thư thử nghiệm không được bật");
     prune();return List.copyOf(mailbox);
   }
-  private void prune() {var now=LocalDateTime.now(WeeklyGoalService.ZONE);mailbox.removeIf(message->!message.expiresAt().isAfter(now));}
+  private void prune() {var now=ApplicationTime.now();mailbox.removeIf(message->!message.expiresAt().isAfter(now));}
 }

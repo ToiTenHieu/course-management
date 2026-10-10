@@ -34,7 +34,8 @@ public class SecurityConfig {
     http.csrf(csrf -> csrf.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers(
+                auth.dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
+                    .requestMatchers(
                         "/",
                         "/*.html",
                         "/css/**",
@@ -47,6 +48,7 @@ public class SecurityConfig {
                         "/api/auth/reset-password",
                         "/api/auth/csrf",
                         "/api/auth/session",
+                        "/api/auth/ready",
                         "/api/auth/config")
                     .permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/discovery/**")

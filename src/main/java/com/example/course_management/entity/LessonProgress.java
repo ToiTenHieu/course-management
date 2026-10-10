@@ -1,5 +1,6 @@
 package com.example.course_management.entity;
 
+import com.example.course_management.time.ApplicationTime;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -37,7 +38,7 @@ public class LessonProgress {
   private LocalDateTime completedAt;
 
   @Column(name = "last_accessed_at", nullable = false)
-  private LocalDateTime lastAccessedAt = LocalDateTime.now();
+  private LocalDateTime lastAccessedAt = ApplicationTime.now();
 
   @Column(name = "note", columnDefinition = "text")
   private String note;

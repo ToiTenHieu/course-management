@@ -1,5 +1,6 @@
 package com.example.course_management.entity;
 
+import com.example.course_management.time.ApplicationTime;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -24,5 +25,5 @@ public class CourseWishlist {
   private Course course;
 
   @Column(name = "saved_at", nullable = false)
-  private LocalDateTime savedAt = LocalDateTime.now();
+  private LocalDateTime savedAt = ApplicationTime.now();
 }

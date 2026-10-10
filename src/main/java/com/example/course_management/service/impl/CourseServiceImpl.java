@@ -1,5 +1,6 @@
 package com.example.course_management.service.impl;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.dto.request.*;
 import com.example.course_management.dto.response.*;
 import com.example.course_management.entity.*;
@@ -224,7 +225,7 @@ public class CourseServiceImpl implements CourseService {
     // Older clients omit these fields; an explicit empty string clears them.
     if (r.getPrerequisites() != null) c.setPrerequisites(r.getPrerequisites().trim());
     if (r.getTargetAudience() != null) c.setTargetAudience(r.getTargetAudience().trim());
-    c.setUpdatedAt(LocalDateTime.now());
+    c.setUpdatedAt(ApplicationTime.now());
     return toResponse(courses.save(c));
   }
 
@@ -238,7 +239,7 @@ public class CourseServiceImpl implements CourseService {
       throw new BadRequestException("Cần ít nhất một bài học đã xuất bản trước khi mở khóa học");
     var previousStatus = c.getStatus();
     c.setStatus(r.getStatus());
-    c.setUpdatedAt(LocalDateTime.now());
+    c.setUpdatedAt(ApplicationTime.now());
     audit.recordCurrent("COURSE_STATUS_CHANGED", "COURSE", id, c.getTitle(), previousStatus.name(), r.getStatus().name());
     return toResponse(courses.save(c));
   }

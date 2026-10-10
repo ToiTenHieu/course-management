@@ -1,3 +1,4 @@
+import { dateTime } from './dates.js';
 import { api, appConfig } from "./api.js";
 import { enhanceForms } from "./experience.js";
 
@@ -12,7 +13,7 @@ const esc = (value) =>
 let letters = [];
 const editorDrafts = new Map();
 const selections = new Map();
-const date = (v) => new Date(v).toLocaleString("vi-VN");
+const date = dateTime;
 const blankQuestion = () => ({
   prompt: "",
   options: letters.map(() => ""),

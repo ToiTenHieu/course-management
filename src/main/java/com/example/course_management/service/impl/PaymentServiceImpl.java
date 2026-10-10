@@ -1,5 +1,6 @@
 package com.example.course_management.service.impl;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.dto.response.BankInfoResponse;
 import com.example.course_management.dto.response.PaymentResponse;
 import com.example.course_management.entity.*;
@@ -93,7 +94,7 @@ public class PaymentServiceImpl implements PaymentService {
     payment.setCourse(course);
     payment.setAmount(course.getPrice());
     payment.setStatus(PaymentStatus.PENDING);
-    payment.setCreatedAt(LocalDateTime.now());
+    payment.setCreatedAt(ApplicationTime.now());
     payment = paymentRepository.save(payment);
 
     // Sinh mã nội dung chuyển khoản sau khi có paymentId, để đảm bảo duy nhất và dễ đối chiếu
@@ -135,7 +136,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.getStudent().getUserId(), payment.getCourse().getCourseId()))
       throw new ConflictException("Học viên đã được cấp quyền học khóa này");
     payment.setStatus(PaymentStatus.CONFIRMED);
-    payment.setConfirmedAt(LocalDateTime.now());
+    payment.setConfirmedAt(ApplicationTime.now());
     payment.setConfirmedBy(actor.getUser());
     paymentRepository.save(payment);
 
@@ -143,7 +144,7 @@ public class PaymentServiceImpl implements PaymentService {
     Enrollment enrollment = new Enrollment();
     enrollment.setStudent(payment.getStudent());
     enrollment.setCourse(payment.getCourse());
-    enrollment.setEnrollmentDate(LocalDateTime.now());
+    enrollment.setEnrollmentDate(ApplicationTime.now());
     enrollment.setStatus(EnrollmentStatus.ENROLLED);
     enrollment.setProgressPercentage(BigDecimal.ZERO);
     enrollmentRepository.saveAndFlush(enrollment);
@@ -173,7 +174,7 @@ public class PaymentServiceImpl implements PaymentService {
       throw new BadRequestException("Yêu cầu thanh toán này đã được xử lý trước đó");
     }
     payment.setStatus(PaymentStatus.REJECTED);
-    payment.setConfirmedAt(LocalDateTime.now());
+    payment.setConfirmedAt(ApplicationTime.now());
     payment.setConfirmedBy(actor.getUser());
     audit.record(actor, "PAYMENT_REJECTED", "PAYMENT", paymentId, payment.getCourse().getTitle(), "PENDING", "REJECTED");
     return toResponse(paymentRepository.save(payment));

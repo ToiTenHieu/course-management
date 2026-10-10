@@ -1,7 +1,8 @@
+import { dateTime } from './dates.js';
 import { api, appConfig } from './api.js';
 import { enhanceForms } from './experience.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const date = value => value ? new Date(value).toLocaleString('vi-VN') : '';
+const date = dateTime;
 window.addEventListener('beforeunload', event => {
   if (document.querySelector('.lesson-assignment form[data-dirty="true"],.lesson-assignment[data-pending="true"]')) {event.preventDefault();event.returnValue='';}
 });

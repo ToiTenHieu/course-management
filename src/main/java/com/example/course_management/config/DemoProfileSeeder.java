@@ -52,7 +52,7 @@ public class DemoProfileSeeder {
       }
     }
     // Missing demo accounts must not cause this enrichment to create accounts or consume its marker.
-    if (foundTeacher) jdbc.update("INSERT INTO demo_seed_runs (dataset_key) VALUES (?)", KEY);
+    if (foundTeacher) jdbc.update("INSERT INTO demo_seed_runs (dataset_key, completed_at) VALUES (?, ?)", KEY, com.example.course_management.time.ApplicationTime.now());
   }
 
   private boolean blank(String value) {

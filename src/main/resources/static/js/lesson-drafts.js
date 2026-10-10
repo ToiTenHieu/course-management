@@ -1,3 +1,4 @@
+import { dateTime, timeOnly } from './dates.js';
 import { api } from './api.js';
 const fields = ['title', 'orderIndex', 'contentUrl', 'textContent', 'contentFormat', 'videoUrl'];
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -33,7 +34,7 @@ export function mountLessonDraft(form, courseId, lesson, draft) {
     try {
       const result = await api(path, 'PUT', {...content, expectedRevision:revision, baseRevision});
       revision = result.revision; saved = snapshot;
-      status.textContent = 'Đã lưu bản nháp trên máy chủ · ' + new Date(result.updatedAt).toLocaleTimeString('vi-VN');
+      status.textContent = 'Đã lưu bản nháp trên máy chủ · ' + timeOnly(result.updatedAt);
       retry.hidden = true;
     } catch (error) {
       blocked = error.status === 409;
@@ -87,7 +88,7 @@ export function mountLessonDraft(form, courseId, lesson, draft) {
       try {
         const versions = await api('/lessons/' + lesson.lessonId + '/content-versions');
         loaded = true;
-        list.innerHTML = versions.length ? versions.map((v,i) => `<div class="history-row"><span>Phiên bản ${v.revision} · ${escape(v.editorName)}<small>${escape(new Date(v.createdAt).toLocaleString('vi-VN'))} · ${escape(v.content.title)}</small></span><button type="button" class="btn secondary compact" data-version="${i}">Đưa vào bản nháp</button></div>`).join('') : '<p class="hint">Chưa có phiên bản trước đó.</p>';
+        list.innerHTML = versions.length ? versions.map((v,i) => `<div class="history-row"><span>Phiên bản ${v.revision} · ${escape(v.editorName)}<small>${escape(dateTime(v.createdAt))} · ${escape(v.content.title)}</small></span><button type="button" class="btn secondary compact" data-version="${i}">Đưa vào bản nháp</button></div>`).join('') : '<p class="hint">Chưa có phiên bản trước đó.</p>';
         list.querySelectorAll('[data-version]').forEach(button => button.onclick = () => {
           if (!confirm('Thay nội dung đang soạn bằng phiên bản này? Bài học chỉ cập nhật sau khi bạn lưu thay đổi.')) return;
           apply(versions[Number(button.dataset.version)].content);

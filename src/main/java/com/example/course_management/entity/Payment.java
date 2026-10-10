@@ -1,5 +1,6 @@
 package com.example.course_management.entity;
 
+import com.example.course_management.time.ApplicationTime;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ public class Payment {
   private String transferNote;
 
   @Column(name = "created_at", nullable = false)
-  private LocalDateTime createdAt = LocalDateTime.now();
+  private LocalDateTime createdAt = ApplicationTime.now();
 
   @Column(name = "confirmed_at")
   private LocalDateTime confirmedAt;

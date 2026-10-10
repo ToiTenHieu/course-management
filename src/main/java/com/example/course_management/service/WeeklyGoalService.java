@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service @Transactional
 public class WeeklyGoalService {
-  public static final ZoneId ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+  public static final ZoneId ZONE = com.example.course_management.time.ApplicationTime.ZONE;
   public record Save(@NotNull LocalDate weekStart,@Min(0) int expectedRevision,
       @Min(1) @Max(50) int lessonTarget,boolean dashboardReminder) {}
   public record Week(LocalDate weekStart,LocalDate weekEnd,Integer lessonTarget,long completed) {}
@@ -22,9 +22,10 @@ public class WeeklyGoalService {
   private record Setting(int target,boolean reminder,int revision) {}
   private final JdbcTemplate jdbc;
   private final UserRepository users;
-  public WeeklyGoalService(JdbcTemplate jdbc,UserRepository users) {this.jdbc=jdbc;this.users=users;}
+  private final Clock clock;
+  public WeeklyGoalService(JdbcTemplate jdbc,UserRepository users,Clock clock) {this.jdbc=jdbc;this.users=users;this.clock=clock;}
   private LocalDate currentWeek() {
-    return LocalDate.now(ZONE).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+    return com.example.course_management.time.ApplicationTime.today(clock).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
   }
   @Transactional(readOnly=true)
   public Goal get(CustomUserDetails actor) {
@@ -59,6 +60,6 @@ public class WeeklyGoalService {
   // Called while the course/enrollment locks are held. Retained when course content changes.
   public void recordCompletion(int studentId,int lessonId) {
     jdbc.update("INSERT INTO learning_completions(student_id,lesson_id,completed_at) SELECT ?,?,? WHERE NOT EXISTS (SELECT 1 FROM learning_completions WHERE student_id=? AND lesson_id=?)",
-        studentId,lessonId,LocalDateTime.now(ZONE),studentId,lessonId);
+        studentId,lessonId,com.example.course_management.time.ApplicationTime.now(clock),studentId,lessonId);
   }
 }

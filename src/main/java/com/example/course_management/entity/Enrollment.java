@@ -1,5 +1,6 @@
 package com.example.course_management.entity;
 
+import com.example.course_management.time.ApplicationTime;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,7 +33,7 @@ public class Enrollment {
   private Course course;
 
   @Column(name = "enrollment_date", nullable = false)
-  private LocalDateTime enrollmentDate = LocalDateTime.now();
+  private LocalDateTime enrollmentDate = ApplicationTime.now();
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false, length = 20)

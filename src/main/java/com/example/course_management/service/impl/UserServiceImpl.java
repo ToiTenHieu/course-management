@@ -1,5 +1,6 @@
 package com.example.course_management.service.impl;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.dto.request.*;
 import com.example.course_management.dto.response.UserResponse;
 import com.example.course_management.entity.Role;
@@ -23,9 +24,12 @@ public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final com.example.course_management.service.AuditLogService audit;
+  private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
   public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
-      com.example.course_management.service.AuditLogService audit) {
+      com.example.course_management.service.AuditLogService audit,
+      org.springframework.jdbc.core.JdbcTemplate jdbc) {
+    this.jdbc = jdbc;
     this.audit = audit;
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
@@ -43,6 +47,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserResponse createUser(CreateUserRequest req) {
+    com.example.course_management.security.PasswordPolicy.validateNewPassword(req.getPassword());
     if (userRepository.existsByUsername(req.getUsername())) {
       throw new ConflictException("Username đã tồn tại");
     }
@@ -57,8 +62,8 @@ public class UserServiceImpl implements UserService {
     user.setFullName(req.getFullName());
     user.setRole(req.getRole());
     user.setIsActive(true);
-    user.setCreatedAt(LocalDateTime.now());
-    user.setUpdatedAt(LocalDateTime.now());
+    user.setCreatedAt(ApplicationTime.now());
+    user.setUpdatedAt(ApplicationTime.now());
 
     return toResponse(userRepository.save(user));
   }
@@ -75,26 +80,40 @@ public class UserServiceImpl implements UserService {
     var previousRole = user.getRole();
     user.setRole(req.getRole());
     user.setAuthVersion(user.getAuthVersion() + 1);
-    user.setUpdatedAt(LocalDateTime.now());
+    user.setUpdatedAt(ApplicationTime.now());
     audit.recordCurrent("USER_ROLE_CHANGED", "USER", userId, user.getUsername(), previousRole.name(), req.getRole().name());
     return toResponse(userRepository.save(user));
   }
 
   @Override
   public UserResponse updateStatus(Integer userId, UpdateStatusRequest req) {
+    lockAccountManagement();
     User user = lockedUserOrThrow(userId);
+    if (!Boolean.TRUE.equals(req.getIsActive())) protectLastAdministrator(user);
     var previousStatus = user.getIsActive();
     user.setIsActive(req.getIsActive());
     user.setAuthVersion(user.getAuthVersion() + 1);
-    user.setUpdatedAt(LocalDateTime.now());
+    user.setUpdatedAt(ApplicationTime.now());
     audit.recordCurrent("USER_STATUS_CHANGED", "USER", userId, user.getUsername(), String.valueOf(previousStatus), String.valueOf(req.getIsActive()));
     return toResponse(userRepository.save(user));
   }
 
   @Override
   public void deleteUser(Integer userId) {
-    User user = findUserOrThrow(userId);
+    lockAccountManagement();
+    User user = lockedUserOrThrow(userId);
+    protectLastAdministrator(user);
     userRepository.delete(user);
+  }
+
+  private void lockAccountManagement() {
+    jdbc.queryForObject("SELECT id FROM account_management_guard WHERE id=1 FOR UPDATE", Integer.class);
+  }
+
+  private void protectLastAdministrator(User user) {
+    if (user.getRole() == Role.ADMIN && Boolean.TRUE.equals(user.getIsActive())
+        && userRepository.countByRoleAndIsActiveTrue(Role.ADMIN) <= 1)
+      throw new ConflictException("Không thể khóa hoặc xóa quản trị viên hoạt động cuối cùng");
   }
 
   @Override
@@ -105,7 +124,7 @@ public class UserServiceImpl implements UserService {
     }
     user.setFullName(req.getFullName());
     user.setEmail(req.getEmail());
-    user.setUpdatedAt(LocalDateTime.now());
+    user.setUpdatedAt(ApplicationTime.now());
     return toResponse(userRepository.save(user));
   }
 
@@ -126,12 +145,14 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void changePassword(Integer userId, ChangePasswordRequest req, CustomUserDetails actor) {
+    com.example.course_management.security.PasswordPolicy.validateNewPassword(req.getNewPassword());
     User user = lockedUserOrThrow(userId);
 
     boolean isSelf = actor.getUser().getUserId().equals(userId);
     // Nếu tự đổi mật khẩu của chính mình (không phải admin đổi hộ) → bắt buộc xác nhận mật khẩu cũ
     if (isSelf) {
       if (req.getOldPassword() == null
+          || !com.example.course_management.security.PasswordPolicy.fitsBcrypt(req.getOldPassword())
           || !passwordEncoder.matches(req.getOldPassword(), user.getPasswordHash())) {
         throw new ForbiddenException("Mật khẩu hiện tại không đúng");
       }
@@ -139,7 +160,7 @@ public class UserServiceImpl implements UserService {
 
     user.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
     user.setAuthVersion(user.getAuthVersion() + 1);
-    user.setUpdatedAt(LocalDateTime.now());
+    user.setUpdatedAt(ApplicationTime.now());
     userRepository.save(user);
   }
 

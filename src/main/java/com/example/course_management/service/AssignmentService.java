@@ -1,5 +1,6 @@
 package com.example.course_management.service;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.dto.response.PageResponse;
 import com.example.course_management.entity.*;
 import com.example.course_management.exception.*;
@@ -86,9 +87,9 @@ public class AssignmentService {
     if (d.revision()!=expectedRevision) throw new ConflictException("Đề bài đã thay đổi. Tải lại đề trước khi nộp.");
     jdbc.update("""
         INSERT INTO assignment_submissions(assignment_id,student_id,submission_key,request_hash,assignment_revision,
-          assignment_title,assignment_instructions,answer,file_name,media_type,file_content) VALUES (?,?,?,?,?,?,?,?,?,?,?)
+          assignment_title,assignment_instructions,answer,file_name,media_type,file_content,submitted_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
         """,d.assignmentId(),studentId,key,hash,d.revision(),d.title(),d.instructions(),answer,
-        uploaded==null ? null : uploaded.name(),uploaded==null ? null : uploaded.mediaType(),uploaded==null ? null : uploaded.content());
+        uploaded==null ? null : uploaded.name(),uploaded==null ? null : uploaded.mediaType(),uploaded==null ? null : uploaded.content(),com.example.course_management.time.ApplicationTime.now());
     return own(d.assignmentId(),studentId);
   }
   public PageResponse<Submission> list(int lessonId, boolean ungradedOnly, int page, int size, CustomUserDetails actor) {
@@ -104,7 +105,7 @@ public class AssignmentService {
   public Submission grade(int submissionId, Grade r, CustomUserDetails actor) {
     var l=lockedLesson(submissionLesson(submissionId)); policy.manager(l.getCourse(),actor);
     int count=jdbc.update("UPDATE assignment_submissions SET score=?,feedback=?,graded_by=?,graded_at=?,grade_revision=grade_revision+1 WHERE submission_id=? AND grade_revision=?",
-        r.score(),r.feedback().strip(),actor.getUser().getUserId(),LocalDateTime.now(),submissionId,r.expectedRevision());
+        r.score(),r.feedback().strip(),actor.getUser().getUserId(),ApplicationTime.now(),submissionId,r.expectedRevision());
     if (count==0) throw new ConflictException("Bài đã được chấm lại. Tải danh sách để xem điểm mới.");
     return jdbc.queryForObject(select()+" WHERE s.submission_id=?",this::map,submissionId);
   }
@@ -140,7 +141,9 @@ public class AssignmentService {
     return rows.isEmpty() ? null : rows.getFirst();
   }
   private String select() { return """
-      SELECT s.*,u.full_name AS student_name,g.full_name AS grader_name FROM assignment_submissions s
+      SELECT s.submission_id,s.student_id,s.assignment_revision,s.assignment_title,s.assignment_instructions,
+        s.answer,s.file_name,s.submitted_at,s.score,s.feedback,s.graded_at,s.grade_revision,
+        u.full_name AS student_name,g.full_name AS grader_name FROM assignment_submissions s
       JOIN users u ON u.user_id=s.student_id LEFT JOIN users g ON g.user_id=s.graded_by
       """; }
   private Submission map(java.sql.ResultSet r,int n) throws java.sql.SQLException {

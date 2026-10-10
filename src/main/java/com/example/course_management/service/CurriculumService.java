@@ -50,8 +50,11 @@ public class CurriculumService {
         throw new BadRequestException("Bài học không thuộc khóa hoặc bị lặp");
     }
     if (!seen.equals(lessonMap.keySet())) throw new BadRequestException("Chương trình phải chứa đúng tất cả bài học của khóa");
+    // The editor and response always put ungrouped lessons last. Normalize before assigning order.
+    var orderedGroups = new ArrayList<>(plan.groups().stream().filter(g -> !g.title().isBlank()).toList());
+    orderedGroups.addAll(plan.groups().stream().filter(g -> g.title().isBlank()).toList());
     int chapterOrder=0, lessonOrder=0;
-    for (var group:plan.groups()) {
+    for (var group:orderedGroups) {
       CourseChapter chapter=null;
       if (!group.title().isBlank()) {
         chapter=group.chapterId()==null ? new CourseChapter() : existing.get(group.chapterId());

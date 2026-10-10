@@ -22,6 +22,6 @@ public class DemoYouTubeSeeder {
     if (jdbc.queryForObject("SELECT COUNT(*) FROM demo_seed_runs WHERE dataset_key = ?", Integer.class, KEY) > 0) return;
     if (users.findByUsername(catalog.account("teacher").username()).isEmpty()) return;
     catalog.data().youtubeCourses().forEach(courses::create);
-    jdbc.update("INSERT INTO demo_seed_runs (dataset_key) VALUES (?)", KEY);
+    jdbc.update("INSERT INTO demo_seed_runs (dataset_key, completed_at) VALUES (?, ?)", KEY, com.example.course_management.time.ApplicationTime.now());
   }
 }

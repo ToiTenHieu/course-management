@@ -1,5 +1,6 @@
 package com.example.course_management.service.impl;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.dto.response.EnrollmentDetailResponse;
 import com.example.course_management.dto.response.EnrollmentResponse;
 import com.example.course_management.dto.response.LessonNoteResponse;
@@ -82,7 +83,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     Enrollment enrollment = new Enrollment();
     enrollment.setStudent(actor.getUser());
     enrollment.setCourse(course);
-    enrollment.setEnrollmentDate(LocalDateTime.now());
+    enrollment.setEnrollmentDate(ApplicationTime.now());
     enrollment.setStatus(EnrollmentStatus.ENROLLED);
     enrollment.setProgressPercentage(BigDecimal.ZERO);
 
@@ -140,8 +141,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     boolean firstCompletion = !Boolean.TRUE.equals(progress.getIsCompleted());
     progress.setIsCompleted(true);
-    if (progress.getCompletedAt() == null) progress.setCompletedAt(LocalDateTime.now());
-    progress.setLastAccessedAt(LocalDateTime.now());
+    if (progress.getCompletedAt() == null) progress.setCompletedAt(ApplicationTime.now());
+    progress.setLastAccessedAt(ApplicationTime.now());
     lessonProgressRepository.save(progress);
     if (firstCompletion) weeklyGoals.recordCompletion(actor.getUser().getUserId(), lessonId);
 
@@ -179,7 +180,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
   public void accessLesson(Integer enrollmentId, Integer lessonId, CustomUserDetails actor) {
     var p = writableProgress(enrollmentId, lessonId, actor);
-    p.setLastAccessedAt(LocalDateTime.now());
+    p.setLastAccessedAt(ApplicationTime.now());
     lessonProgressRepository.save(p);
   }
 

@@ -41,11 +41,11 @@ public class LessonDraftService {
     if (revision != r.getExpectedRevision()) throw conflict();
     int owner = actor.getUser().getUserId();
     if (current == null) {
-      jdbc.update("INSERT INTO lesson_drafts(course_id,owner_id,lesson_id,lesson_key,revision,base_revision,title,order_index,content_url,text_content,content_format,video_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-          courseId, owner, key == 0 ? null : key, key, 1, r.getBaseRevision(), r.getTitle(), r.getOrderIndex(), r.getContentUrl(), r.getTextContent(), r.getContentFormat(), r.getVideoUrl());
+      jdbc.update("INSERT INTO lesson_drafts(course_id,owner_id,lesson_id,lesson_key,revision,base_revision,title,order_index,content_url,text_content,content_format,video_url,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+          courseId, owner, key == 0 ? null : key, key, 1, r.getBaseRevision(), r.getTitle(), r.getOrderIndex(), r.getContentUrl(), r.getTextContent(), r.getContentFormat(), r.getVideoUrl(),com.example.course_management.time.ApplicationTime.now());
     } else {
-      jdbc.update("UPDATE lesson_drafts SET is_active=TRUE,revision=?,base_revision=?,title=?,order_index=?,content_url=?,text_content=?,content_format=?,video_url=?,updated_at=CURRENT_TIMESTAMP WHERE course_id=? AND owner_id=? AND lesson_key=?",
-          revision + 1, r.getBaseRevision(), r.getTitle(), r.getOrderIndex(), r.getContentUrl(), r.getTextContent(), r.getContentFormat(), r.getVideoUrl(), courseId, owner, key);
+      jdbc.update("UPDATE lesson_drafts SET is_active=TRUE,revision=?,base_revision=?,title=?,order_index=?,content_url=?,text_content=?,content_format=?,video_url=?,updated_at=? WHERE course_id=? AND owner_id=? AND lesson_key=?",
+          revision + 1, r.getBaseRevision(), r.getTitle(), r.getOrderIndex(), r.getContentUrl(), r.getTextContent(), r.getContentFormat(), r.getVideoUrl(), com.example.course_management.time.ApplicationTime.now(),courseId, owner, key);
     }
     return find(courseId, key, actor);
   }
@@ -60,8 +60,8 @@ public class LessonDraftService {
     if (revision == null) return;
     var current = find(courseId, key, actor);
     if (current == null || current.content() == null || current.revision() != revision) throw conflict();
-    jdbc.update("UPDATE lesson_drafts SET is_active=FALSE,revision=revision+1,base_revision=NULL,title=NULL,order_index=NULL,content_url=NULL,text_content=NULL,content_format=NULL,video_url=NULL,updated_at=CURRENT_TIMESTAMP WHERE course_id=? AND owner_id=? AND lesson_key=?",
-        courseId, actor.getUser().getUserId(), key);
+    jdbc.update("UPDATE lesson_drafts SET is_active=FALSE,revision=revision+1,base_revision=NULL,title=NULL,order_index=NULL,content_url=NULL,text_content=NULL,content_format=NULL,video_url=NULL,updated_at=? WHERE course_id=? AND owner_id=? AND lesson_key=?",
+        com.example.course_management.time.ApplicationTime.now(),courseId, actor.getUser().getUserId(), key);
   }
 
   public List<Version> history(int id, CustomUserDetails actor) {
@@ -72,8 +72,8 @@ public class LessonDraftService {
   }
 
   public void snapshot(Lesson l, CustomUserDetails actor) {
-    jdbc.update("INSERT INTO lesson_content_versions(lesson_id,revision,editor_id,title,order_index,content_url,text_content,content_format,video_url) VALUES (?,?,?,?,?,?,?,?,?)",
-        l.getLessonId(), l.getContentRevision(), actor.getUser().getUserId(), l.getTitle(), l.getOrderIndex(), l.getContentUrl(), l.getTextContent(), l.getContentFormat(), l.getVideoUrl());
+    jdbc.update("INSERT INTO lesson_content_versions(lesson_id,revision,editor_id,title,order_index,content_url,text_content,content_format,video_url,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+        l.getLessonId(), l.getContentRevision(), actor.getUser().getUserId(), l.getTitle(), l.getOrderIndex(), l.getContentUrl(), l.getTextContent(), l.getContentFormat(), l.getVideoUrl(),com.example.course_management.time.ApplicationTime.now());
   }
 
   private Draft find(int courseId, int key, CustomUserDetails actor) {

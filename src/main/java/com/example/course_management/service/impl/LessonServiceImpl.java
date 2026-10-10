@@ -1,5 +1,6 @@
 package com.example.course_management.service.impl;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.dto.request.*;
 import com.example.course_management.dto.response.*;
 import com.example.course_management.entity.*;
@@ -94,7 +95,7 @@ public class LessonServiceImpl implements LessonService {
     l.setVideoUrl(r.getVideoUrl());
     l.setOrderIndex(r.getOrderIndex());
     c.setCurriculumRevision(c.getCurriculumRevision() + 1);
-    l.setUpdatedAt(LocalDateTime.now());
+    l.setUpdatedAt(ApplicationTime.now());
     return response(lessons.save(l), true);
   }
 
@@ -105,7 +106,7 @@ public class LessonServiceImpl implements LessonService {
     policy.manager(c, actor);
     var l = lesson(id);
     l.setIsPublished(r.getIsPublished());
-    l.setUpdatedAt(LocalDateTime.now());
+    l.setUpdatedAt(ApplicationTime.now());
     lessons.saveAndFlush(l);
     calculator.recalculateCourse(l.getCourse().getCourseId());
     return response(l, true);

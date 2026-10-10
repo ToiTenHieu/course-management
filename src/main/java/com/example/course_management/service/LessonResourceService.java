@@ -45,8 +45,8 @@ public class LessonResourceService {
     var validated = validateFile(file);
     byte[] bytes = validated.content();
     String name = validated.name(), type = validated.mediaType();
-    jdbc.update("INSERT INTO lesson_resources(lesson_id,name,media_type,file_size,content) VALUES (?,?,?,?,?)",
-        id, name, type, bytes.length, bytes);
+    jdbc.update("INSERT INTO lesson_resources(lesson_id,name,media_type,file_size,content,created_at) VALUES (?,?,?,?,?,?)",
+        id, name, type, bytes.length, bytes,com.example.course_management.time.ApplicationTime.now());
     return list(id, actor);
   }
 

@@ -1,5 +1,6 @@
 package com.example.course_management.service;
 
+import com.example.course_management.time.ApplicationTime;
 import com.example.course_management.dto.request.SaveTeacherProfileRequest;
 import com.example.course_management.dto.response.TeacherProfileResponse;
 import com.example.course_management.entity.Role;
@@ -35,7 +36,7 @@ public class TeacherProfileService {
       throw new ForbiddenException("Chỉ giảng viên đang hoạt động có thể sửa hồ sơ công khai");
     if (request.getBiography() != null) teacher.setBiography(request.getBiography().trim());
     if (request.getExpertise() != null) teacher.setExpertise(request.getExpertise().trim());
-    teacher.setUpdatedAt(LocalDateTime.now());
+    teacher.setUpdatedAt(ApplicationTime.now());
     return response(users.save(teacher));
   }
 
