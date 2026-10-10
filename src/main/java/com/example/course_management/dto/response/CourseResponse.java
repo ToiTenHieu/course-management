@@ -14,6 +14,8 @@ public class CourseResponse {
   private String category;
   private String level;
   private String learningOutcomes;
+  private String prerequisites;
+  private String targetAudience;
   private Long lessonCount;
   private Long enrollmentCount;
   private Double averageRating;

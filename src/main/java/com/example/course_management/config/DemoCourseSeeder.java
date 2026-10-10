@@ -26,6 +26,7 @@ public class DemoCourseSeeder {
     course.setTeacher(teacher); course.setTitle(sample.title()); course.setCategory(sample.category());
     course.setLevel(sample.level()); course.setPrice(sample.price()); course.setDurationHours(sample.durationHours());
     course.setStatus(sample.status()); course.setDescription(sample.description()); course.setLearningOutcomes(sample.learningOutcomes());
+    course.setTargetAudience(sample.targetAudience()); course.setPrerequisites(sample.prerequisites());
     courses.saveAndFlush(course);
     Lesson last = null;
     for (var data : sample.lessons()) {

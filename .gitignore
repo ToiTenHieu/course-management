@@ -47,6 +47,7 @@ logs/
 output/
 .playwright-cli/
 node_modules/
+__pycache__/
 
 ### OS
 

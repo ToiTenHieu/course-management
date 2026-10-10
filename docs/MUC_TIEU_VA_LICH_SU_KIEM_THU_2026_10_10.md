@@ -1,0 +1,14 @@
+# Kiểm thử mục tiêu tuần và lịch sử admin — 10/10/2026
+
+- Bộ backend đầy đủ: **127 ca H2 đạt**, gồm 117 nghiệp vụ/API, bảy cấu hình, hai migration và một khởi động. Sau điều chỉnh truy vấn đếm hoạt động theo ngày, chạy lại sáu ca liên quan trên H2 đạt. **Năm ca nghiệp vụ mới trên PostgreSQL 18 đạt**, database riêng `course_management_test`; không chạy toàn bộ 127 ca trên PostgreSQL trong đợt này.
+- **19 Node, sáu Python và sáu E2E Chromium đạt**. JAR cuối đóng gói thành công; demo PostgreSQL chạy tại cổng 8080.
+- Kiểm thử mục tiêu: mặc định chưa cấu hình, 1–50 bài, CSRF/quyền tài khoản, lưu đồng thời chỉ một phiên thắng, stale revision/tuần cũ trả 409. Hoàn thành lặp không đếm trùng; chỉ hoàn thành đầu tiên được tính; ẩn/xóa nội dung không mất hoạt động lịch sử. Migration giữ thời điểm cũ sớm nhất và không suy đoán bản ghi thiếu thời điểm.
+- Kiểm thử audit: actor từ phiên admin và vai trò chụp tại thời điểm thao tác, trước/sau của quyền/trạng thái/duyệt thanh toán, gửi lại trạng thái giống nhau không thêm bản ghi. Hai trường hợp rollback: lỗi thông báo khi duyệt và lỗi giao dịch sau khi đã ghi audit. Người không phải admin không đọc được lịch sử; lọc literal `%`, tìm kiếm, loại thao tác, khoảng ngày và phân trang đạt. Xóa actor giữ tên lịch sử, đặt tham chiếu thành null.
+- Playwright CLI dùng tài khoản/khóa QA riêng. Biểu mẫu mục tiêu chặn 51 trước khi gửi, lưu và giữ sau tải lại; 503/409 giữ bản nhập, tải lại lấy bản mới. GET lỗi có nút thử lại. Hủy điều hướng/đăng xuất giữ bản nhập và phiên; chấp nhận điều hướng chỉ hỏi một lần, không tự lưu bản bỏ đi.
+- Luồng học thật: đăng ký khóa hai bài, bấm hoàn thành từng bài, mục tiêu tăng 0 → 1 → 2; gọi lại hoàn thành bài đầu vẫn là 1; dashboard hiển thị đạt 2/2. Tùy chọn nhắc được lưu theo tài khoản. Lịch sử tám tuần hiển thị tuần chưa cấu hình.
+- Trang audit đã kiểm tra 23 thay đổi trạng thái của khóa QA, phân trang 20 + 3, lọc hai lần đổi vai trò, giữ bộ lọc sau tải trang, khoảng không có dữ liệu, khoảng quá 366 ngày và 503/thử lại giữ bộ lọc. Desktop và điện thoại 390×844 không tràn ngang; điện thoại hiển thị thẻ gồm thời điểm, người thực hiện, thao tác/đối tượng và trước/sau. Đã xem ảnh kết quả.
+- Sau kiểm tra, khóa QA #82 được lưu trữ và tài khoản QA #156 bị khóa. Giữ hoạt động/lịch sử làm bằng chứng; không xóa dữ liệu demo khác.
+
+Bằng chứng bỏ qua bởi Git: `target/weekly-full-tests.log`, `weekly-targeted-tests.log`, `weekly-postgres-tests.log`, `weekly-node-tests.log`, `weekly-python-tests.log`, `weekly-e2e.log`, `weekly-package.log`; script/log/ảnh `output/playwright/weekly-*`, `target/weekly-*-ui.log` và `weekly-final-state.log`. Hai lỗi 503/409 trong console trình duyệt là lỗi mạng/xung đột được mô phỏng khi kiểm tra.
+
+Phạm vi và hướng dẫn: [Mục tiêu tuần và lịch sử admin](MUC_TIEU_TUAN_VA_LICH_SU_ADMIN.md).

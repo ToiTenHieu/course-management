@@ -70,6 +70,7 @@ public class LessonServiceImpl implements LessonService {
     if (r.getContentFormat() != null) l.setContentFormat(r.getContentFormat());
     l.setVideoUrl(r.getVideoUrl());
     l.setOrderIndex(r.getOrderIndex());
+    c.setCurriculumRevision(c.getCurriculumRevision() + 1);
     drafts.consume(courseId, 0, r.getDraftRevision(), actor);
     return response(lessons.save(l), true);
   }
@@ -92,6 +93,7 @@ public class LessonServiceImpl implements LessonService {
     if (r.getContentFormat() != null) l.setContentFormat(r.getContentFormat());
     l.setVideoUrl(r.getVideoUrl());
     l.setOrderIndex(r.getOrderIndex());
+    c.setCurriculumRevision(c.getCurriculumRevision() + 1);
     l.setUpdatedAt(LocalDateTime.now());
     return response(lessons.save(l), true);
   }
@@ -113,6 +115,7 @@ public class LessonServiceImpl implements LessonService {
     var l = lesson(id);
     var c = lockedCourse(l.getCourse().getCourseId());
     policy.manager(c, actor);
+    c.setCurriculumRevision(c.getCurriculumRevision() + 1);
     progress.deleteByLesson_LessonId(id);
     progress.flush();
     lessons.delete(l);
@@ -128,6 +131,8 @@ public class LessonServiceImpl implements LessonService {
         .lessonId(id)
         .title(l.getTitle())
         .orderIndex(l.getOrderIndex())
+        .chapterId(l.getChapter() == null ? null : l.getChapter().getChapterId())
+        .chapterTitle(l.getChapter() == null ? null : l.getChapter().getTitle())
         .preview(text.length() > 150 ? text.substring(0, 150) + "…" : text)
         .hasVideoOrDocument(
             (l.getContentUrl() != null && !l.getContentUrl().isBlank())
@@ -169,6 +174,8 @@ public class LessonServiceImpl implements LessonService {
         .contentFormat(full ? l.getContentFormat() : null)
         .videoUrl(full ? l.getVideoUrl() : null)
         .orderIndex(l.getOrderIndex())
+        .chapterId(l.getChapter() == null ? null : l.getChapter().getChapterId())
+        .chapterTitle(l.getChapter() == null ? null : l.getChapter().getTitle())
         .contentRevision(full ? l.getContentRevision() : null)
         .isPublished(l.getIsPublished())
         .build();

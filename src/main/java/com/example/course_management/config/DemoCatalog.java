@@ -53,13 +53,18 @@ public class DemoCatalog {
 
   public record Data(@NotEmpty List<@Valid Account> accounts, @NotEmpty List<@Valid CourseSample> baseCourses,
       @NotNull @Valid JavaQuiz javaQuiz, @NotEmpty List<@Valid CourseSample> youtubeCourses,
-      @NotEmpty List<@Valid CourseSample> scenarioCourses, @NotNull @Valid Scenario scenario) {}
+      @NotEmpty List<@Valid CourseSample> scenarioCourses, @NotNull @Valid Scenario scenario,
+      @NotEmpty List<@Valid CourseFitSample> courseFitDefaults) {}
   public record Account(@NotBlank String key, @NotBlank String username, @NotBlank String fullName,
-      @NotNull Role role, boolean quickLogin) {}
+      @NotNull Role role, boolean quickLogin, @Size(max = 10000) String biography,
+      @Size(max = 2000) String expertise) {}
   public record CourseSample(@NotBlank String title, @NotBlank String category, @NotBlank String level,
       @NotNull @DecimalMin("0") BigDecimal price, @Positive int durationHours, @NotBlank String teacher,
       @NotNull CourseStatus status, @NotBlank String description, @NotBlank String learningOutcomes,
+      @NotBlank @Size(max = 10000) String targetAudience, @NotBlank @Size(max = 10000) String prerequisites,
       @NotEmpty List<@Valid LessonSample> lessons, @Valid Quiz quiz) {}
+  public record CourseFitSample(@NotNull String category,
+      @NotBlank @Size(max = 10000) String targetAudience, @NotBlank @Size(max = 10000) String prerequisites) {}
   public record LessonSample(@NotBlank String title, @NotBlank String textContent, @Positive int orderIndex,
       String videoUrl, boolean published, @NotNull @Pattern(regexp = "TEXT|MARKDOWN") String contentFormat) {}
   public record Quiz(@NotBlank String title, @Min(1) @Max(100) int passPercentage,

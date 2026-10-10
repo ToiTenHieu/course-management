@@ -39,6 +39,13 @@ class BusinessFlowTests {
   @Autowired PaymentRepository payments;
   @Autowired LessonService lessonService;
   @Autowired CourseService courseService;
+  @Autowired CourseWishlistService wishlistService;
+  @Autowired CurriculumService curriculumService;
+  @Autowired AssignmentService assignmentService;
+  @Autowired ActivityReportService activityReports;
+  @Autowired WeeklyGoalService weeklyGoals;
+  @Autowired AuditLogService auditLogs;
+  @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
   @Autowired EnrollmentService enrollmentService;
   @Autowired PaymentService paymentService;
   @Autowired UserService userService;
@@ -64,6 +71,7 @@ class BusinessFlowTests {
     reset(notifications);
     for (String table :
         new String[] {
+          "audit_logs",
           "demo_seed_runs",
           "quiz_answers",
           "quiz_attempts",
@@ -91,6 +99,449 @@ class BusinessFlowTests {
     first = lesson(free, "First", 1, true);
     second = lesson(free, "Second", 2, true);
     lesson(paid, "Paid lesson", 1, true);
+  }
+
+  @Test
+  void passwordRecoveryIsDisabledUnlessExplicitlyConfigured() throws Exception {
+    mvc.perform(get("/api/auth/config")).andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.passwordRecovery.enabled").value(false))
+        .andExpect(jsonPath("$.data.passwordRecovery.demoMailbox").value(false));
+    mvc.perform(post("/api/auth/forgot-password").with(csrf()).contentType("application/json")
+        .content("{\"email\":\"student@example.invalid\"}")).andExpect(status().isNotFound());
+    mvc.perform(get("/api/demo/recovery-mailbox").session(login(admin))).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void weeklyGoalCountsFirstCompletionsAndPreservesHistoryAcrossContentChanges() throws Exception {
+    enrollForQuestions(student);
+    var e=enrollments.findByStudent_UserIdAndCourse_CourseId(student.getUserId(),free.getCourseId()).orElseThrow();
+    var initial=weeklyGoals.get(actor(student));assertFalse(initial.configured());assertEquals(3,initial.lessonTarget());
+    var saved=weeklyGoals.save(new WeeklyGoalService.Save(initial.weekStart(),0,2,true),actor(student));
+    assertEquals(1,saved.revision());assertTrue(saved.configured());
+    enrollmentService.completeLesson(e.getEnrollmentId(),first.getLessonId(),actor(student));
+    enrollmentService.completeLesson(e.getEnrollmentId(),first.getLessonId(),actor(student));
+    enrollmentService.completeLesson(e.getEnrollmentId(),second.getLessonId(),actor(student));
+    assertEquals(2,weeklyGoals.get(actor(student)).completed());
+    var other=user("goal-other",Role.STUDENT);assertEquals(0,weeklyGoals.get(actor(other)).completed());
+    first.setIsPublished(false);lessons.saveAndFlush(first);
+    assertEquals(2,weeklyGoals.get(actor(student)).completed());
+    jdbc.update("UPDATE learning_completions SET completed_at=? WHERE student_id=? AND lesson_id=?",initial.weekStart().minusDays(1).atTime(23,59),student.getUserId(),first.getLessonId());
+    var history=weeklyGoals.get(actor(student));assertEquals(1,history.completed());assertEquals(1,history.history().get(1).completed());assertNull(history.history().get(1).lessonTarget());
+    jdbc.update("DELETE FROM lesson_progress WHERE lesson_id=?",first.getLessonId());
+    lessons.deleteById(first.getLessonId());assertEquals(1,weeklyGoals.get(actor(student)).history().get(1).completed());
+    assertThrows(ConflictException.class,()->weeklyGoals.save(new WeeklyGoalService.Save(initial.weekStart(),0,3,false),actor(student)));
+    assertThrows(ConflictException.class,()->weeklyGoals.save(new WeeklyGoalService.Save(initial.weekStart().minusWeeks(1),1,3,false),actor(student)));
+  }
+
+  @Test
+  void weeklyGoalEndpointsValidatePrivateAccessCsrfAndBounds() throws Exception {
+    var session=login(student);String week=weeklyGoals.get(actor(student)).weekStart().toString();
+    String valid="{\"weekStart\":\""+week+"\",\"expectedRevision\":0,\"lessonTarget\":4,\"dashboardReminder\":false}";
+    mvc.perform(get("/api/learning-goal").session(session)).andExpect(status().isOk()).andExpect(jsonPath("$.data.completed").value(0));
+    mvc.perform(put("/api/learning-goal").session(session).contentType("application/json").content(valid)).andExpect(status().isForbidden());
+    mvc.perform(put("/api/learning-goal").session(session).with(csrf()).contentType("application/json").content(valid.replace("\"lessonTarget\":4","\"lessonTarget\":51"))).andExpect(status().isBadRequest());
+    mvc.perform(put("/api/learning-goal").session(session).with(csrf()).contentType("application/json").content(valid)).andExpect(status().isOk()).andExpect(jsonPath("$.data.dashboardReminder").value(false));
+    mvc.perform(put("/api/learning-goal").session(session).with(csrf()).contentType("application/json").content(valid)).andExpect(status().isConflict());
+    mvc.perform(get("/api/learning-goal").session(login(teacher))).andExpect(status().isForbidden());
+    mvc.perform(get("/api/learning-goal").session(login(admin))).andExpect(status().isForbidden());
+    mvc.perform(get("/api/learning-goal")).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void concurrentWeeklyGoalWritesHaveExactlyOneWinner() throws Exception {
+    var week=weeklyGoals.get(actor(student)).weekStart();var barrier=new CyclicBarrier(2);var pool=Executors.newFixedThreadPool(2);
+    try {
+      java.util.concurrent.Callable<Boolean> save=()->{barrier.await();try{weeklyGoals.save(new WeeklyGoalService.Save(week,0,5,true),actor(student));return true;}catch(ConflictException ex){return false;}};
+      var one=pool.submit(save);var two=pool.submit(save);
+      assertNotEquals(one.get(10,TimeUnit.SECONDS),two.get(10,TimeUnit.SECONDS));assertEquals(1,weeklyGoals.get(actor(student)).revision());
+    }finally{pool.shutdownNow();}
+  }
+
+  @Test
+  void auditHistoryCapturesAuthenticatedChangesSnapshotsAndLiteralFilters() throws Exception {
+    var session=login(admin);var today=java.time.LocalDate.now(WeeklyGoalService.ZONE);
+    mvc.perform(put("/api/users/"+student.getUserId()+"/role").session(session).with(csrf()).contentType("application/json").content("{\"role\":\"TEACHER\"}")).andExpect(status().isOk());
+    mvc.perform(put("/api/users/"+student.getUserId()+"/role").session(session).with(csrf()).contentType("application/json").content("{\"role\":\"TEACHER\"}")).andExpect(status().isOk());
+    mvc.perform(put("/api/users/"+student.getUserId()+"/status").session(session).with(csrf()).contentType("application/json").content("{\"isActive\":false}")).andExpect(status().isOk());
+    mvc.perform(put("/api/courses/"+free.getCourseId()+"/status").session(session).with(csrf()).contentType("application/json").content("{\"status\":\"ARCHIVED\"}")).andExpect(status().isOk());
+    var result=auditLogs.list(today,today,"","",0,2);assertEquals(3,result.totalElements());assertEquals(2,result.totalPages());
+    assertEquals("admin",result.content().getFirst().actorUsername());assertEquals("ADMIN",result.content().getFirst().actorRole());
+    var role=auditLogs.list(today,today,"USER_ROLE_CHANGED","student",0,20).content().getFirst();assertEquals("STUDENT",role.beforeValue());assertEquals("TEACHER",role.afterValue());
+    student=users.findById(student.getUserId()).orElseThrow();student.setUsername("renamed");users.saveAndFlush(student);
+    assertEquals("student",auditLogs.list(today,today,"USER_ROLE_CHANGED","student",0,20).content().getFirst().targetName());
+    assertEquals(0,auditLogs.list(today,today,"","%",0,20).totalElements());
+    assertEquals(1,auditLogs.list(today,today,"","free",0,20).totalElements());
+    String path="/api/audit-logs?from="+today+"&to="+today;
+    mvc.perform(get(path).session(session)).andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(3));
+    mvc.perform(get(path).session(login(teacher))).andExpect(status().isForbidden());
+    var another=user("audit-student",Role.STUDENT);mvc.perform(get(path).session(login(another))).andExpect(status().isForbidden());
+    mvc.perform(get(path)).andExpect(status().isUnauthorized());
+    mvc.perform(get(path+"&action=INVALID").session(session)).andExpect(status().isBadRequest());
+    assertThrows(BadRequestException.class,()->auditLogs.list(today.minusDays(366),today,"","",0,20));
+  }
+
+  @Test
+  void auditPaymentEntriesRollBackWithFailedApprovalAndNeverDuplicate() throws Exception {
+    var p=paymentService.createPayment(paid.getCourseId(),actor(student));
+    doThrow(new IllegalStateException("Simulated notification failure")).when(notifications).save(any(Notification.class));
+    assertThrows(IllegalStateException.class,()->paymentService.confirmPayment(p.getPaymentId(),actor(admin)));
+    assertEquals(PaymentStatus.PENDING,payments.findById(p.getPaymentId()).orElseThrow().getStatus());
+    assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM audit_logs",Integer.class));
+    reset(notifications);paymentService.confirmPayment(p.getPaymentId(),actor(admin));
+    assertThrows(BadRequestException.class,()->paymentService.confirmPayment(p.getPaymentId(),actor(admin)));
+    var other=user("payment-other",Role.STUDENT);var rejected=paymentService.createPayment(paid.getCourseId(),actor(other));
+    assertThrows(IllegalStateException.class,()->new org.springframework.transaction.support.TransactionTemplate(transactionManager).executeWithoutResult(tx->{
+      paymentService.rejectPayment(rejected.getPaymentId(),actor(admin));
+      throw new IllegalStateException("Failure after audit insert");
+    }));
+    assertEquals(PaymentStatus.PENDING,payments.findById(rejected.getPaymentId()).orElseThrow().getStatus());
+    assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM audit_logs",Integer.class));
+    paymentService.rejectPayment(rejected.getPaymentId(),actor(admin));
+    assertEquals(2,jdbc.queryForObject("SELECT COUNT(*) FROM audit_logs",Integer.class));
+    var today=java.time.LocalDate.now(WeeklyGoalService.ZONE);
+    assertEquals(1,auditLogs.list(today,today,"PAYMENT_CONFIRMED","",0,20).totalElements());
+    assertEquals(1,auditLogs.list(today,today,"PAYMENT_REJECTED","",0,20).totalElements());
+    // Failed authorization cannot record a successful course status change.
+    mvc.perform(put("/api/courses/"+free.getCourseId()+"/status").session(login(teacher)).with(csrf()).contentType("application/json").content("{\"status\":\"ARCHIVED\"}")).andExpect(status().isForbidden());
+    assertEquals(2,jdbc.queryForObject("SELECT COUNT(*) FROM audit_logs",Integer.class));
+  }
+
+  @Test
+  void curriculumReorderPreservesProgressAndRejectsStaleOrForeignPlans() throws Exception {
+    enrollForQuestions(student);
+    var enrollment=enrollments.findByStudent_UserIdAndCourse_CourseId(student.getUserId(),free.getCourseId()).orElseThrow();
+    var progressItem=new LessonProgress();progressItem.setEnrollment(enrollment);progressItem.setLesson(first);
+    progressItem.setNote("Keep this note");progressItem.setIsCompleted(true);progress.saveAndFlush(progressItem);
+    var plan=new CurriculumService.Plan(0,java.util.List.of(new CurriculumService.Group(null,"Thực hành",java.util.List.of(second.getLessonId(),first.getLessonId()))));
+    var saved=curriculumService.save(free.getCourseId(),plan,actor(teacher));
+    assertEquals(1,saved.revision());
+    assertEquals(second.getLessonId(),lessonService.getLessonsByCourse(free.getCourseId(),actor(student)).getFirst().getLessonId());
+    assertEquals("Thực hành",courseService.getPublicCourse(free.getCourseId()).getLessons().getFirst().getChapterTitle());
+    assertEquals("Keep this note",progress.findById(progressItem.getProgressId()).orElseThrow().getNote());
+    assertThrows(ConflictException.class,()->curriculumService.save(free.getCourseId(),plan,actor(teacher)));
+    var foreign=lessons.findByCourse_CourseIdOrderByOrderIndex(paid.getCourseId()).getFirst();
+    var bad=new CurriculumService.Plan(1,java.util.List.of(new CurriculumService.Group(null,"",java.util.List.of(first.getLessonId(),foreign.getLessonId()))));
+    assertThrows(BadRequestException.class,()->curriculumService.save(free.getCourseId(),bad,actor(teacher)));
+    assertEquals(1,curriculumService.get(free.getCourseId(),actor(teacher)).revision());
+    mvc.perform(get("/api/courses/"+free.getCourseId()+"/curriculum").session(login(outsider))).andExpect(status().isForbidden());
+    mvc.perform(put("/api/courses/"+free.getCourseId()+"/curriculum").session(login(teacher)).contentType("application/json").content("{}"))
+        .andExpect(status().isForbidden());
+    mvc.perform(get("/api/courses/"+free.getCourseId()+"/curriculum").session(login(student))).andExpect(status().isForbidden());
+    var moved=curriculumService.save(free.getCourseId(),new CurriculumService.Plan(1,java.util.List.of(new CurriculumService.Group(null,"",java.util.List.of(first.getLessonId(),second.getLessonId())))),actor(teacher));
+    assertEquals(2,moved.revision());assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM course_chapters",Integer.class));
+    assertNull(lessonService.getLessonById(first.getLessonId(),actor(student)).getChapterId());
+  }
+
+  @Test
+  void assignmentSubmissionIsPrivateIdempotentAndKeepsOriginalPrompt() throws Exception {
+    var original=assignmentService.save(first.getLessonId(),new AssignmentService.Save(0,"Bài tập","Đề gốc",true),actor(teacher));
+    var other=user("assignment-other",Role.STUDENT);
+    assertThrows(ForbiddenException.class,()->assignmentService.view(first.getLessonId(),actor(other)));
+    enrollForQuestions(student);enrollForQuestions(other);
+    String key=java.util.UUID.randomUUID().toString();
+    var file=new org.springframework.mock.web.MockMultipartFile("file","../loi-giai.txt","text/plain","Private answer".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    var submission=assignmentService.submit(first.getLessonId(),1,key,"Lời giải",file,actor(student));
+    assertEquals(submission.submissionId(),assignmentService.submit(first.getLessonId(),1,key,"Lời giải",file,actor(student)).submissionId());
+    assertThrows(ConflictException.class,()->assignmentService.submit(first.getLessonId(),1,key,"Đổi đáp án",file,actor(student)));
+    assertNull(assignmentService.view(first.getLessonId(),actor(other)).submission());
+    assertThrows(ForbiddenException.class,()->assignmentService.download(submission.submissionId(),actor(other)));
+    assertThrows(ForbiddenException.class,()->assignmentService.grade(submission.submissionId(),new AssignmentService.Grade(0,90,"Good"),actor(outsider)));
+    assertEquals("loi-giai.txt",assignmentService.download(submission.submissionId(),actor(student)).name());
+    assertArrayEquals(file.getBytes(),assignmentService.download(submission.submissionId(),actor(teacher)).content());
+    assignmentService.save(first.getLessonId(),new AssignmentService.Save(original.revision(),"Đề mới","Nội dung mới",false),actor(teacher));
+    assertNull(assignmentService.view(first.getLessonId(),actor(student)).assignment());
+    assertEquals("Đề gốc",assignmentService.view(first.getLessonId(),actor(student)).submission().assignmentInstructions());
+    var graded=assignmentService.grade(submission.submissionId(),new AssignmentService.Grade(0,85,"Cần thêm ví dụ"),actor(teacher));
+    assertEquals(85,graded.score());assertEquals(1,graded.gradeRevision());
+    assertThrows(ConflictException.class,()->assignmentService.grade(submission.submissionId(),new AssignmentService.Grade(0,95,"stale"),actor(admin)));
+    assertEquals(0,assignmentService.list(first.getLessonId(),true,0,5,actor(teacher)).totalElements());
+    assertEquals(85,assignmentService.view(first.getLessonId(),actor(student)).submission().score());
+    mvc.perform(get("/api/assignment-submissions/"+submission.submissionId()+"/file").session(login(other))).andExpect(status().isForbidden());
+    mvc.perform(put("/api/assignment-submissions/"+submission.submissionId()+"/grade").session(login(student)).with(csrf())
+        .contentType("application/json").content("{\"expectedRevision\":1,\"score\":80,\"feedback\":\"x\"}")).andExpect(status().isForbidden());
+  }
+
+  @Test
+  void assignmentRejectsDraftStalePromptInvalidFileAndDroppedEnrollment() throws Exception {
+    enrollForQuestions(student);
+    String key=java.util.UUID.randomUUID().toString();
+    assignmentService.save(first.getLessonId(),new AssignmentService.Save(0,"Draft","Instructions",false),actor(teacher));
+    assertThrows(ResourceNotFoundException.class,()->assignmentService.submit(first.getLessonId(),1,key,"Answer",null,actor(student)));
+    assignmentService.save(first.getLessonId(),new AssignmentService.Save(1,"Published","Instructions",true),actor(teacher));
+    assertThrows(ConflictException.class,()->assignmentService.submit(first.getLessonId(),1,key,"Answer",null,actor(student)));
+    assertThrows(BadRequestException.class,()->assignmentService.submit(first.getLessonId(),2,key," ",null,actor(student)));
+    var invalid=new org.springframework.mock.web.MockMultipartFile("file","bad.pdf","application/pdf","not a PDF".getBytes());
+    assertThrows(BadRequestException.class,()->assignmentService.submit(first.getLessonId(),2,key,"Answer",invalid,actor(student)));
+    var session=login(student);
+    mvc.perform(multipart("/api/lessons/"+first.getLessonId()+"/assignment/submissions").session(session)
+        .param("expectedRevision","2").param("submissionKey",key).param("answer","HTTP answer")).andExpect(status().isForbidden());
+    mvc.perform(multipart("/api/lessons/"+first.getLessonId()+"/assignment/submissions").session(session).with(csrf())
+        .param("expectedRevision","2").param("submissionKey",key).param("answer","HTTP answer")).andExpect(status().isOk());
+    var e=enrollments.findByStudent_UserIdAndCourse_CourseId(student.getUserId(),free.getCourseId()).orElseThrow();
+    e.setStatus(EnrollmentStatus.DROPPED);enrollments.saveAndFlush(e);
+    assertThrows(ForbiddenException.class,()->assignmentService.view(first.getLessonId(),actor(student)));
+    assertEquals(1,assignmentService.list(first.getLessonId(),false,0,5,actor(teacher)).totalElements());
+  }
+
+  @Test
+  void concurrentAssignmentRetriesCreateOneSubmission() throws Exception {
+    enrollForQuestions(student);assignmentService.save(first.getLessonId(),new AssignmentService.Save(0,"Task","Prompt",true),actor(teacher));
+    String key=java.util.UUID.randomUUID().toString();var start=new CountDownLatch(1);
+    try(var pool=Executors.newFixedThreadPool(2)) {
+      Callable<Integer> submit=()->{start.await();return assignmentService.submit(first.getLessonId(),1,key,"Answer",null,actor(student)).submissionId();};
+      var a=pool.submit(submit);var b=pool.submit(submit);start.countDown();
+      assertEquals(a.get(10,TimeUnit.SECONDS),b.get(10,TimeUnit.SECONDS));
+      assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM assignment_submissions",Integer.class));
+    }
+  }
+
+  @Test
+  void activityReportUsesConfirmationDatesAndAvoidsMultiplyingRevenue() throws Exception {
+    var other=user("report-other",Role.STUDENT);enrollForQuestions(student);enrollForQuestions(other);
+    var from=java.time.LocalDate.of(2026,10,1);var to=java.time.LocalDate.of(2026,10,10);
+    jdbc.update("UPDATE enrollments SET enrollment_date=?,status='COMPLETED',progress_percentage=100",from.atStartOfDay());
+    for(int i=0;i<3;i++) jdbc.update("INSERT INTO payments(student_id,course_id,amount,status,transfer_note,created_at,confirmed_at) VALUES (?,?,?,?,?,?,?)",
+        student.getUserId(),free.getCourseId(),new BigDecimal("100000"),i==2?"PENDING":"CONFIRMED","report-"+i,from.minusDays(10).atStartOfDay(),to.atTime(23,59,59));
+    jdbc.update("INSERT INTO payments(student_id,course_id,amount,status,transfer_note,created_at,confirmed_at) VALUES (?,?,?,?,?,?,?)",
+        student.getUserId(),free.getCourseId(),new BigDecimal("999999"),"CONFIRMED","outside",from.atStartOfDay(),to.plusDays(1).atStartOfDay());
+    var report=activityReports.get(from,to,0,1);
+    assertEquals(2,report.summary().enrollments());assertEquals(2,report.summary().completed());assertEquals(2,report.summary().confirmedPayments());
+    assertEquals(0,new BigDecimal("200000").compareTo(report.summary().revenue()));
+    assertEquals(1,report.courses().totalElements());assertEquals(2,report.courses().content().getFirst().confirmedPayments());
+    mvc.perform(get("/api/reports/activity?from=2026-10-01&to=2026-10-10").session(login(teacher))).andExpect(status().isForbidden());
+    mvc.perform(get("/api/reports/activity?from=2026-10-01&to=2026-10-10").session(login(admin))).andExpect(status().isOk());
+    assertThrows(BadRequestException.class,()->activityReports.get(to,from,0,20));
+    assertThrows(BadRequestException.class,()->activityReports.get(from,from.plusDays(366),0,20));
+    free.setTitle(" =SUM(1,2)\"\nDanger");courses.saveAndFlush(free);
+    String csv=new String(activityReports.export(from,to),java.nio.charset.StandardCharsets.UTF_8);
+    assertTrue(csv.startsWith("\uFEFF"));assertTrue(csv.contains("\"' =SUM(1,2)\"\"\nDanger\""));assertTrue(csv.contains("200000"));
+    mvc.perform(get("/api/reports/activity/export?from=2026-10-01&to=2026-10-10").session(login(admin)))
+        .andExpect(status().isOk()).andExpect(header().string("Content-Disposition",org.hamcrest.Matchers.containsString("attachment")));
+  }
+
+  @Test
+  void wishlistRequiresStudentSessionCsrfAndPublishedCourse() throws Exception {
+    String path = "/api/wishlist/" + free.getCourseId();
+    mvc.perform(get("/api/wishlist")).andExpect(status().isUnauthorized());
+    mvc.perform(get("/api/wishlist/status?ids=" + free.getCourseId())).andExpect(status().isUnauthorized());
+    mvc.perform(put(path).with(csrf())).andExpect(status().isUnauthorized());
+    for (User u : new User[] {admin, teacher}) {
+      var session = login(u);
+      mvc.perform(get("/api/wishlist").session(session)).andExpect(status().isForbidden());
+      mvc.perform(put(path).session(session).with(csrf())).andExpect(status().isForbidden());
+      mvc.perform(delete(path).session(session).with(csrf())).andExpect(status().isForbidden());
+    }
+    var session = login(student);
+    mvc.perform(put(path).session(session)).andExpect(status().isForbidden());
+    mvc.perform(put(path).session(session).with(csrf())).andExpect(status().isOk());
+    mvc.perform(delete(path).session(session)).andExpect(status().isForbidden());
+    free.setStatus(CourseStatus.DRAFT); courses.saveAndFlush(free);
+    mvc.perform(put(path).session(session).with(csrf())).andExpect(status().isNotFound());
+    mvc.perform(put("/api/wishlist/2147483647").session(session).with(csrf())).andExpect(status().isNotFound());
+    assertEquals(0, enrollments.count());
+    assertEquals(0, payments.count());
+  }
+
+  @Test
+  void wishlistIsPrivateIdempotentAndPersistsAcrossSessions() throws Exception {
+    var a = login(student);
+    var other = user("wishlist-other", Role.STUDENT);
+    var b = login(other);
+    String path = "/api/wishlist/" + paid.getCourseId();
+    for (int i = 0; i < 2; i++) mvc.perform(put(path).session(a).with(csrf())).andExpect(status().isOk());
+    assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM course_wishlist", Integer.class));
+    mvc.perform(get("/api/wishlist").session(login(student)))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(1))
+        .andExpect(jsonPath("$.data.content[0].courseId").value(paid.getCourseId()))
+        .andExpect(jsonPath("$.data.content[0].lessons").isEmpty());
+    mvc.perform(get("/api/wishlist").session(b)).andExpect(jsonPath("$.data.totalElements").value(0));
+    mvc.perform(get("/api/wishlist/status?ids=" + paid.getCourseId()).session(b))
+        .andExpect(jsonPath("$.data").isEmpty());
+    mvc.perform(delete(path).session(b).with(csrf())).andExpect(status().isOk());
+    mvc.perform(get("/api/wishlist/status?ids=" + paid.getCourseId() + "," + free.getCourseId()).session(a))
+        .andExpect(jsonPath("$.data.length()").value(1)).andExpect(jsonPath("$.data[0]").value(paid.getCourseId()));
+    for (int i = 0; i < 2; i++) mvc.perform(delete(path).session(a).with(csrf())).andExpect(status().isOk());
+    mvc.perform(get("/api/wishlist").session(a)).andExpect(jsonPath("$.data.totalElements").value(0));
+  }
+
+  @Test
+  void wishlistPaginationSearchAndHiddenCoursesRespectVisibility() throws Exception {
+    wishlistService.save(free.getCourseId(), actor(student));
+    wishlistService.save(paid.getCourseId(), actor(student));
+    var sameTime = java.time.LocalDateTime.of(2026, 1, 1, 0, 0);
+    jdbc.update("UPDATE course_wishlist SET saved_at=?", sameTime);
+    var a = wishlistService.list("", 0, 1, actor(student));
+    var b = wishlistService.list("", 1, 1, actor(student));
+    assertEquals(2, a.totalElements()); assertEquals(2, a.totalPages());
+    assertEquals(paid.getCourseId(), a.content().getFirst().getCourseId());
+    assertEquals(free.getCourseId(), b.content().getFirst().getCourseId());
+    paid.setTitle("Paid %_!"); courses.saveAndFlush(paid);
+    assertEquals(1, wishlistService.list("%_!", 0, 9, actor(student)).totalElements());
+    assertEquals(2, wishlistService.list("TEACHER", 0, 9, actor(student)).totalElements());
+    assertEquals(0, wishlistService.list("missing", 0, 9, actor(student)).totalElements());
+    paid.setStatus(CourseStatus.ARCHIVED); courses.saveAndFlush(paid);
+    assertEquals(1, wishlistService.list("", 0, 9, actor(student)).totalElements());
+    assertTrue(wishlistService.savedIds(java.util.List.of(paid.getCourseId()), actor(student)).isEmpty());
+    assertEquals(2, jdbc.queryForObject("SELECT COUNT(*) FROM course_wishlist", Integer.class));
+    paid.setStatus(CourseStatus.PUBLISHED); courses.saveAndFlush(paid);
+    assertEquals(2, wishlistService.list("", 0, 9, actor(student)).totalElements());
+    paid.setStatus(CourseStatus.DRAFT); courses.saveAndFlush(paid);
+    wishlistService.remove(paid.getCourseId(), actor(student));
+    assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM course_wishlist", Integer.class));
+  }
+
+  @Test
+  void wishlistValidatesPaginationAndStatusBatch() throws Exception {
+    var session = login(student);
+    for (String query : new String[] {"page=-1", "size=0", "size=101", "page=2147483647&size=100", "search=" + "x".repeat(256)})
+      mvc.perform(get("/api/wishlist?" + query).session(session)).andExpect(status().isBadRequest());
+    for (String query : new String[] {"ids=0", "ids=-1", "ids=abc", "ids=" + String.join(",", java.util.Collections.nCopies(101, "1"))})
+      mvc.perform(get("/api/wishlist/status?" + query).session(session)).andExpect(status().isBadRequest());
+    mvc.perform(get("/api/wishlist/status").session(session)).andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").isEmpty());
+  }
+
+  @Test
+  void concurrentWishlistSavesCreateOnlyOneAndDeletionCleansBookmarks() throws Exception {
+    try (var executor = Executors.newFixedThreadPool(2)) {
+      var start = new CountDownLatch(1);
+      Callable<Void> save = () -> { start.await(); wishlistService.save(free.getCourseId(), actor(student)); return null; };
+      var a = executor.submit(save); var b = executor.submit(save); start.countDown();
+      a.get(10, TimeUnit.SECONDS); b.get(10, TimeUnit.SECONDS);
+    }
+    assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM course_wishlist", Integer.class));
+    var deletable = course("Saved course without lessons", BigDecimal.ZERO);
+    wishlistService.save(deletable.getCourseId(), actor(student));
+    courseService.deleteCourse(deletable.getCourseId());
+    assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM course_wishlist", Integer.class));
+    userService.deleteUser(student.getUserId());
+    assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM course_wishlist", Integer.class));
+  }
+
+  @Test
+  void teacherProfileIsPublicWithoutPrivateAccountFieldsAndPersistsSeparately() throws Exception {
+    var session = login(teacher);
+    String body = """
+        {"biography":"  Teaching Java\\nHands-on courses  ","expertise":"Java\\nSpring Boot","fullName":"Ignore injected name","teacherId":%d}
+        """.formatted(outsider.getUserId());
+    mvc.perform(put("/api/teacher-profile").session(session).with(csrf())
+        .contentType("application/json").content(body))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.teacherId").value(teacher.getUserId()));
+    mvc.perform(get("/api/discovery/teachers/" + teacher.getUserId()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.biography").value("Teaching Java\nHands-on courses"))
+        .andExpect(jsonPath("$.data.expertise").value("Java\nSpring Boot"))
+        .andExpect(jsonPath("$.data.fullName").value("teacher"))
+        .andExpect(jsonPath("$.data.email").doesNotExist())
+        .andExpect(jsonPath("$.data.username").doesNotExist())
+        .andExpect(jsonPath("$.data.passwordHash").doesNotExist());
+    assertNull(users.findById(outsider.getUserId()).orElseThrow().getBiography());
+    mvc.perform(get("/api/teacher-profile").session(session))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.expertise").value("Java\nSpring Boot"));
+    // Generic profile updates do not erase the teacher's public biography.
+    mvc.perform(put("/api/users/" + teacher.getUserId()).session(session).with(csrf())
+        .contentType("application/json").content("{\"fullName\":\"Teacher renamed\",\"email\":\"teacher@example.invalid\"}"))
+        .andExpect(status().isOk());
+    mvc.perform(get("/api/discovery/teachers/" + teacher.getUserId()))
+        .andExpect(jsonPath("$.data.fullName").value("Teacher renamed"))
+        .andExpect(jsonPath("$.data.biography").value("Teaching Java\nHands-on courses"));
+    mvc.perform(put("/api/teacher-profile").session(session).with(csrf())
+        .contentType("application/json").content("{\"biography\":\"   \"}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.biography").value(""))
+        .andExpect(jsonPath("$.data.expertise").value("Java\nSpring Boot"));
+  }
+
+  @Test
+  void teacherProfileRequiresTeacherSessionCsrfAndValidLengths() throws Exception {
+    var session = login(teacher);
+    String body = "{\"biography\":\"About me\",\"expertise\":\"Java\"}";
+    mvc.perform(get("/api/teacher-profile")).andExpect(status().isUnauthorized());
+    mvc.perform(get("/api/teacher-profile").session(login(student))).andExpect(status().isForbidden());
+    for (User actor : new User[] {student, admin}) {
+      mvc.perform(put("/api/teacher-profile").session(login(actor)).with(csrf())
+          .contentType("application/json").content(body)).andExpect(status().isForbidden());
+    }
+    mvc.perform(put("/api/teacher-profile").session(session)
+        .contentType("application/json").content(body)).andExpect(status().isForbidden());
+    for (String invalid : new String[] {
+        "{\"biography\":\"" + "a".repeat(10001) + "\"}",
+        "{\"expertise\":\"" + "a".repeat(2001) + "\"}"}) {
+      mvc.perform(put("/api/teacher-profile").session(session).with(csrf())
+          .contentType("application/json").content(invalid)).andExpect(status().isBadRequest());
+    }
+    assertNull(users.findById(teacher.getUserId()).orElseThrow().getBiography());
+    mvc.perform(get("/api/discovery/teachers/" + student.getUserId())).andExpect(status().isNotFound());
+    teacher.setIsActive(false);
+    users.saveAndFlush(teacher);
+    mvc.perform(get("/api/discovery/teachers/" + teacher.getUserId())).andExpect(status().isNotFound());
+    mvc.perform(get("/api/discovery/teachers/" + teacher.getUserId() + "/courses")).andExpect(status().isNotFound());
+    mvc.perform(put("/api/teacher-profile").session(session).with(csrf())
+        .contentType("application/json").content(body)).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void publicTeacherCoursesArePaginatedAndExcludeDraftsArchivesAndOtherTeachers() throws Exception {
+    paid.setStatus(CourseStatus.DRAFT);
+    courses.saveAndFlush(paid);
+    var archived = course("Archived", BigDecimal.ZERO);
+    archived.setStatus(CourseStatus.ARCHIVED);
+    courses.saveAndFlush(archived);
+    var unrelated = course("Other teacher", BigDecimal.ZERO);
+    unrelated.setTeacher(outsider);
+    courses.saveAndFlush(unrelated);
+    String path = "/api/discovery/teachers/" + teacher.getUserId() + "/courses";
+    mvc.perform(get(path + "?size=1"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(1))
+        .andExpect(jsonPath("$.data.content[0].courseId").value(free.getCourseId()))
+        .andExpect(jsonPath("$.data.content[0].lessons").isEmpty());
+    mvc.perform(get(path + "?page=1&size=1")).andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.content").isEmpty());
+    mvc.perform(get(path + "?size=101")).andExpect(status().isBadRequest());
+    mvc.perform(get(path + "?page=-1")).andExpect(status().isBadRequest());
+    mvc.perform(get(path).session(login(admin)))
+        .andExpect(jsonPath("$.data.totalElements").value(1));
+  }
+
+  @Test
+  void courseAudienceAndPrerequisitesPersistWithPermissionsAndLegacyUpdates() throws Exception {
+    var session = login(teacher);
+    String path = "/api/courses/" + free.getCourseId();
+    String body = """
+        {"title":"Free","teacherId":%d,"targetAudience":"  New developers  ","prerequisites":"Laptop\\nNo prior Java required"}
+        """.formatted(teacher.getUserId());
+    mvc.perform(put(path).session(login(outsider)).with(csrf()).contentType("application/json").content(body))
+        .andExpect(status().isForbidden());
+    mvc.perform(put(path).session(session).contentType("application/json").content(body))
+        .andExpect(status().isForbidden());
+    mvc.perform(put(path).session(session).with(csrf()).contentType("application/json").content(body))
+        .andExpect(status().isOk());
+    mvc.perform(get("/api/discovery/courses/" + free.getCourseId()))
+        .andExpect(jsonPath("$.data.targetAudience").value("New developers"))
+        .andExpect(jsonPath("$.data.prerequisites").value("Laptop\nNo prior Java required"))
+        .andExpect(jsonPath("$.data.lessons[0].textContent").doesNotExist());
+    mvc.perform(put(path).session(session).with(csrf()).contentType("application/json")
+        .content("{\"title\":\"Legacy edit\",\"teacherId\":" + teacher.getUserId() + "}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.targetAudience").value("New developers"));
+    for (String key : new String[] {"targetAudience", "prerequisites"}) {
+      mvc.perform(put(path).session(session).with(csrf()).contentType("application/json")
+          .content("{\"title\":\"Must not save\",\"teacherId\":" + teacher.getUserId()
+              + ",\"" + key + "\":\"" + "x".repeat(10001) + "\"}"))
+          .andExpect(status().isBadRequest());
+    }
+    assertEquals("Legacy edit", courses.findById(free.getCourseId()).orElseThrow().getTitle());
+    mvc.perform(put(path).session(session).with(csrf()).contentType("application/json")
+        .content(body.replace("  New developers  ", "")))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.targetAudience").value(""));
+  }
+
+  @Test
+  void adminCanCreateCourseWithAudienceAndPreparationMetadata() throws Exception {
+    mvc.perform(post("/api/courses").session(login(admin)).with(csrf()).contentType("application/json")
+        .content("""
+            {"title":"New course","teacherId":%d,"targetAudience":"Beginners","prerequisites":"A laptop"}
+            """.formatted(teacher.getUserId())))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.targetAudience").value("Beginners"))
+        .andExpect(jsonPath("$.data.prerequisites").value("A laptop"));
   }
 
   @Test

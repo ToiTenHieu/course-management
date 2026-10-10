@@ -27,6 +27,7 @@ public class CourseServiceImpl implements CourseService {
   private final EnrollmentRepository enrollments;
   private final ReviewRepository reviews;
   private final ContentPolicy policy;
+  private final AuditLogService audit;
   private final com.example.course_management.config.LearningSettings settings;
 
   public CourseServiceImpl(
@@ -35,7 +36,9 @@ public class CourseServiceImpl implements CourseService {
       LessonRepository lessons,
       EnrollmentRepository enrollments,
       ReviewRepository reviews,
-      ContentPolicy policy, com.example.course_management.config.LearningSettings settings) {
+      ContentPolicy policy, com.example.course_management.config.LearningSettings settings,
+      AuditLogService audit) {
+    this.audit = audit;
     this.courses = courses;
     this.users = users;
     this.lessons = lessons;
@@ -156,6 +159,8 @@ public class CourseServiceImpl implements CourseService {
                         .lessonId(l.getLessonId())
                         .title(l.getTitle())
                         .orderIndex(l.getOrderIndex())
+        .chapterId(l.getChapter() == null ? null : l.getChapter().getChapterId())
+        .chapterTitle(l.getChapter() == null ? null : l.getChapter().getTitle())
                         .build())
             .toList());
     return response;
@@ -175,6 +180,8 @@ public class CourseServiceImpl implements CourseService {
                         .lessonId(l.getLessonId())
                         .title(l.getTitle())
                         .orderIndex(l.getOrderIndex())
+        .chapterId(l.getChapter() == null ? null : l.getChapter().getChapterId())
+        .chapterTitle(l.getChapter() == null ? null : l.getChapter().getTitle())
                         .build())
             .toList());
     return response;
@@ -191,6 +198,8 @@ public class CourseServiceImpl implements CourseService {
     c.setCategory(value(r.getCategory(), defaults.defaultCategory()));
     c.setLevel(value(r.getLevel(), defaults.defaultLevel()));
     c.setLearningOutcomes(r.getLearningOutcomes());
+    c.setPrerequisites(r.getPrerequisites() == null ? null : r.getPrerequisites().trim());
+    c.setTargetAudience(r.getTargetAudience() == null ? null : r.getTargetAudience().trim());
     return toResponse(courses.save(c));
   }
 
@@ -212,6 +221,9 @@ public class CourseServiceImpl implements CourseService {
     c.setCategory(value(r.getCategory(), c.getCategory()));
     c.setLevel(value(r.getLevel(), c.getLevel()));
     c.setLearningOutcomes(r.getLearningOutcomes());
+    // Older clients omit these fields; an explicit empty string clears them.
+    if (r.getPrerequisites() != null) c.setPrerequisites(r.getPrerequisites().trim());
+    if (r.getTargetAudience() != null) c.setTargetAudience(r.getTargetAudience().trim());
     c.setUpdatedAt(LocalDateTime.now());
     return toResponse(courses.save(c));
   }
@@ -224,8 +236,10 @@ public class CourseServiceImpl implements CourseService {
     if (r.getStatus() == CourseStatus.PUBLISHED
         && lessons.findByCourse_CourseIdAndIsPublishedTrueOrderByOrderIndex(id).isEmpty())
       throw new BadRequestException("Cần ít nhất một bài học đã xuất bản trước khi mở khóa học");
+    var previousStatus = c.getStatus();
     c.setStatus(r.getStatus());
     c.setUpdatedAt(LocalDateTime.now());
+    audit.recordCurrent("COURSE_STATUS_CHANGED", "COURSE", id, c.getTitle(), previousStatus.name(), r.getStatus().name());
     return toResponse(courses.save(c));
   }
 
@@ -305,6 +319,8 @@ public class CourseServiceImpl implements CourseService {
         .category(c.getCategory())
         .level(c.getLevel())
         .learningOutcomes(c.getLearningOutcomes())
+        .prerequisites(c.getPrerequisites())
+        .targetAudience(c.getTargetAudience())
         .lessonCount(lessonCount)
         .enrollmentCount(enrollmentCount)
         .averageRating(rating)

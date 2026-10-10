@@ -38,11 +38,14 @@ Checklist là hướng dẫn chất lượng, không thay thế luật xuất b�
 
 ## Tiếp theo, theo giá trị với người dùng
 
+Đã bổ sung 10/10: chia chương/kéo thả chương trình; bài tập nộp lời giải/tệp và chấm điểm; báo cáo admin theo khoảng ngày và xuất CSV mở trong Excel. Chi tiết thao tác, quyền và giới hạn: [Chương, bài tập và báo cáo](CHUONG_BAI_TAP_VA_BAO_CAO.md).
+
 | Ưu tiên | Hạng mục | Người hưởng lợi | Tiêu chí hoàn thành |
 |---|---|---|---|
 | Đã triển khai 08/10 | Soạn nội dung có cấu trúc, video và tài liệu trong phòng học | Giảng viên, học viên | Markdown giới hạn, preview dùng chung renderer, YouTube/MP4/WebM, file đính kèm được kiểm tra quyền |
-| P2 | Hồ sơ giảng viên, yêu cầu đầu vào và đối tượng phù hợp | Khách, học viên | Người học hiểu khóa dành cho ai và phải chuẩn bị gì; thông tin do giảng viên cung cấp |
-| P2 | Lưu khóa quan tâm và đề xuất dựa trên chủ đề đã chọn | Khách, học viên | Lưu giữa thiết bị, gỡ lưu được; đề xuất giải thích được, không gắn nhãn “phổ biến” bằng dữ liệu giả |
+| Đã triển khai 09/10 | Hồ sơ giảng viên, yêu cầu đầu vào và đối tượng phù hợp | Khách, học viên | Hồ sơ công khai gồm tên, giới thiệu/chuyên môn và khóa đã xuất bản; tab Đối tượng & chuẩn bị do giảng viên/admin chỉnh sửa |
+| Đã triển khai 09/10 | Lưu khóa quan tâm | Khách, học viên | Lưu theo tài khoản giữa thiết bị, bỏ lưu, tìm kiếm/phân trang danh sách riêng; khách đăng nhập để tiếp tục lưu trong cùng tab |
+| P2 | Đề xuất dựa trên chủ đề đã chọn | Khách, học viên | Đề xuất giải thích được, không gắn nhãn “phổ biến” bằng dữ liệu giả |
 | P2 | Mục tiêu học theo tuần và nhắc học tùy chọn | Học viên | Học viên chủ động chọn mục tiêu và bật/tắt nhắc; không tạo streak khi chưa có hoạt động học |
 | P2 | Báo cáo nội dung, kiểm duyệt đánh giá và lịch sử thao tác | Admin | Theo dõi người thực hiện, lý do, trạng thái xử lý; giữ lịch sử và quyền học |
 | P3 | Chứng nhận có xác minh | Học viên | Chỉ cấp khi có tiêu chí đánh giá năng lực đủ rõ; mã xác minh và khả năng thu hồi hợp lệ |
@@ -125,3 +128,13 @@ Học viên còn đăng ký trả lời nhau và trao đổi nhiều lượt v�
 Giảng viên phụ trách/admin ẩn hoặc hiện từng phản hồi hoặc cả câu hỏi. Backend loại phản hồi ẩn trước khi tính tổng/phân trang cho học viên và đồng bộ tóm tắt chính thức để báo cáo không lộ nội dung ẩn. Học viên hỗ trợ nhau không tự làm mất câu hỏi khỏi hàng chờ giảng viên. Phản hồi tính vào hoạt động gần nhất trong báo cáo học viên.
 
 Flyway V15 chuyển phản hồi cũ vào hội thoại, giữ nội dung/thời điểm. UUID cho mỗi lượt gửi giúp thử lại sau mất phản hồi mạng không tạo bản ghi/thông báo trùng. Gửi lỗi giữ văn bản trong phiên trang; đổi bài hoặc phản hồi về chậm không ghi đè vùng hội thoại mới. Chưa hỗ trợ chat riêng, hội thoại phân nhánh hoặc sửa nội dung một phản hồi đã gửi.
+
+## Bổ sung ngày 10/10/2026: mục tiêu và lịch sử vận hành
+
+Học viên đặt mục tiêu riêng từng tuần, xem hoạt động hoàn thành lần đầu trong 8 tuần và bật/tắt lời nhắc tại tổng quan. Mục tiêu lưu theo tài khoản, có kiểm tra phiên sửa cũ và cảnh báo thay đổi chưa lưu. Admin có trang lịch sử phân trang/lọc cho duyệt thanh toán, đổi vai trò, khóa/mở tài khoản và trạng thái khóa học. Bản ghi giữ ảnh chụp tên/trạng thái và lưu cùng giao dịch. Phạm vi/API/giới hạn tại [Mục tiêu tuần và lịch sử admin](MUC_TIEU_TUAN_VA_LICH_SU_ADMIN.md).
+
+## Lấy lại mật khẩu — 10/10/2026
+
+Trang đăng nhập có liên kết Quên mật khẩu khi tính năng được bật. Người dùng nhập email và nhận phản hồi thống nhất; liên kết có hiệu lực 15 phút, dùng một lần. Form đổi mật khẩu kiểm tra nhập lại và giới hạn UTF-8, giữ nội dung khi lỗi mạng. Sau khi đổi, phiên cũ hết hiệu lực và người dùng đăng nhập lại bằng mật khẩu mới. Mở lại liên kết trong cùng tab đọc lại token, không giữ màn hình thành công cũ.
+
+Demo có hộp thư thử nghiệm riêng cho admin, hỗ trợ làm mới, mở tab mới và sao chép với phương án dự phòng. Thư chỉ nằm trong bộ nhớ, không gửi ra ngoài; triển khai thật dùng SMTP được cấu hình riêng. Chi tiết cấu hình/API và giới hạn tại [Lấy lại mật khẩu](LAY_LAI_MAT_KHAU.md). Đã kiểm tra desktop và mobile 390×844, lỗi mạng/thử lại, liên kết dùng lại và mất hiệu lực phiên cũ.

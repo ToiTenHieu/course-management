@@ -22,6 +22,8 @@ public class EnrollmentDetailResponse {
     private Integer lessonId;
     private String title;
     private Integer orderIndex;
+    private Integer chapterId;
+    private String chapterTitle;
     private Boolean isCompleted;
   }
 }

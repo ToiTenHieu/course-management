@@ -28,6 +28,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
   private final CourseRepository courseRepository;
   private final LessonRepository lessonRepository;
   private final LessonProgressRepository lessonProgressRepository;
+  private final com.example.course_management.service.WeeklyGoalService weeklyGoals;
 
   public EnrollmentServiceImpl(
       EnrollmentRepository enrollmentRepository,
@@ -35,7 +36,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
       LessonRepository lessonRepository,
       LessonProgressRepository lessonProgressRepository,
       UserRepository userRepository,
-      com.example.course_management.service.ProgressCalculator calculator) {
+      com.example.course_management.service.ProgressCalculator calculator,
+      com.example.course_management.service.WeeklyGoalService weeklyGoals) {
+    this.weeklyGoals = weeklyGoals;
     this.userRepository = userRepository;
     this.calculator = calculator;
     this.enrollmentRepository = enrollmentRepository;
@@ -135,10 +138,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                   return p;
                 });
 
+    boolean firstCompletion = !Boolean.TRUE.equals(progress.getIsCompleted());
     progress.setIsCompleted(true);
     if (progress.getCompletedAt() == null) progress.setCompletedAt(LocalDateTime.now());
     progress.setLastAccessedAt(LocalDateTime.now());
     lessonProgressRepository.save(progress);
+    if (firstCompletion) weeklyGoals.recordCompletion(actor.getUser().getUserId(), lessonId);
 
     recalculateProgress(enrollment);
 
@@ -262,6 +267,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                       .lessonId(l.getLessonId())
                       .title(l.getTitle())
                       .orderIndex(l.getOrderIndex())
+        .chapterId(l.getChapter() == null ? null : l.getChapter().getChapterId())
+        .chapterTitle(l.getChapter() == null ? null : l.getChapter().getTitle())
                       .isCompleted(completed)
                       .build();
                 })

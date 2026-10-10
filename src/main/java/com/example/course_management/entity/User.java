@@ -30,6 +30,12 @@ public class User {
   @Column(nullable = false)
   private String fullName;
 
+  @Column(columnDefinition = "TEXT")
+  private String biography;
+
+  @Column(length = 2000)
+  private String expertise;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Role role; // ADMIN, TEACHER, STUDENT

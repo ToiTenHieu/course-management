@@ -24,6 +24,10 @@ public class Lesson {
   @JoinColumn(name = "course_id", nullable = false)
   private Course course;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "chapter_id")
+  private CourseChapter chapter;
+
   @Column(name = "title", nullable = false, length = 255)
   private String title;
 

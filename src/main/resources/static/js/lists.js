@@ -333,9 +333,7 @@ export function wireDetailTabs(initial = "outcomes") {
     }
     const practice = document.querySelector("#practice");
     if (practice)
-      practice.hidden = !["#quiz", "#questions"].includes(
-        current.getAttribute("href"),
-      );
+      practice.hidden = !practice.contains(document.querySelector(current.getAttribute("href")));
     for (const link of document.querySelectorAll('.enroll-panel a[href]')) {
       const url = new URL(link.href);
       if (url.origin === location.origin && url.searchParams.has("next")) {

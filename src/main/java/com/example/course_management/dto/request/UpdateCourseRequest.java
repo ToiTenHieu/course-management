@@ -35,4 +35,10 @@ public class UpdateCourseRequest {
 
   @Size(max = 10000)
   private String learningOutcomes;
+
+  @Size(max = 10000)
+  private String prerequisites;
+
+  @Size(max = 10000)
+  private String targetAudience;
 }

@@ -9,6 +9,8 @@ public class LessonPreviewResponse {
   private Integer lessonId;
   private String title;
   private Integer orderIndex;
+  private Integer chapterId;
+  private String chapterTitle;
   private String preview;
   private Boolean hasVideoOrDocument;
 }

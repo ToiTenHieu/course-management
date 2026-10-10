@@ -43,6 +43,8 @@ public class SecurityConfig {
                         "/favicon.ico",
                         "/api/auth/login",
                         "/api/auth/register",
+                        "/api/auth/forgot-password",
+                        "/api/auth/reset-password",
                         "/api/auth/csrf",
                         "/api/auth/session",
                         "/api/auth/config")

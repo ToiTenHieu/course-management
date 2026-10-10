@@ -1,0 +1,297 @@
+{
+  "dataset": "foundation-content-v1",
+  "courses": [
+    {
+      "teacher": "teacher",
+      "courseTitle": "Java từ nền tảng đến ứng dụng",
+      "catalogGroup": "baseCourses",
+      "baseline": {
+        "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+        "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+        "lessons": [
+          {
+            "title": "Bắt đầu và chuẩn bị môi trường",
+            "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 1,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Các khái niệm cốt lõi",
+            "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 2,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Thực hành qua ví dụ",
+            "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 3,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Tổng kết và dự án nhỏ",
+            "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 4,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          }
+        ]
+      }
+    },
+    {
+      "teacher": "teacher",
+      "courseTitle": "Thiết kế giao diện với tư duy sản phẩm",
+      "catalogGroup": "baseCourses",
+      "baseline": {
+        "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+        "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+        "lessons": [
+          {
+            "title": "Bắt đầu và chuẩn bị môi trường",
+            "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 1,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Các khái niệm cốt lõi",
+            "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 2,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Thực hành qua ví dụ",
+            "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 3,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Tổng kết và dự án nhỏ",
+            "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 4,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          }
+        ]
+      }
+    },
+    {
+      "teacher": "teacher",
+      "courseTitle": "SQL: từ truy vấn đến phân tích dữ liệu",
+      "catalogGroup": "baseCourses",
+      "baseline": {
+        "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+        "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+        "lessons": [
+          {
+            "title": "Bắt đầu và chuẩn bị môi trường",
+            "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 1,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Các khái niệm cốt lõi",
+            "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 2,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Thực hành qua ví dụ",
+            "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 3,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Tổng kết và dự án nhỏ",
+            "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 4,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          }
+        ]
+      }
+    },
+    {
+      "teacher": "teacher",
+      "courseTitle": "Xây dựng website với HTML, CSS và JavaScript",
+      "catalogGroup": "baseCourses",
+      "baseline": {
+        "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+        "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+        "lessons": [
+          {
+            "title": "Bắt đầu và chuẩn bị môi trường",
+            "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 1,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Các khái niệm cốt lõi",
+            "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 2,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Thực hành qua ví dụ",
+            "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 3,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Tổng kết và dự án nhỏ",
+            "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 4,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          }
+        ]
+      }
+    },
+    {
+      "teacher": "teacher",
+      "courseTitle": "Git và quy trình làm việc nhóm",
+      "catalogGroup": "baseCourses",
+      "baseline": {
+        "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+        "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+        "lessons": [
+          {
+            "title": "Bắt đầu và chuẩn bị môi trường",
+            "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 1,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Các khái niệm cốt lõi",
+            "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 2,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Thực hành qua ví dụ",
+            "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 3,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Tổng kết và dự án nhỏ",
+            "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 4,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          }
+        ]
+      }
+    },
+    {
+      "teacher": "teacher",
+      "courseTitle": "Spring Boot: xây dựng API thực tế",
+      "catalogGroup": "baseCourses",
+      "baseline": {
+        "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
+        "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+        "lessons": [
+          {
+            "title": "Bắt đầu và chuẩn bị môi trường",
+            "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 1,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Các khái niệm cốt lõi",
+            "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 2,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Thực hành qua ví dụ",
+            "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 3,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          },
+          {
+            "title": "Tổng kết và dự án nhỏ",
+            "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+            "orderIndex": 4,
+            "videoUrl": null,
+            "published": true,
+            "contentFormat": "TEXT",
+            "contentRevision": 0
+          }
+        ]
+      }
+    },
+    {
+      "teacher": "teacher",
+      "courseTitle": "Nhập môn Java - Demo",
+      "baseline": {
+        "learningOutcomes": null
+      },
+      "replacement": {
+        "learningOutcomes": "Chạy chương trình Java đầu tiên\nĐọc bài hướng dẫn và hoàn thành luồng học thử trên nền tảng"
+      }
+    }
+  ]
+}

@@ -55,6 +55,7 @@ class ConfigurationTests {
   @Autowired DemoYouTubeSeeder youtube;
   @Autowired DemoCatalog catalog;
   @Autowired DemoCourseSeeder courseSeeder;
+  @Autowired DemoProfileSeeder demoProfiles;
 
   private User account(Role role) {
     var value = new User(); value.setUsername("config_" + UUID.randomUUID());
@@ -166,6 +167,70 @@ class ConfigurationTests {
     settings.save(changed(2048, 2, 3));
     assertEquals(2, resources.upload(lesson.getLessonId(), file, actor).size());
     assertEquals(3, quizzes.save(lesson.getLessonId(), quiz, actor).questions().size());
+  }
+
+  @Test
+  void newDemoAccountsAndCoursesIncludePublicProfilesAndPreparation() {
+    var teacher = demoAccounts.account("teacher");
+    assertEquals(catalog.account("teacher").biography(), teacher.getBiography());
+    assertEquals(catalog.account("teacher").expertise(), teacher.getExpertise());
+    var sample = catalog.data().baseCourses().getFirst();
+    var course = courseSeeder.create(sample);
+    assertEquals(sample.targetAudience(), course.getTargetAudience());
+    assertEquals(sample.prerequisites(), course.getPrerequisites());
+    teacher.setBiography("Edited introduction");
+    teacher.setExpertise("");
+    users.saveAndFlush(teacher);
+    assertEquals("Edited introduction", demoAccounts.account("teacher").getBiography());
+    assertEquals("", demoAccounts.account("teacher").getExpertise());
+  }
+
+  @Test
+  void demoProfileEnrichmentFillsExistingBlanksOnceAndPreservesEditsAndUnrelatedRecords() {
+    var teacher = demoAccounts.account("teacher_demo", "Existing teacher name", Role.TEACHER);
+    teacher.setBiography("Personal introduction"); users.saveAndFlush(teacher);
+    var sample = catalog.data().baseCourses().getFirst();
+    var old = new Course(); old.setTitle(sample.title()); old.setTeacher(teacher);
+    old.setCategory(sample.category()); old.setLevel(sample.level()); old.setStatus(CourseStatus.PUBLISHED); courses.saveAndFlush(old);
+    var edited = new Course(); edited.setTitle("Khóa nháp E2E hiện có"); edited.setTeacher(teacher);
+    edited.setCategory("Công nghệ"); edited.setLevel("Cơ bản"); edited.setTargetAudience("Audience entered by instructor");
+    edited.setPrerequisites("   "); courses.saveAndFlush(edited);
+    var unrelatedTeacher = account(Role.TEACHER);
+    var unrelated = new Course(); unrelated.setTitle(sample.title()); unrelated.setTeacher(unrelatedTeacher);
+    unrelated.setCategory(sample.category()); unrelated.setLevel(sample.level());
+    courses.saveAndFlush(unrelated);
+    long userCount = users.count(), courseCount = courses.count(), lessonCount = lessons.count();
+    demoProfiles.seed();
+    assertEquals("Personal introduction", teacher.getBiography());
+    assertEquals("Existing teacher name", teacher.getFullName());
+    assertEquals(catalog.account("teacher").expertise(), teacher.getExpertise());
+    assertEquals(sample.targetAudience(), old.getTargetAudience());
+    assertEquals(sample.prerequisites(), old.getPrerequisites());
+    assertEquals("Audience entered by instructor", edited.getTargetAudience());
+    assertFalse(edited.getPrerequisites().isBlank());
+    assertNull(unrelated.getTargetAudience()); assertNull(unrelated.getPrerequisites());
+    assertNull(unrelatedTeacher.getBiography());
+    old.setTargetAudience(""); teacher.setExpertise("");
+    courses.saveAndFlush(old); users.saveAndFlush(teacher);
+    courses.delete(edited); courses.flush();
+    demoProfiles.seed();
+    assertEquals("", old.getTargetAudience()); assertEquals("", teacher.getExpertise());
+    assertEquals(userCount, users.count()); assertEquals(courseCount - 1, courses.count());
+    assertEquals(lessonCount, lessons.count());
+    assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM demo_seed_runs WHERE dataset_key = 'demo-public-profiles-and-course-fit-v1'", Integer.class));
+  }
+
+  @Test
+  void demoProfileEnrichmentDoesNotCreateMissingAccountsOrChangeTheirRoles() {
+    long count = users.count();
+    demoProfiles.seed();
+    assertEquals(count, users.count());
+    assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM demo_seed_runs WHERE dataset_key = 'demo-public-profiles-and-course-fit-v1'", Integer.class));
+    var student = demoAccounts.account("teacher_demo", "Existing student", Role.STUDENT);
+    demoProfiles.seed();
+    assertEquals(Role.STUDENT, student.getRole()); assertNull(student.getBiography());
+    assertEquals(count + 1, users.count());
+    assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM demo_seed_runs WHERE dataset_key = 'demo-public-profiles-and-course-fit-v1'", Integer.class));
   }
 
   @Test

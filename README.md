@@ -4,17 +4,25 @@ Nền tảng quản lý khóa học trực tuyến phục vụ đồ án/demo. B
 
 ## Chức năng
 
+- Lấy lại mật khẩu: liên kết qua email dùng một lần, thời hạn 15 phút, thu hồi phiên cũ sau khi đổi. Demo có hộp thư riêng cho admin; triển khai thật hỗ trợ SMTP qua cấu hình. Xem [hướng dẫn lấy lại mật khẩu](docs/LAY_LAI_MAT_KHAU.md).
+
+- Mục tiêu học theo tuần: học viên chọn 1–50 bài, xem số bài hoàn thành lần đầu và lịch sử 8 tuần; nhắc tùy chọn tại tổng quan. Admin có lịch sử duyệt/từ chối thanh toán, đổi quyền, khóa tài khoản và trạng thái khóa học, lọc/phân trang. Xem [hướng dẫn mục tiêu và lịch sử](docs/MUC_TIEU_TUAN_VA_LICH_SU_ADMIN.md).
+
 - Khách: tìm khóa từ trang chủ, khám phá chủ đề, xem kết quả học tập/chương trình/học phí trước khi đăng nhập; giữ khóa đã chọn qua đăng nhập.
 - Học viên: dashboard tiếp tục học, tìm/lọc khóa đã đăng ký, đăng ký và thanh toán, học từng bài với chế độ tập trung, lưu ghi chú riêng và vị trí học trên máy chủ, theo dõi tiến độ, đánh giá, thông báo và hồ sơ.
+- Khóa quan tâm: học viên lưu/bỏ lưu từ thẻ hoặc chi tiết khóa, tìm kiếm và phân trang danh sách riêng; lưu theo tài khoản giữa thiết bị. Khách chọn lưu được chuyển qua đăng nhập và tiếp tục lưu khóa đã chọn trong cùng tab. Lưu khóa không đăng ký học hoặc tạo thanh toán.
 - Hỏi đáp theo bài: học viên đã đăng ký đặt câu hỏi, trả lời nhau và trao đổi nhiều lượt với giảng viên. Phản hồi có nhãn vai trò, phân trang và chống gửi trùng; giảng viên phụ trách/admin ẩn/hiện câu hỏi hoặc từng phản hồi. Thông báo dẫn tới đúng bài và câu hỏi, kể cả câu hỏi nằm ngoài trang đầu.
 - Quiz theo bài: giảng viên soạn 1–20 câu trắc nghiệm bốn lựa chọn, đáp án và giải thích; lưu nháp/xuất bản, đặt mức đạt. Học viên nhận điểm và phản hồi từng câu, xem lịch sử phân trang; giảng viên xem thống kê câu hay sai của phiên bản hiện tại. Mỗi lần sửa giữ đề cũ để lịch sử luôn đúng.
 - Giảng viên: dashboard riêng và checklist chuẩn bị khóa, sửa thông tin/mục tiêu của khóa phụ trách, thêm/sửa/xóa bài học, xuất bản/ẩn bài học. Học phí/phân công và xuất bản khóa do admin quản lý.
+- Hồ sơ giảng viên công khai: giới thiệu, chuyên môn và danh sách khóa đã xuất bản có phân trang. Giảng viên sửa tại **Hồ sơ của tôi**; trang chi tiết khóa có tab **Giảng viên** và **Đối tượng & chuẩn bị**, xem được trước đăng nhập.
 - Chi tiết thao tác: lỗi ngay dưới ô nhập, hiện/ẩn mật khẩu, số ký tự nội dung, trạng thái đang lưu; cảnh báo khi đóng hộp soạn có thay đổi chưa lưu. Giảng viên xem trước bài trước khi lưu. Menu điện thoại có nền che, hỗ trợ Escape và giữ focus trong điều hướng.
 - Admin: quản lý người dùng và khóa học, xuất bản/lưu trữ, xác nhận/từ chối thanh toán, tạo thông báo và xem báo cáo.
 - Quyền học được kiểm tra ở backend; danh sách chương trình của người chưa đăng ký chỉ trả metadata, không trả nội dung hoặc URL tài liệu.
 - Danh mục khóa học phân trang ở máy chủ, tìm theo tên/mô tả/giảng viên, lọc chủ đề, học phí và trạng thái; bộ lọc và trang hiện tại được lưu trong URL.
 
 Kịch bản trình diễn theo vai trò và checklist kiểm thử: [Luồng demo và test](docs/LUONG_DEMO_VA_TEST.md).
+
+Chi tiết nâng cấp: [Chương, bài tập và báo cáo thời gian](docs/CHUONG_BAI_TAP_VA_BAO_CAO.md). Giảng viên chia chương/kéo thả chương trình, xuất bản bài tập và chấm bài nộp; học viên nộp lời giải/tệp riêng tư; admin lọc hoạt động theo ngày và xuất CSV mở được bằng Excel.
 
 ## Chạy bản demo
 
@@ -55,6 +63,8 @@ Profile `demo` tạo tài khoản và nội dung mẫu. Profile mặc định kh
 
 Demo có quiz **Java: chuẩn bị môi trường** ở bài **Bắt đầu và chuẩn bị môi trường** của khóa Java. Chỉ tạo khi bài mẫu chưa có quiz, giữ nguyên đề giảng viên đã sửa. Đăng nhập giảng viên để soạn tại trang khóa → Quiz; học viên đã đăng ký làm bài ngay trong phòng học.
 
+Sáu khóa nền có 24 bài thực hành riêng theo chủ đề và sáu quiz tổng kết ở bài cuối (30 câu), lưu từ catalog vào database. Database demo cũ được bổ sung qua script nhập API có kiểm tra baseline, giữ các phần đã sửa và lịch sử bài; xem [cách nhập nội dung](docs/CAU_HINH_VA_DU_LIEU_DEMO.md#bổ-sung-nội-dung-cho-database-đã-khởi-tạo).
+
 Profile demo còn tạo bộ tình huống theo vai trò: 36 khóa mới (xuất bản/nháp/lưu trữ), 26 học viên `student_scenario_1`–`student_scenario_26`, giảng viên `teacher_scenario`, chương trình dài, 12 lượt đăng ký cho `student_demo`, thanh toán chờ/xác nhận/từ chối, tiến độ/ghi chú, 26 đánh giá, câu hỏi và bài làm quiz. Mật khẩu mẫu vẫn là `Demo123!`; bốn học viên mẫu cuối bị khóa để kiểm tra bộ lọc. Dữ liệu được tạo qua nghiệp vụ, lưu PostgreSQL. Flyway V8 ghi nhận bộ mẫu đã hoàn tất; khởi động lại không tạo trùng, không khôi phục dữ liệu đã xóa hoặc ghi đè phần đã sửa. Profile thông thường không chạy bộ mẫu.
 
 ## Cấu hình và database
@@ -76,7 +86,7 @@ node --check src/main/resources/static/js/questions.js
 node --check src/main/resources/static/js/quiz.js
 ```
 
-Bộ backend có 103 kiểm thử (97 ca nghiệp vụ/API, bốn ca cấu hình, một ca migration và một ca khởi động), dùng migration thật. Bộ đầy đủ đạt trên H2; các ca nghiệp vụ trước đó đã chạy trên PostgreSQL. Bao gồm lưu hồ sơ/vai trò đồng thời, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
+Bộ backend có 138 kiểm thử (125 ca nghiệp vụ/API, mười ca cấu hình, hai ca migration và một ca khởi động), dùng migration thật. Bộ đầy đủ đạt trên H2; các ca nghiệp vụ trước đó đã chạy trên PostgreSQL. Bao gồm lấy lại mật khẩu/token băm/thời hạn/dùng một lần/gửi lỗi/phiên cũ/đổi đồng thời, mục tiêu tuần/lưu đồng thời/lịch sử hoàn thành, lịch sử admin/quyền/bộ lọc/rollback, lưu hồ sơ/vai trò đồng thời, hồ sơ giảng viên công khai và đối tượng/yêu cầu khóa học, giới hạn tài khoản/thông báo, thứ tự bài ổn định, bản nháp/lịch sử nội dung, tài liệu riêng, báo cáo học viên theo khóa, quiz/phiên bản/chấm điểm/lịch sử riêng/nộp đồng thời, hỏi đáp/ẩn câu hỏi, phân trang, thông báo và rollback, khám phá công khai, phiên khách, chỉnh sửa metadata của giảng viên, ghi chú riêng/khôi phục bài, danh mục, bộ lọc, thống kê và giới hạn số truy vấn. Database kiểm thử được xóa dữ liệu trước mỗi ca; chỉ dùng database chuyên biệt `course_management_test`, tuyệt đối không trỏ test vào database demo hoặc dữ liệu cần giữ.
 
 Kiểm thử giao diện với Chromium: đăng nhập lỗi/thành công, đăng ký và học đến 100%, học khóa trả phí sau khi admin duyệt, chống thực thi HTML trong hồ sơ, màn hình điện thoại và soạn bài trên khóa nháp của giảng viên.
 
@@ -91,6 +101,12 @@ npm run test:e2e
 Nếu không đặt `E2E_BASE_URL`, Playwright tự chạy JAR đã build với profile demo; cần cấu hình database bằng biến môi trường. E2E tạo tài khoản/khóa học mẫu mới mỗi lần chạy, không xóa dữ liệu demo. Báo cáo HTML ở `output/e2e-report/index.html`; ca lỗi có screenshot và trace ở `output/e2e-results`.
 
 GitHub Actions chạy backend trên cả H2 và PostgreSQL, kiểm tra cú pháp JavaScript, rồi chạy sáu hành trình trên Chromium và lưu báo cáo. Xem [kế hoạch kiểm thử](docs/KE_HOACH_KIEM_THU.md) để đối chiếu lỗi, test và tiêu chí nghiệm thu.
+
+## Khóa quan tâm
+
+Học viên bấm biểu tượng trái tim trên thẻ khóa hoặc **Lưu khóa quan tâm** trong chi tiết khóa. Mở **Khóa quan tâm** trên điều hướng để tìm kiếm, xem từng trang 9 khóa và bỏ lưu. Danh sách riêng được lưu trong database, độc lập với đăng ký và thanh toán. Khóa DRAFT/ARCHIVED không xuất hiện trong danh sách hoặc API trạng thái; bản lưu vẫn giữ để hiện lại khi khóa được xuất bản. Xóa khóa hoặc tài khoản sẽ dọn bản lưu liên quan.
+
+API `/api/wishlist` chỉ dành cho STUDENT của phiên hiện tại: `GET ?search=&page=0&size=9` trả trang metadata khóa đang xuất bản; `GET /status?ids=1,2` kiểm tra tối đa 100 mã khóa; `PUT /{courseId}` lưu và `DELETE /{courseId}` bỏ lưu. Cả hai thao tác ghi yêu cầu CSRF, gửi lặp không tạo trùng. Flyway V17 thêm bảng và chỉ mục, không reset dữ liệu.
 
 ## Quy tắc nghiệp vụ
 
@@ -136,7 +152,7 @@ Các danh sách nghiệp vụ dùng `/api/lists`, phân trang từ 0, size 1–1
 
 ## Phạm vi bản nền
 
-Xem [đánh giá trải nghiệm theo từng vai trò và lộ trình sản phẩm](docs/PRODUCT_EXPERIENCE.md). Các danh sách nghiệp vụ đã phân trang ở máy chủ; chương trình/điều hướng bài vẫn tải metadata đầy đủ và phân trang trên giao diện. Quiz hiện hỗ trợ một đáp án đúng trong bốn lựa chọn; bài tập tự luận, lịch thi và tiêu chí cấp chứng nhận thuộc giai đoạn sau. Khi triển khai rộng cần thêm email xác minh/quên mật khẩu, thanh toán qua cổng, audit log và quan sát vận hành. Bản hiện tại dùng chuyển khoản đối chiếu thủ công.
+Xem [đánh giá trải nghiệm theo từng vai trò và lộ trình sản phẩm](docs/PRODUCT_EXPERIENCE.md). Các danh sách nghiệp vụ đã phân trang ở máy chủ; chương trình/điều hướng bài vẫn tải metadata đầy đủ và phân trang trên giao diện. Quiz hiện hỗ trợ một đáp án đúng trong bốn lựa chọn; bài tập tự luận hỗ trợ một bài nộp và chấm thủ công. Lịch thi và tiêu chí cấp chứng nhận thuộc giai đoạn sau. Khi triển khai rộng cần cấu hình SMTP cho lấy lại mật khẩu, thêm email xác minh, thanh toán qua cổng và quan sát vận hành. Bản hiện tại dùng chuyển khoản đối chiếu thủ công, có lịch sử các thay đổi trạng thái/quyền và duyệt thanh toán.
 
 ## Nội dung, video và tài liệu bài học
 

@@ -10,9 +10,11 @@ public interface LessonRepository extends JpaRepository<Lesson, Integer> {
   @Query("SELECT l.course.courseId FROM Lesson l WHERE l.lessonId = :id")
   java.util.Optional<Integer> findCourseId(Integer id);
 
+  @org.springframework.data.jpa.repository.EntityGraph(attributePaths = "chapter")
   @Query("SELECT l FROM Lesson l WHERE l.course.courseId = :courseId AND l.isPublished = true ORDER BY l.orderIndex, l.lessonId")
   List<Lesson> findByCourse_CourseIdAndIsPublishedTrueOrderByOrderIndex(@Param("courseId") Integer courseId);
 
+  @org.springframework.data.jpa.repository.EntityGraph(attributePaths = "chapter")
   @Query("SELECT l FROM Lesson l WHERE l.course.courseId = :courseId ORDER BY l.orderIndex, l.lessonId")
   List<Lesson> findByCourse_CourseIdOrderByOrderIndex(@Param("courseId") Integer courseId);
 

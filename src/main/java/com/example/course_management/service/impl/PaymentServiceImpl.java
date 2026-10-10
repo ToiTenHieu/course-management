@@ -29,6 +29,7 @@ public class PaymentServiceImpl implements PaymentService {
   private final PaymentRepository paymentRepository;
   private final CourseRepository courseRepository;
   private final EnrollmentRepository enrollmentRepository;
+  private final com.example.course_management.service.AuditLogService audit;
 
   public PaymentServiceImpl(
       PaymentRepository paymentRepository,
@@ -36,7 +37,9 @@ public class PaymentServiceImpl implements PaymentService {
       EnrollmentRepository enrollmentRepository,
       com.example.course_management.repository.UserRepository users,
       com.example.course_management.repository.NotificationRepository notifications,
-      com.example.course_management.config.LearningSettings settings) {
+      com.example.course_management.config.LearningSettings settings,
+      com.example.course_management.service.AuditLogService audit) {
+    this.audit = audit;
     this.users = users;
     this.notifications = notifications;
     this.paymentRepository = paymentRepository;
@@ -151,6 +154,7 @@ public class PaymentServiceImpl implements PaymentService {
         "Thanh toán đã được xác nhận. Bạn có thể bắt đầu học " + payment.getCourse().getTitle());
     notification.setTargetUrl("/course-detail.html?id=" + payment.getCourse().getCourseId());
     notifications.save(notification);
+    audit.record(actor, "PAYMENT_CONFIRMED", "PAYMENT", paymentId, payment.getCourse().getTitle(), "PENDING", "CONFIRMED");
 
     return toResponse(payment);
   }
@@ -171,6 +175,7 @@ public class PaymentServiceImpl implements PaymentService {
     payment.setStatus(PaymentStatus.REJECTED);
     payment.setConfirmedAt(LocalDateTime.now());
     payment.setConfirmedBy(actor.getUser());
+    audit.record(actor, "PAYMENT_REJECTED", "PAYMENT", paymentId, payment.getCourse().getTitle(), "PENDING", "REJECTED");
     return toResponse(paymentRepository.save(payment));
   }
 

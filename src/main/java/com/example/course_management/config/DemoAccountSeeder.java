@@ -28,7 +28,12 @@ public class DemoAccountSeeder {
   @Transactional
   public User account(String key) {
     var spec = catalog.account(key);
-    return account(spec.username(), spec.fullName(), spec.role());
+    return users.findByUsername(spec.username()).orElseGet(() -> {
+      var user = account(spec.username(), spec.fullName(), spec.role());
+      user.setBiography(spec.biography());
+      user.setExpertise(spec.expertise());
+      return users.saveAndFlush(user);
+    });
   }
 
   @Transactional

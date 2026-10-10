@@ -2346,6 +2346,32 @@ html {
 .detail-tabs a {
   padding: 6px 0;
 }
+.profile-biography {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+.profile-lines {
+  padding-left: 22px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.profile-lines li + li {
+  margin-top: 8px;
+}
+.teacher-profile h3,
+#instructor h3,
+#audience h3 {
+  margin-top: 24px;
+}
+.teacher-profile .instructor h3,
+#instructor .instructor h3 {
+  margin: 0 0 6px;
+}
+#teacherProfileStatus {
+  display: block;
+  margin-top: 12px;
+}
 .learning-benefits {
   gap: 20px;
 }
@@ -3327,6 +3353,7 @@ body:has(dialog[open]) { overflow: hidden; }
 .structured-content ul, .structured-content ol { padding-left: 1.6rem; }
 .structured-content pre { overflow-x: auto; background: #172d2a; color: #eff7f4; padding: 1rem; border-radius: 12px; white-space: pre; }
 .structured-content code { font-family: Consolas, monospace; font-size: .92em; }
+.structured-content pre code { background: transparent; color: inherit; padding: 0; border-radius: 0; }
 .structured-content img { max-width: 100%; height: auto; border-radius: 12px; display: block; margin: 1rem 0; }
 .lesson-video { aspect-ratio: 16/9; margin-bottom: 1.4rem; }
 .lesson-video iframe { width: 100%; height: 100%; border: 0; border-radius: 12px; }
@@ -3365,6 +3392,18 @@ dialog > form {
 .payment-qr img { max-width: 100%; height: auto; background: white; }
 .payment-qr .hint { margin-bottom: 0; }
 .payment-qr button { margin-top: 12px; }
+.course-card { position: relative; }
+.wishlist-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.wishlist-card {
+  position: absolute; z-index: 1; top: 12px; right: 12px;
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line);
+  background: #fff; color: #104b43; box-shadow: 0 2px 8px #173b2414; cursor: pointer;
+}
+.wishlist-toggle[aria-pressed="true"] { color: #8f2345; background: #fff3f6; }
+.wishlist-toggle[aria-pressed="true"] svg { fill: currentColor; }
+.wishlist-toggle:disabled { opacity: .65; cursor: wait; }
+.wishlist-toggle:focus-visible { outline: 3px solid #104b43; outline-offset: 3px; }
+.wishlist-detail { margin: 0 0 12px; }
 .draft-status p { margin: 0 0 6px; }
 .lesson-history { margin-top: 20px; }
 .lesson-history summary { cursor: pointer; font-weight: 600; }
@@ -3388,3 +3427,93 @@ dialog > form {
 .student-report-metrics dt { color: #64776e; margin-bottom: 6px; }
 .student-report-metrics dd { margin: 0; overflow-wrap: anywhere; }
 @media (max-width: 600px) { .student-report-metrics { grid-template-columns: 1fr; } .student-report-heading { align-items: flex-start; } }
+.curriculum-editor { margin: 16px 0; border: 1px solid #d9e5df; border-radius: 12px; padding: 14px; }
+.curriculum-editor > summary { cursor: pointer; font-weight: 700; }
+.curriculum-group { border: 1px solid #d9e5df; border-radius: 10px; margin: 12px 0; padding: 12px; }
+.curriculum-group-heading { display: flex; align-items: end; gap: 12px; justify-content: space-between; }
+.curriculum-group-heading label { flex: 1; min-width: 0; }
+.curriculum-drop { min-height: 48px; padding-top: 10px; }
+.curriculum-item { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 0; border-top: 1px solid #e5ece8; }
+.curriculum-item strong { flex: 1; min-width: 100px; overflow-wrap: anywhere; }
+.curriculum-item .row-actions { flex-wrap: wrap; }
+.curriculum-item select { max-width: 210px; }
+.drag-handle { cursor: grab; font-size: 24px; }
+.chapter-label { display: block; color: #237451; font-weight: 600; }
+.lesson-assignment { margin-top: 24px; padding-top: 18px; border-top: 1px solid #d9e5df; }
+.lesson-assignment form { display: grid; gap: 12px; }
+.lesson-assignment input, .lesson-assignment textarea { max-width: 100%; }
+.assignment-submission { border: 1px solid #d9e5df; border-radius: 12px; padding: 16px; margin-top: 16px; }
+.assignment-submission h4 { margin: 0; }
+.assignment-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.assignment-grade { background: #f4f8f5; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+.checkbox-label { display: flex; gap: 8px; align-items: center; }
+.checkbox-label input[type="checkbox"] { width: auto; }
+.report-filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.report-filters label { flex: 1; min-width: 140px; }
+.table-scroll { overflow-x: auto; }
+.activity-report table { width: 100%; border-collapse: collapse; min-width: 680px; }
+.activity-report th, .activity-report td { text-align: left; padding: 12px; border-bottom: 1px solid #d9e5df; }
+@media (max-width: 600px) {
+  .curriculum-group-heading { align-items: stretch; flex-direction: column; }
+  .curriculum-item .row-actions { width: 100%; }
+  .curriculum-item select { flex: 1; min-width: 0; max-width: 100%; }
+  .report-filters .btn { width: 100%; }
+}
+.weekly-goal { margin-bottom: 28px; }
+.goal-count { font-size: 28px; color: var(--green, #104b43); white-space: nowrap; }
+.goal-count small { font-size: 15px; font-weight: 500; }
+.goal-progress { height: 10px; border-radius: 10px; background: #e6efeb; overflow: hidden; }
+.goal-progress span { display: block; height: 100%; background: #167568; border-radius: inherit; }
+.goal-nudge { margin: 14px 0; }
+.goal-controls { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 16px; }
+.goal-controls label:first-child { max-width: 180px; }
+.goal-controls .goal-checkbox { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.goal-checkbox input { width: 18px; height: 18px; }
+.weekly-goal details { margin-top: 16px; }
+.weekly-goal summary { cursor: pointer; font-weight: 600; }
+.goal-history { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 12px; margin-top: 16px; }
+.goal-history div { display: grid; gap: 6px; padding: 14px; background: #f5f8f6; border-radius: 10px; }
+.goal-history small, .audit-table small { color: #5d6c67; }
+.audit-table td strong, .audit-table td span, .audit-table td small { display: block; overflow-wrap: anywhere; }
+.audit-table td { vertical-align: top; min-width: 140px; }
+.audit-table td:nth-child(3) { min-width: 240px; }
+.audit-filters label:last-of-type { flex: 1; min-width: 200px; }
+@media (max-width: 600px) {
+  .weekly-goal .section-heading { align-items: flex-start; flex-wrap: wrap; }
+  .goal-controls { align-items: stretch; }
+  .goal-controls label:first-child { max-width: none; width: 100%; }
+  .goal-controls .goal-checkbox { width: 100%; }
+  .goal-controls button { flex: 1; }
+  .audit-filters label:last-of-type { min-width: 0; }
+  #auditLog .table-scroll { overflow: visible; }
+  .audit-table, .audit-table tbody { display: block; width: 100%; }
+  .audit-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .audit-table tr { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #e6efeb; border-radius: 10px; margin-bottom: 14px; }
+  .audit-table td, .audit-table td:nth-child(3) { display: block; min-width: 0; padding: 12px; white-space: normal; }
+  .audit-table td:nth-child(3), .audit-table td:nth-child(4) { grid-column: 1 / -1; }
+  .audit-table td::before { display: block; font-size: 12px; color: #5d6c67; margin-bottom: 6px; }
+  .audit-table td:nth-child(1)::before { content: 'Thời điểm'; }
+  .audit-table td:nth-child(2)::before { content: 'Người thực hiện'; }
+  .audit-table td:nth-child(3)::before { content: 'Thao tác / đối tượng'; }
+  .audit-table td:nth-child(4)::before { content: 'Thay đổi'; }
+}
+.recovery-page { min-height: 100vh; padding: 40px 20px; display: flex; align-items: center; flex-direction: column; gap: 28px; }
+.recovery-card { width: 100%; max-width: 520px; padding: 32px; }
+.recovery-card h1 { font-size: 30px; margin: 14px 0; }
+.recovery-card .eyebrow { display: block; margin-top: 24px; }
+.recovery-card [data-error] { color: var(--danger); }
+.recovery-card [data-status] { color: var(--brand); }
+.recovery-new-link { display: block; margin-top: 18px; }
+.recovery-demo-note { background: #f5f8f6; padding: 14px; margin-top: 22px; border-radius: 10px; }
+.recovery-mails { display: grid; gap: 20px; margin-top: 24px; }
+.recovery-mail { border: 1px solid var(--line); border-radius: 12px; padding: 22px; overflow-wrap: anywhere; }
+.recovery-mail .section-heading { align-items: flex-start; flex-wrap: wrap; }
+.recovery-mail .eyebrow { overflow-wrap: anywhere; }
+.recovery-mail [data-copy] { margin: 8px 0 0 8px; }
+@media(max-width: 600px) {
+  .recovery-page { padding: 26px 16px; gap: 20px; }
+  .recovery-card { padding: 24px 20px; }
+  .recovery-mail { padding: 16px; }
+  .recovery-mail .btn { width: 100%; }
+  .recovery-mail [data-copy] { margin-left: 0; }
+}

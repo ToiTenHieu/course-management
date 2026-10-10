@@ -9,4 +9,6 @@ public class LessonSummaryResponse {
   private Integer lessonId;
   private String title;
   private Integer orderIndex;
+    private Integer chapterId;
+    private String chapterTitle;
 }

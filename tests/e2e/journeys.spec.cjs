@@ -1,5 +1,6 @@
 const { test, expect } = require("@playwright/test");
 const password = "Journey123!";
+const demoCatalog = require("../../src/main/resources/demo/catalog.json");
 let sequence = 0;
 test.beforeEach(async ({ page }) => {
   const errors = [];
@@ -86,12 +87,9 @@ test("Đăng ký, học khóa miễn phí đến 100% và giữ tiến độ sau
   await course(page, "Java từ nền tảng đến ứng dụng");
   await page.getByRole("button", { name: "Đăng ký miễn phí" }).click();
   await page.getByRole("link", { name: /Vào phòng học/ }).click();
-  const titles = [
-    "Bắt đầu và chuẩn bị môi trường",
-    "Các khái niệm cốt lõi",
-    "Thực hành qua ví dụ",
-    "Tổng kết và dự án nhỏ",
-  ];
+  const fixture = demoCatalog.baseCourses.find(c => c.title === "Java từ nền tảng đến ứng dụng");
+  const titles = fixture.lessons.filter(l => l.published).sort((a,b) => a.orderIndex-b.orderIndex).map(l => l.title);
+  expect(titles.length).toBeGreaterThan(0);
   for (let i = 0; i < titles.length; i++) {
     await page
       .locator("#lessonNav")
@@ -100,7 +98,7 @@ test("Đăng ký, học khóa miễn phí đến 100% và giữ tiến độ sau
     await expect(page.locator("#lessonContent h2")).toHaveText(titles[i]);
     await page.getByRole("button", { name: "Đánh dấu hoàn thành" }).click();
     await expect(page.locator(".progress-label strong")).toHaveText(
-      `${(i + 1) * 25}%`,
+      `${Number(((i + 1) * 100 / titles.length).toFixed(2))}%`,
     );
   }
   await page.reload();
@@ -144,9 +142,11 @@ test("Khóa trả phí chỉ mở sau khi admin duyệt thanh toán", async ({
     await expect(row).toContainText("Đã xác nhận");
     await page.reload();
     await page.getByRole("link", { name: /Vào phòng học/ }).click();
-    await expect(page.locator(".lesson-text")).toContainText(
-      "Đây là nội dung mẫu",
-    );
+    const fixture = demoCatalog.baseCourses.find(c => c.title === "Thiết kế giao diện với tư duy sản phẩm");
+    const firstParagraph = fixture.lessons.filter(l => l.published).sort((a,b) => a.orderIndex-b.orderIndex)[0]
+      .textContent.split(/\r?\n/).find(line => line.trim() && !line.startsWith("#"));
+    expect(firstParagraph).toBeTruthy();
+    await expect(page.locator(".lesson-text")).toContainText(firstParagraph);
   } finally {
     await context.close();
   }

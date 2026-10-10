@@ -12,7 +12,9 @@
       "username": "teacher_demo",
       "fullName": "Nguyễn Minh Anh",
       "role": "TEACHER",
-      "quickLogin": true
+      "quickLogin": true,
+      "biography": "Hồ sơ giảng viên mẫu của Course Management. Giảng viên hướng dẫn các khóa lập trình, dữ liệu và công cụ làm việc qua ví dụ nhỏ, bài thực hành và phần hỏi đáp theo bài. Người học có thể bắt đầu từ kiến thức nền tảng rồi từng bước áp dụng vào sản phẩm của mình.",
+      "expertise": "Java và Spring Boot\nHTML, CSS, JavaScript và React\nSQL và phân tích dữ liệu\nGit, kiểm thử và công cụ phát triển\nTư duy sản phẩm và trình bày ý tưởng"
     },
     {
       "key": "admin",
@@ -26,7 +28,9 @@
       "username": "teacher_scenario",
       "fullName": "Trần Hà Phương (mẫu)",
       "role": "TEACHER",
-      "quickLogin": false
+      "quickLogin": false,
+      "biography": "Hồ sơ giảng viên mẫu của Course Management. Giảng viên đồng hành với người học qua các khóa Python, thiết kế sản phẩm và kỹ năng làm việc. Các bài mẫu tập trung vào thực hành từng bước, tự đánh giá kết quả và trao đổi khi gặp vướng mắc.",
+      "expertise": "Python thực hành\nFigma và thiết kế giao diện\nQuản lý dự án và phối hợp nhóm\nTiếng Anh giao tiếp"
     }
   ],
   "baseCourses": [
@@ -38,43 +42,105 @@
       "durationHours": 12,
       "teacher": "teacher",
       "status": "PUBLISHED",
-      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
-      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "description": "Thực hành Java qua chương trình dòng lệnh quản lý kết quả học tập: chuẩn bị JDK, xử lý biến và điều kiện, tách hàm, dùng lớp và danh sách. Mỗi bài có ví dụ chạy được, bài tập và kết quả để tự đối chiếu. Nội dung mẫu phục vụ đồ án.",
+      "learningOutcomes": "Biên dịch và chạy chương trình Java từ dòng lệnh\nDùng điều kiện, vòng lặp và hàm để xử lý điểm\nMô hình hóa học viên bằng lớp và lưu trong danh sách\nHoàn thành chương trình tính điểm, kiểm tra dữ liệu và tìm học viên",
       "lessons": [
         {
           "title": "Bắt đầu và chuẩn bị môi trường",
-          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "textContent": "## Mục tiêu\nChạy một chương trình Java và phân biệt tệp mã nguồn với tệp đã biên dịch.\n\n## Chuẩn bị\nCài JDK 21 hoặc mới hơn. Mở terminal và chạy `java -version`, `javac -version`. Cả hai lệnh phải nhận diện được; nếu chỉ có `java`, kiểm tra lại JDK và PATH. Tạo thư mục thực hành và lưu tệp `HelloCourse.java` bằng UTF-8.\n\n```java\npublic class HelloCourse {\n    public static void main(String[] args) {\n        String learner = \"An\";\n        System.out.println(\"Xin chao, \" + learner);\n    }\n}\n```\n\n## Chạy và đối chiếu\nTrong thư mục chứa tệp, chạy `javac -encoding UTF-8 HelloCourse.java`, rồi `java HelloCourse`. Kết quả: `Xin chao, An`. Tên lớp public phải trùng tên tệp, kể cả chữ hoa. Sau biên dịch sẽ xuất hiện `HelloCourse.class`.\n\n## Thực hành\n1. Thay tên học viên và chạy lại cả hai lệnh.\n2. Thêm một dòng giới thiệu khóa học.\n3. Cố ý bỏ dấu chấm phẩy, đọc vị trí lỗi, sửa rồi biên dịch lại.\n\n## Tự kiểm tra\nGiải thích vì sao sửa tệp `.java` nhưng không biên dịch lại có thể vẫn chạy kết quả cũ. Lưu hai lệnh chạy và kết quả vào README của bài thực hành.",
           "orderIndex": 1,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Các khái niệm cốt lõi",
-          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Biến, điều kiện và vòng lặp trong Java",
+          "textContent": "## Mục tiêu\nTính điểm trung bình và xử lý một danh sách điểm với điều kiện hợp lệ.\n\n```java\npublic class ScorePractice {\n    public static void main(String[] args) {\n        double[] scores = {8.0, 6.0, 9.0};\n        double total = 0;\n        for (double score : scores) {\n            if (score < 0 || score > 10) {\n                throw new IllegalArgumentException(\"Diem ngoai khoang 0-10\");\n            }\n            total += score;\n        }\n        double average = total / scores.length;\n        System.out.println(average);\n        System.out.println(average >= 5 ? \"Dat\" : \"Can on tap\");\n    }\n}\n```\n\n## Giải thích\n`double` giữ phần thập phân. Vòng lặp duyệt từng phần tử; `total += score` cộng vào tổng. `||` đúng khi ít nhất một điều kiện đúng. Trong ví dụ, trung bình là khoảng 7.6667 và trạng thái là `Dat`. Nếu mảng rỗng, không được chia cho số phần tử; cần kiểm tra trước.\n\n## Thực hành\n1. Thêm kiểm tra `scores.length == 0` và báo lỗi rõ ràng.\n2. Đếm số điểm từ 8 trở lên.\n3. Thử bộ điểm `{5, 5}`, `{0, 10}`, `{11}` và mảng rỗng.\n\n## Tự kiểm tra\nHai bộ đầu có trung bình 5 và đạt; hai bộ sau phải bị từ chối. Không làm tròn trước khi so sánh ngưỡng đạt. So sánh chuỗi bằng `.equals()` khi bổ sung tên học viên.",
           "orderIndex": 2,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Thực hành qua ví dụ",
-          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Tách hàm và mô hình hóa học viên",
+          "textContent": "## Mục tiêu\nTách phép tính khỏi việc hiển thị và dùng một lớp để giữ dữ liệu học viên.\n\n```java\npublic class LearnerPractice {\n    record Learner(String name, double score) {}\n\n    static boolean passed(Learner learner) {\n        return learner.score() >= 5;\n    }\n\n    public static void main(String[] args) {\n        Learner learner = new Learner(\"An\", 8);\n        System.out.println(learner.name() + \": \" + passed(learner));\n    }\n}\n```\n\n## Giải thích\n`record` khai báo kiểu dữ liệu với các trường và hàm đọc tương ứng. `passed` nhận một học viên và trả về boolean; nó không tự in kết quả. Ví dụ in `An: true`. Tách hàm giúp thử nhiều đầu vào mà không sao chép điều kiện.\n\n## Thực hành\n1. Viết hàm `validate` từ chối tên trống, điểm âm và điểm lớn hơn 10.\n2. Dùng `java.util.List.of` tạo ba học viên: An 8, Bình 4, Chi 5.\n3. Duyệt danh sách, gọi validate, rồi in tên và trạng thái.\n\n## Tự kiểm tra\nAn và Chi đạt, Bình cần ôn tập. Hãy thử tên chỉ có khoảng trắng; dùng `isBlank()` cho tên. Nếu muốn thêm học viên sau khi tạo danh sách, dùng `ArrayList`; danh sách từ `List.of` không hỗ trợ thêm/xóa.",
           "orderIndex": 3,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Tổng kết và dự án nhỏ",
-          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Dự án Java: báo cáo kết quả học tập",
+          "textContent": "## Mục tiêu\nGhép điều kiện, hàm và danh sách thành chương trình báo cáo dòng lệnh.\n\n## Dữ liệu thực hành\n```text\nAn,8\nBinh,4\nChi,5\nDung,9\n```\n\nTạo danh sách học viên từ bốn dòng trên. Trong bản đầu có thể khai báo danh sách trong chương trình thực hành; ở bước mở rộng, đọc từ tệp CSV để thay dữ liệu mà không sửa chương trình. Đây là dữ liệu của bài tập, không phải dữ liệu tài khoản trong nền tảng.\n\n## Yêu cầu\n1. Tách hàm kiểm tra tên và điểm, tính trung bình, lọc học viên đạt.\n2. In số học viên, trung bình và danh sách cần ôn tập.\n3. Tìm tên không phân biệt hoa/thường và báo rõ khi không tìm thấy.\n4. Xử lý danh sách rỗng trước khi tính trung bình.\n\n## Kết quả đối chiếu\nVới bốn học viên: tổng số 4, trung bình 6.5, số đạt 3; Bình cần ôn tập. Tìm `chi` nhận học viên Chi. Tên lạ nhận thông báo không tìm thấy, không phát sinh lỗi truy cập danh sách.\n\n## Bàn giao\nNộp mã nguồn và README có lệnh biên dịch/chạy, dữ liệu thử, kết quả thực tế và một lỗi đã sửa. Mở rộng tùy chọn: dùng `Files.readAllLines` đọc UTF-8, báo số dòng khi một dòng CSV sai định dạng.",
           "orderIndex": 4,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         }
       ],
-      "quiz": null
+      "quiz": {
+        "title": "Java: biến, hàm và danh sách",
+        "passPercentage": 70,
+        "questions": [
+          {
+            "prompt": "Lệnh nào biên dịch HelloCourse.java?",
+            "options": [
+              "java HelloCourse.java.class",
+              "javac HelloCourse.java",
+              "java compile HelloCourse",
+              "compile HelloCourse"
+            ],
+            "correctIndex": 1,
+            "explanation": "javac biên dịch mã nguồn .java; java HelloCourse chạy lớp đã biên dịch."
+          },
+          {
+            "prompt": "Điểm 5 được kiểm tra bằng score >= 5 cho kết quả gì?",
+            "options": [
+              "false",
+              "Lỗi biên dịch",
+              "true",
+              "null"
+            ],
+            "correctIndex": 2,
+            "explanation": "Toán tử >= bao gồm giá trị tại ngưỡng, nên 5 đạt điều kiện."
+          },
+          {
+            "prompt": "Cách nào so sánh nội dung hai chuỗi Java?",
+            "options": [
+              "a == b trong mọi trường hợp",
+              "a = b",
+              "a.equals(b)",
+              "a + b"
+            ],
+            "correctIndex": 2,
+            "explanation": "equals so sánh nội dung; == so sánh tham chiếu đối với đối tượng."
+          },
+          {
+            "prompt": "Trước khi chia tổng điểm cho số học viên cần kiểm tra gì?",
+            "options": [
+              "Danh sách không rỗng",
+              "Tên tệp có dấu cách",
+              "Tất cả điểm đều bằng 10",
+              "Sắp xếp tên giảm dần"
+            ],
+            "correctIndex": 0,
+            "explanation": "Danh sách rỗng có số phần tử 0; cần xử lý riêng trước phép chia."
+          },
+          {
+            "prompt": "Muốn thêm học viên sau khi khởi tạo, nên dùng cấu trúc nào?",
+            "options": [
+              "String duy nhất",
+              "List.of rồi add",
+              "boolean",
+              "ArrayList"
+            ],
+            "correctIndex": 3,
+            "explanation": "ArrayList hỗ trợ thêm/xóa phần tử; List.of tạo danh sách không thể sửa cấu trúc."
+          }
+        ]
+      },
+      "targetAudience": "Người mới bắt đầu lập trình và muốn học Java có hệ thống.\nSinh viên cần nền tảng để xây dựng ứng dụng nhỏ.",
+      "prerequisites": "Máy tính có thể cài JDK 21 và một trình soạn mã như IntelliJ IDEA hoặc VS Code.\nBiết tạo thư mục, lưu tệp và sử dụng trình duyệt; không cần biết Java trước."
     },
     {
       "title": "Thiết kế giao diện với tư duy sản phẩm",
@@ -84,43 +150,105 @@
       "durationHours": 8,
       "teacher": "teacher",
       "status": "PUBLISHED",
-      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
-      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "description": "Thiết kế luồng đăng ký khóa học từ nhu cầu người dùng đến wireframe và prototype: xác định tác vụ, sắp xếp thông tin, xây dựng form rõ ràng và kiểm tra khả năng sử dụng. Bài thực hành dùng Figma hoặc bản vẽ giấy, có tiêu chí tự đánh giá. Nội dung mẫu phục vụ đồ án.",
+      "learningOutcomes": "Xác định người dùng, tác vụ và tiêu chí thành công\nVẽ luồng chọn khóa và đăng ký không bỏ sót trạng thái lỗi\nThiết kế wireframe có thứ bậc thông tin và nhãn form rõ ràng\nKiểm tra prototype, ghi nhận vấn đề và đề xuất cải tiến",
       "lessons": [
         {
           "title": "Bắt đầu và chuẩn bị môi trường",
-          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "textContent": "## Mục tiêu\nXác định một vấn đề cụ thể trước khi vẽ giao diện.\n\n## Tình huống\nMột học viên muốn tìm khóa SQL phù hợp và biết phải chuẩn bị gì trước khi đăng ký. Chưa có nghiên cứu người dùng thật; các giả định của bài tập phải được ghi là giả định, không biến thành kết luận.\n\n## Thực hành\n1. Tạo trang Figma hoặc chuẩn bị giấy, đặt tên dự án: Chọn khóa học.\n2. Viết tác vụ: tìm khóa SQL, kiểm tra yêu cầu đầu vào, đăng ký.\n3. Liệt kê thông tin cần có: trình độ, mục tiêu, chương trình, học phí và cách học.\n4. Viết ba câu hỏi phỏng vấn mở, chẳng hạn: Lần gần nhất bạn chọn khóa học như thế nào?\n\n## Sản phẩm\nMột trang ghi vấn đề, giả định, câu hỏi cần kiểm chứng và tiêu chí thành công. Ví dụ tiêu chí: người thử tìm được học phí và yêu cầu đầu vào mà không cần người hướng dẫn chỉ vị trí.\n\n## Tự kiểm tra\nTránh câu hỏi dẫn dắt như Giao diện này đẹp đúng không. Tách điều quan sát được khỏi ý kiến của người thiết kế. Chưa dùng số liệu tỷ lệ thành công khi chưa có phiên thử.",
           "orderIndex": 1,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Các khái niệm cốt lõi",
-          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Luồng tác vụ và thứ bậc thông tin",
+          "textContent": "## Mục tiêu\nSắp xếp thông tin theo quyết định của học viên.\n\n## Luồng đề xuất\nDanh mục → Chi tiết khóa → Đăng nhập khi cần → Đăng ký → Phòng học. Với khóa có phí, thêm bước tạo yêu cầu thanh toán và chờ xác nhận trước khi học. Vẽ cả trường hợp không có kết quả tìm kiếm và lỗi tải dữ liệu.\n\n## Thực hành\n1. Vẽ sơ đồ gồm màn hình, hành động và kết quả của mỗi bước.\n2. Tạo wireframe chi tiết khóa: tên và giới thiệu, mục tiêu, chương trình, yêu cầu, học phí, nút đăng ký.\n3. Đặt hành động chính rõ ràng; đặt liên kết phụ ở vị trí không cạnh tranh với hành động chính.\n4. Bổ sung thông báo cho trạng thái đã đăng ký và đang chờ thanh toán.\n\n## Tự kiểm tra\nNgười thử phải phân biệt được xem thông tin và đăng ký học. Mỗi nút có nhãn mô tả hành động. Trạng thái chờ xác nhận không được trình bày như thanh toán đã thành công. Thử wireframe ở chiều rộng điện thoại trước khi thêm màu và hiệu ứng.",
           "orderIndex": 2,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Thực hành qua ví dụ",
-          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Form, lỗi và khả năng tiếp cận",
+          "textContent": "## Mục tiêu\nThiết kế form giúp người dùng biết cần nhập gì và sửa lỗi ở đâu.\n\n## Mẫu form\nForm đăng ký có nhãn Email, Mật khẩu, Xác nhận mật khẩu; hướng dẫn ở gần trường nhập. Khi email sai định dạng, hiển thị lỗi cạnh trường và giữ các giá trị hợp lệ. Không chỉ dùng màu đỏ để truyền đạt lỗi.\n\n## Thực hành\n1. Vẽ form ở trạng thái trống, đang nhập, lỗi và đang gửi.\n2. Bổ sung nút hiện/ẩn mật khẩu có tên rõ nghĩa.\n3. Thiết kế focus nhìn thấy được và thứ tự Tab theo luồng đọc.\n4. Ghi chú yêu cầu kỹ thuật: nhãn gắn với ô nhập, lỗi gắn với trường, focus đến lỗi đầu tiên.\n\n## Tự kiểm tra\nẨn placeholder vẫn biết tên mỗi trường. Dùng bàn phím vẫn tiếp cận được nút gửi. Lỗi mạng có cách thử lại và giữ nội dung. Nút đang gửi không cho gửi lặp. Đánh giá tương phản bằng công cụ kiểm tra, không suy luận bằng mắt rằng màu đã đạt chuẩn.",
           "orderIndex": 3,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Tổng kết và dự án nhỏ",
-          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Dự án thiết kế: kiểm tra prototype chọn khóa",
+          "textContent": "## Mục tiêu\nKiểm tra một prototype bằng tác vụ thay vì hỏi người thử có thích thiết kế không.\n\n## Yêu cầu\nLiên kết ba màn hình danh mục, chi tiết và đăng ký. Có một khóa miễn phí, một khóa trả phí, trạng thái tìm kiếm rỗng và thông báo lỗi form.\n\n## Phiên thử\n1. Đưa tác vụ: tìm khóa SQL cho người mới, nêu học phí và yêu cầu đầu vào.\n2. Để người thử thao tác; ghi vị trí do dự, nhấp sai và thông tin chưa rõ.\n3. Đưa tác vụ đăng ký rồi xử lý một lỗi email.\n4. Tổng hợp vấn đề theo mức cản trở hoàn thành tác vụ.\n\n## Bàn giao\nNộp prototype, ghi chép đã ẩn thông tin cá nhân và bảng vấn đề/đề xuất sửa. Nếu chỉ tự thử, ghi rõ là tự đánh giá; không báo đó là kết quả nghiên cứu người dùng.\n\n## Tự kiểm tra\nMỗi đề xuất cải tiến phải dẫn đến một quan sát hoặc một giả định cần kiểm chứng. Chọn sửa vấn đề khiến tác vụ thất bại trước các thay đổi trang trí.",
           "orderIndex": 4,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         }
       ],
-      "quiz": null
+      "quiz": {
+        "title": "Thiết kế: luồng, form và kiểm tra tác vụ",
+        "passPercentage": 70,
+        "questions": [
+          {
+            "prompt": "Trước khi vẽ giao diện nên xác định điều gì?",
+            "options": [
+              "Màu yêu thích của người thiết kế",
+              "Vấn đề và tác vụ của người dùng",
+              "Số hiệu ứng tối đa",
+              "Tên của tất cả font chữ"
+            ],
+            "correctIndex": 1,
+            "explanation": "Tác vụ và vấn đề định hướng cấu trúc giao diện và cách đánh giá kết quả."
+          },
+          {
+            "prompt": "Câu hỏi nào ít dẫn dắt người thử nhất?",
+            "options": [
+              "Bạn thích màu này đúng không?",
+              "Nút này rõ ràng đúng không?",
+              "Giao diện này rất dễ dùng phải không?",
+              "Lần gần nhất bạn chọn khóa học như thế nào?"
+            ],
+            "correctIndex": 3,
+            "explanation": "Câu hỏi về hành vi đã xảy ra giúp thu thập trải nghiệm mà không gợi đáp án mong muốn."
+          },
+          {
+            "prompt": "Khi form có lỗi email, cách phản hồi nào phù hợp?",
+            "options": [
+              "Chỉ đổi viền thành đỏ",
+              "Xóa toàn bộ form",
+              "Giữ dữ liệu và ghi lỗi gần trường email",
+              "Ẩn nút gửi vĩnh viễn"
+            ],
+            "correctIndex": 2,
+            "explanation": "Lỗi cụ thể tại trường giúp sửa nhanh; giữ các giá trị hợp lệ tránh nhập lại."
+          },
+          {
+            "prompt": "Trong kiểm tra prototype nên ưu tiên quan sát gì?",
+            "options": [
+              "Khả năng hoàn thành tác vụ",
+              "Số màu trong logo",
+              "Ý kiến đoán trước của người thiết kế",
+              "Số layer trong Figma"
+            ],
+            "correctIndex": 0,
+            "explanation": "Khả năng hoàn thành tác vụ cho biết giao diện có hỗ trợ nhu cầu đã xác định hay không."
+          },
+          {
+            "prompt": "Nếu chưa có phiên thử người dùng, kết quả tự thử nên ghi thế nào?",
+            "options": [
+              "Nghiên cứu đã chứng minh",
+              "Tự đánh giá và giả định cần kiểm chứng",
+              "100% người dùng hài lòng",
+              "Dữ liệu khách hàng thật"
+            ],
+            "correctIndex": 1,
+            "explanation": "Tự đánh giá không thay thế nghiên cứu; cần ghi đúng nguồn và giới hạn của bằng chứng."
+          }
+        ]
+      },
+      "targetAudience": "Người muốn thiết kế giao diện dựa trên nhu cầu của người dùng.\nLập trình viên hoặc người làm sản phẩm cần trao đổi rõ hơn với nhóm thiết kế.",
+      "prerequisites": "Máy tính có trình duyệt và tài khoản Figma miễn phí để thực hành.\nChuẩn bị một ý tưởng ứng dụng hoặc website; không yêu cầu kinh nghiệm thiết kế."
     },
     {
       "title": "SQL: từ truy vấn đến phân tích dữ liệu",
@@ -130,43 +258,105 @@
       "durationHours": 10,
       "teacher": "teacher",
       "status": "PUBLISHED",
-      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
-      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "description": "Học SQL bằng bộ dữ liệu đăng ký khóa học nhỏ: tạo bảng PostgreSQL, lọc và sắp xếp, nối bảng, tổng hợp doanh thu và kiểm tra kết quả. Mỗi truy vấn có số liệu đối chiếu; dự án cuối tạo báo cáo không đếm trùng. Nội dung mẫu phục vụ đồ án.",
+      "learningOutcomes": "Tạo và nạp dữ liệu mẫu trong database thực hành riêng\nViết SELECT, WHERE và ORDER BY có thứ tự ổn định\nDùng JOIN và GROUP BY để báo cáo đăng ký\nPhân biệt COUNT(*) với COUNT(cột) và kiểm tra ảnh hưởng của NULL",
       "lessons": [
         {
           "title": "Bắt đầu và chuẩn bị môi trường",
-          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "textContent": "## Mục tiêu\nTạo bộ dữ liệu SQL nhỏ để dùng xuyên suốt khóa.\n\n## Chuẩn bị\nDùng database thực hành riêng, không chạy câu lệnh tạo/xóa bảng trong database của ứng dụng. Mở công cụ SQL kết nối PostgreSQL rồi chạy:\n\n```sql\nCREATE TABLE practice_courses (\n  id INTEGER PRIMARY KEY,\n  title VARCHAR(100) NOT NULL,\n  price INTEGER NOT NULL CHECK (price >= 0)\n);\nCREATE TABLE practice_enrollments (\n  id INTEGER PRIMARY KEY,\n  learner VARCHAR(100) NOT NULL,\n  course_id INTEGER NOT NULL REFERENCES practice_courses(id)\n);\nINSERT INTO practice_courses VALUES\n  (1, 'Java', 0), (2, 'SQL', 199000), (3, 'Git', 99000);\nINSERT INTO practice_enrollments VALUES\n  (1, 'An', 1), (2, 'Binh', 2), (3, 'Chi', 2);\nSELECT * FROM practice_courses ORDER BY id;\n```\n\n## Đối chiếu\nCó ba khóa và ba lượt đăng ký. SQL có hai lượt, Git chưa có lượt nào. Giữ tệp tạo dữ liệu để mở một database thực hành mới khi muốn chạy lại; không chèn lại trên bộ dữ liệu đã có vì khóa chính sẽ trùng.\n\n## Thực hành\nThử chèn một khóa với giá âm và một đăng ký có course_id không tồn tại. Cả hai phải bị từ chối do ràng buộc. Trong chế độ transaction thủ công, rollback transaction lỗi trước khi tiếp tục.",
           "orderIndex": 1,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Các khái niệm cốt lõi",
-          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Lọc, sắp xếp và phân trang dữ liệu SQL",
+          "textContent": "## Mục tiêu\nChọn đúng tập dữ liệu và giữ thứ tự ổn định khi xem từng trang.\n\n```sql\nSELECT id, title, price\nFROM practice_courses\nWHERE price > 0\nORDER BY price ASC, id ASC;\n```\n\n## Đối chiếu\nKết quả gồm Git 99000 rồi SQL 199000. `WHERE` chọn dòng trước khi sắp xếp; tiêu chí id làm thứ tự rõ ràng khi hai khóa cùng giá.\n\n```sql\nSELECT id, title\nFROM practice_courses\nORDER BY id\nLIMIT 2 OFFSET 0;\n```\n\nTrang đầu gồm Java và SQL. Đổi OFFSET thành 2 để nhận Git. Truy vấn phân trang không có ORDER BY không đảm bảo các trang có thứ tự như mong muốn.\n\n## Thực hành\n1. Tìm khóa miễn phí bằng `price = 0`.\n2. Tìm tên có SQL bằng `title ILIKE '%sql%'`.\n3. Chọn khóa có giá từ 99000 đến 199000, bao gồm hai đầu.\n\n## Tự kiểm tra\nKết quả lần lượt là Java, SQL, rồi Git và SQL. Phân biệt `IS NULL` với `= NULL`; trong ứng dụng, truyền tham số truy vấn thay vì ghép chuỗi từ người dùng.",
           "orderIndex": 2,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Thực hành qua ví dụ",
-          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Nối bảng và tổng hợp lượt đăng ký",
+          "textContent": "## Mục tiêu\nĐếm lượt đăng ký, kể cả khóa chưa có học viên.\n\n```sql\nSELECT c.id, c.title, COUNT(e.id) AS enrollment_count\nFROM practice_courses c\nLEFT JOIN practice_enrollments e ON e.course_id = c.id\nGROUP BY c.id, c.title\nORDER BY c.id;\n```\n\n## Đối chiếu\nJava có 1, SQL có 2, Git có 0 lượt. LEFT JOIN giữ khóa Git; khi không có đăng ký tương ứng, các cột của e là NULL. `COUNT(e.id)` bỏ qua NULL nên cho 0. `COUNT(*)` sẽ đếm dòng giữ lại bởi LEFT JOIN và cho 1 ở Git, không đúng với mục tiêu đếm đăng ký.\n\n## Thực hành\n1. Đổi LEFT JOIN thành JOIN, giải thích vì sao Git biến mất.\n2. Thêm `HAVING COUNT(e.id) >= 2` để chọn khóa có ít nhất hai đăng ký.\n3. Liệt kê tên học viên và tên khóa bằng JOIN, sắp theo e.id.\n\n## Tự kiểm tra\nHAVING nhận SQL. WHERE lọc dòng trước khi nhóm; HAVING lọc các nhóm sau tổng hợp. Khi nối thêm bảng một-nhiều, kiểm tra xem một đăng ký có bị nhân thành nhiều dòng trước khi tính tổng hay không.",
           "orderIndex": 3,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Tổng kết và dự án nhỏ",
-          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Dự án SQL: báo cáo đăng ký và học phí",
+          "textContent": "## Mục tiêu\nTạo báo cáo có số liệu đối chiếu và diễn giải đúng ý nghĩa.\n\n```sql\nSELECT c.id, c.title,\n       COUNT(e.id) AS enrollment_count,\n       c.price * COUNT(e.id) AS listed_fee_total\nFROM practice_courses c\nLEFT JOIN practice_enrollments e ON e.course_id = c.id\nGROUP BY c.id, c.title, c.price\nORDER BY c.id;\n```\n\n## Kết quả\nJava: 1 lượt, học phí niêm yết tương ứng 0. SQL: 2 lượt, 398000. Git: 0 lượt, 0. Tổng học phí niêm yết của các lượt đăng ký là 398000. Đây không phải doanh thu đã nhận: bộ dữ liệu chưa có thanh toán hay hoàn tiền.\n\n## Yêu cầu\n1. Lưu ba truy vấn: danh sách khóa có phí, danh sách học viên/khóa, báo cáo đếm đăng ký.\n2. Viết truy vấn tổng số đăng ký; kết quả phải là 3.\n3. Thử thêm một khóa chưa có đăng ký và bảo đảm báo cáo vẫn hiển thị 0.\n4. Ghi rõ quy tắc tính và giả định trong README.\n\n## Tự kiểm tra\nKhông gọi tổng giá niêm yết là tiền đã thu. Không sửa dữ liệu để làm truy vấn sai trông có vẻ đúng. Dùng đối chiếu số dòng và tổng độc lập để phát hiện JOIN đếm trùng.",
           "orderIndex": 4,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         }
       ],
-      "quiz": null
+      "quiz": {
+        "title": "SQL: lọc, JOIN và tổng hợp",
+        "passPercentage": 70,
+        "questions": [
+          {
+            "prompt": "Điều kiện nào chọn khóa miễn phí?",
+            "options": [
+              "price = 0",
+              "price > 0",
+              "price IS NOT NULL",
+              "title = 0"
+            ],
+            "correctIndex": 0,
+            "explanation": "Khóa miễn phí được thể hiện bằng giá 0 trong bộ dữ liệu thực hành."
+          },
+          {
+            "prompt": "Muốn giữ cả khóa chưa có đăng ký, dùng kiểu JOIN nào từ bảng khóa?",
+            "options": [
+              "CROSS JOIN",
+              "INNER JOIN bắt buộc có dòng khớp",
+              "LEFT JOIN",
+              "Không kiểu JOIN nào làm được"
+            ],
+            "correctIndex": 2,
+            "explanation": "LEFT JOIN giữ mọi dòng bên trái và đặt các cột bên phải là NULL khi không khớp."
+          },
+          {
+            "prompt": "Sau LEFT JOIN, cách nào đếm 0 cho khóa không có đăng ký?",
+            "options": [
+              "COUNT(*)",
+              "COUNT(e.id)",
+              "SUM(c.id)",
+              "COUNT(c.title)"
+            ],
+            "correctIndex": 1,
+            "explanation": "COUNT(e.id) bỏ qua NULL; COUNT(*) vẫn đếm dòng khóa được giữ lại."
+          },
+          {
+            "prompt": "Điều kiện lọc nhóm có ít nhất hai đăng ký đặt ở đâu?",
+            "options": [
+              "LIMIT",
+              "ORDER BY",
+              "SELECT title",
+              "HAVING COUNT(e.id) >= 2"
+            ],
+            "correctIndex": 3,
+            "explanation": "HAVING lọc sau GROUP BY; WHERE không dùng trực tiếp phép tổng hợp đó."
+          },
+          {
+            "prompt": "Tổng giá niêm yết nhân số đăng ký có chứng minh tiền đã nhận không?",
+            "options": [
+              "Có trong mọi trường hợp",
+              "Có nếu tổng dương",
+              "Không, cần dữ liệu thanh toán đã xác nhận",
+              "Có nếu dùng LEFT JOIN"
+            ],
+            "correctIndex": 2,
+            "explanation": "Lượt đăng ký và học phí niêm yết không cho biết trạng thái nhận tiền hay hoàn tiền."
+          }
+        ]
+      },
+      "targetAudience": "Người mới làm quen với cơ sở dữ liệu và truy vấn SQL.\nSinh viên, lập trình viên hoặc người làm báo cáo cần đọc và xử lý dữ liệu dạng bảng.",
+      "prerequisites": "Máy tính có PostgreSQL hoặc một môi trường thực hành SQL tương đương.\nBiết thao tác với bảng dữ liệu; chưa cần kinh nghiệm viết SQL."
     },
     {
       "title": "Xây dựng website với HTML, CSS và JavaScript",
@@ -176,43 +366,105 @@
       "durationHours": 16,
       "teacher": "teacher",
       "status": "PUBLISHED",
-      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
-      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "description": "Xây dựng trang giới thiệu khóa học bằng HTML, CSS và JavaScript: tạo cấu trúc ngữ nghĩa, bố cục responsive, tương tác bộ lọc và form đăng ký. Ví dụ chạy trực tiếp trong trình duyệt; dự án cuối kiểm tra trên điện thoại và bằng bàn phím. Nội dung mẫu phục vụ đồ án.",
+      "learningOutcomes": "Tạo trang HTML có heading, liên kết và nhãn form đúng vai trò\nDùng CSS Grid và media query cho bố cục nhiều kích thước\nĐọc dữ liệu từ form và cập nhật giao diện bằng DOM\nKiểm tra trang trên điện thoại, bàn phím và khi nhập dữ liệu sai",
       "lessons": [
         {
           "title": "Bắt đầu và chuẩn bị môi trường",
-          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "textContent": "## Mục tiêu\nTạo trang HTML có nội dung đọc được trước khi thêm CSS hay JavaScript.\n\nTạo thư mục với `index.html`, `style.css`, `app.js`. Lưu các tệp bằng UTF-8, rồi mở index.html trong trình duyệt.\n\n```html\n<!doctype html>\n<html lang=\"vi\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Khóa học đầu tiên</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n  <script src=\"app.js\" defer></script>\n</head>\n<body>\n  <main>\n    <h1>HTML và CSS cho người mới</h1>\n    <p>Tạo một trang giới thiệu có cấu trúc rõ ràng.</p>\n    <a href=\"#register\">Đến phần đăng ký</a>\n    <section id=\"register\">\n      <h2>Đăng ký nhận thông tin</h2>\n    </section>\n  </main>\n</body>\n</html>\n```\n\n## Thực hành\n1. Thêm danh sách ba mục tiêu bằng ul và li.\n2. Thêm ảnh có alt mô tả nội dung; nếu không có ảnh, giữ bản văn bản.\n3. Kiểm tra liên kết đưa tới phần đăng ký.\n\n## Tự kiểm tra\nTiêu đề tab trình duyệt đúng, chữ tiếng Việt không lỗi và trang có h1 rõ ràng. Heading thể hiện cấu trúc nội dung; không chọn cấp heading chỉ vì muốn cỡ chữ lớn hơn.",
           "orderIndex": 1,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Các khái niệm cốt lõi",
-          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "CSS Grid và bố cục responsive",
+          "textContent": "## Mục tiêu\nCho thẻ khóa học tự đổi số cột theo độ rộng màn hình.\n\n```css\n* { box-sizing: border-box; }\nbody { margin: 0; font-family: system-ui, sans-serif; line-height: 1.6; }\nmain { max-width: 960px; margin: auto; padding: 24px; }\n.courses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }\n.course { padding: 16px; border: 1px solid #ccc; border-radius: 12px; overflow-wrap: anywhere; }\nimg { max-width: 100%; height: auto; }\n@media (max-width: 640px) {\n  .courses { grid-template-columns: 1fr; }\n}\n```\n\nÁp dụng courses cho phần chứa ba article có class course. Ở màn hình rộng, có ba cột; ở độ rộng 390px, có một cột.\n\n## Thực hành\n1. Thêm tên khóa dài để kiểm tra xuống dòng.\n2. Thử chiều rộng 390px, 640px và 960px bằng công cụ trình duyệt.\n3. Dùng Tab kiểm tra focus của liên kết và nút vẫn nhìn thấy.\n\n## Tự kiểm tra\nKhông có thanh cuộn ngang ngoài ý muốn. Không dùng chiều rộng cố định lớn hơn màn hình cho toàn trang. Giữ nội dung theo thứ tự hợp lý trong HTML, không chỉ đổi thứ tự bằng CSS.",
           "orderIndex": 2,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Thực hành qua ví dụ",
-          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "JavaScript: xử lý form bằng DOM",
+          "textContent": "## Mục tiêu\nĐọc tên nhập vào và phản hồi an toàn bằng văn bản.\n\nThêm vào HTML:\n```html\n<form id=\"signup\">\n  <label for=\"name\">Tên của bạn</label>\n  <input id=\"name\" name=\"name\" required maxlength=\"100\">\n  <button type=\"submit\">Xem lời chào</button>\n</form>\n<p id=\"message\" role=\"status\"></p>\n```\n\nThêm vào app.js:\n```javascript\nconst form = document.querySelector('#signup');\nconst message = document.querySelector('#message');\nform.addEventListener('submit', (event) => {\n  event.preventDefault();\n  const name = new FormData(form).get('name').trim();\n  message.textContent = name ? `Xin chào, ${name}` : 'Hãy nhập tên.';\n});\n```\n\n## Thực hành\n1. Nhập An: nhận lời chào, trang không tải lại.\n2. Nhập toàn khoảng trắng: nhận hướng dẫn nhập tên.\n3. Nhập `<b>An</b>`: chuỗi hiển thị nguyên văn, không thành chữ đậm.\n\n## Tự kiểm tra\ntextContent hiển thị dữ liệu như văn bản. Không chèn nội dung người dùng vào innerHTML. Bài này chỉ hiển thị trên trang; muốn lưu đăng ký thật cần gửi API và xử lý kết quả máy chủ.",
           "orderIndex": 3,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Tổng kết và dự án nhỏ",
-          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Dự án web: trang chọn khóa và form",
+          "textContent": "## Mục tiêu\nHoàn thành trang nhỏ với cấu trúc, bố cục và hành vi có thể kiểm tra.\n\n## Yêu cầu\n1. Tạo ba thẻ khóa, mỗi thẻ có tên, mục tiêu, trình độ và học phí.\n2. Có bộ lọc miễn phí, hiển thị trạng thái không có kết quả.\n3. Có form nhận tên và email, nhãn rõ ràng, kiểm tra required và type=email.\n4. Hiển thị thông báo sau khi xử lý bằng textContent.\n\n## Dữ liệu mẫu\n```json\n[\n  {\"title\":\"HTML cơ bản\",\"price\":0},\n  {\"title\":\"CSS bố cục\",\"price\":99000},\n  {\"title\":\"JavaScript DOM\",\"price\":149000}\n]\n```\n\nTách dữ liệu khỏi hàm render trong bài thực hành. Nếu mở rộng đọc courses.json bằng fetch, dùng máy chủ HTTP cục bộ thay vì file://. Form demo chưa gửi máy chủ phải ghi rõ là mô phỏng, không báo đăng ký tài khoản thành công.\n\n## Nghiệm thu\nLọc miễn phí còn một khóa. Không lọc có ba khóa. Ở 390px không tràn ngang; bàn phím đi qua liên kết, bộ lọc, trường nhập và nút gửi. Email sai bị chặn, tên chứa thẻ HTML hiển thị nguyên văn.\n\n## Bàn giao\nNộp ba tệp mã nguồn, dữ liệu mẫu và README mô tả cách mở trang, tiêu chí đã kiểm tra, phần còn chưa kết nối API.",
           "orderIndex": 4,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         }
       ],
-      "quiz": null
+      "quiz": {
+        "title": "Web: cấu trúc, responsive và DOM",
+        "passPercentage": 70,
+        "questions": [
+          {
+            "prompt": "Thẻ nào mô tả tiêu đề chính của trang?",
+            "options": [
+              "div",
+              "h1",
+              "span",
+              "br"
+            ],
+            "correctIndex": 1,
+            "explanation": "h1 thể hiện tiêu đề chính; CSS điều chỉnh cách hiển thị mà không đổi vai trò ngữ nghĩa."
+          },
+          {
+            "prompt": "Để nhãn gắn với input id=name, dùng thuộc tính nào trên label?",
+            "options": [
+              "href=\"name\"",
+              "class=\"name\"",
+              "for=\"name\"",
+              "src=\"name\""
+            ],
+            "correctIndex": 2,
+            "explanation": "for khớp id liên kết nhãn với trường nhập."
+          },
+          {
+            "prompt": "Cách nào hiển thị tên do người dùng nhập như văn bản?",
+            "options": [
+              "element.textContent = name",
+              "element.innerHTML = name",
+              "eval(name)",
+              "document.write(name)"
+            ],
+            "correctIndex": 0,
+            "explanation": "textContent không phân tích chuỗi thành HTML."
+          },
+          {
+            "prompt": "event.preventDefault() trong submit giúp làm gì?",
+            "options": [
+              "Xóa mọi dữ liệu máy chủ",
+              "Tắt bàn phím",
+              "Biến form thành API",
+              "Ngăn hành vi submit mặc định để tự xử lý"
+            ],
+            "correctIndex": 3,
+            "explanation": "Có thể đọc dữ liệu và phản hồi bằng JavaScript mà không gửi form theo hành vi mặc định."
+          },
+          {
+            "prompt": "Khi form chỉ mô phỏng trên trình duyệt nên hiển thị gì?",
+            "options": [
+              "Đã tạo tài khoản thật",
+              "Đã thu tiền",
+              "Đây là mô phỏng, chưa lưu trên máy chủ",
+              "Máy chủ luôn thành công"
+            ],
+            "correctIndex": 2,
+            "explanation": "Phản hồi cần đúng với việc đã xảy ra; hiển thị cục bộ không chứng minh dữ liệu đã lưu."
+          }
+        ]
+      },
+      "targetAudience": "Người mới muốn tự tạo website đầu tiên.\nHọc viên cần hiểu cách HTML, CSS và JavaScript phối hợp trên trình duyệt.",
+      "prerequisites": "Máy tính có VS Code và trình duyệt hiện đại.\nBiết tạo, lưu và mở tệp; không yêu cầu kiến thức lập trình trước."
     },
     {
       "title": "Git và quy trình làm việc nhóm",
@@ -222,43 +474,105 @@
       "durationHours": 6,
       "teacher": "teacher",
       "status": "PUBLISHED",
-      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
-      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "description": "Thực hành Git trên repository riêng: theo dõi thay đổi, tạo commit nhỏ, làm việc với nhánh và giải quyết xung đột. Dự án cuối mô phỏng hai người cùng sửa tài liệu, giữ lịch sử và kiểm tra trước khi hợp nhất. Nội dung mẫu phục vụ đồ án.",
+      "learningOutcomes": "Phân biệt working tree, staging area và commit\nTạo nhánh, commit và hợp nhất thay đổi\nĐọc git diff và xử lý xung đột có kiểm tra\nViết README và lịch sử commit giúp người khác tiếp tục công việc",
       "lessons": [
         {
           "title": "Bắt đầu và chuẩn bị môi trường",
-          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "textContent": "## Mục tiêu\nTạo repository thực hành và lưu phiên bản đầu tiên.\n\n```text\ngit --version\nmkdir git-practice\ncd git-practice\ngit init -b main\ngit config user.name \"Practice Learner\"\ngit config user.email \"practice@example.invalid\"\n```\n\nHai lệnh config trên áp dụng trong repository này. Tạo README.md với một dòng giới thiệu dự án rồi chạy:\n\n```text\ngit status\ngit add README.md\ngit diff --cached\ngit commit -m \"Add project introduction\"\ngit log --oneline\n```\n\n## Giải thích\nWorking tree chứa tệp đang sửa. Staging area chứa phiên bản được chọn cho commit. Commit giữ snapshot và lịch sử. `git add` không gửi tệp lên GitHub.\n\n## Thực hành\nSửa README sau khi git add, rồi xem cả git diff và git diff --cached. Nội dung chưa add lần nữa không nằm trong commit tiếp theo.\n\n## Tự kiểm tra\nSau commit đầu, git status không báo thay đổi chưa lưu. Dùng repository thực hành, không chạy các lệnh này trong thư mục dự án Course Management.",
           "orderIndex": 1,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Các khái niệm cốt lõi",
-          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Nhánh và commit theo tác vụ",
+          "textContent": "## Mục tiêu\nTách một thay đổi khỏi nhánh chính và kiểm tra trước khi hợp nhất.\n\n```text\ngit switch -c docs/course-guide\n```\n\nThêm mục Cách chạy vào README.md, sau đó:\n```text\ngit diff\ngit add README.md\ngit diff --cached\ngit commit -m \"Document practice commands\"\ngit switch main\ngit merge docs/course-guide\ngit log --oneline --graph --all\n```\n\n## Giải thích\nNhánh là tên trỏ tới một dòng lịch sử. Chuyển nhánh thay đổi phiên bản tệp tương ứng; commit trên nhánh tác vụ không tự cập nhật main. Sau merge, main có nội dung hướng dẫn mới.\n\n## Thực hành\n1. Tạo nhánh khác để bổ sung danh sách việc cần làm.\n2. Chỉ stage tệp thuộc tác vụ đó.\n3. Viết thông điệp commit mô tả kết quả thay đổi.\n\n## Tự kiểm tra\nTrước commit, git diff --cached chỉ chứa những thay đổi bạn định lưu. Tránh commit mật khẩu hoặc file cấu hình cục bộ; dùng .gitignore cho tệp sinh ra và cấu hình riêng.",
           "orderIndex": 2,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Thực hành qua ví dụ",
-          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Giải quyết xung đột khi hợp nhất",
+          "textContent": "## Mục tiêu\nHiểu và xử lý hai thay đổi cùng một dòng.\n\nTrong repository thực hành sạch, tạo shared.txt có dòng `Lich hoc: thu Hai`, add và commit. Tạo nhánh schedule, đổi dòng thành `Lich hoc: thu Ba` rồi commit. Về main, đổi cùng dòng thành `Lich hoc: thu Tu` và commit. Chạy `git merge schedule`.\n\n## Đọc xung đột\nGit đánh dấu các phần bằng `<<<<<<<`, `=======`, `>>>>>>>`. Một phía là nội dung hiện tại, phía kia là thay đổi đang hợp nhất. Git không tự quyết định lịch nào đúng.\n\n## Thực hành\n1. Chọn nội dung cuối sau khi đối chiếu yêu cầu; ví dụ `Lich hoc: thu Ba va thu Tu`.\n2. Xóa toàn bộ dấu xung đột, đọc lại tệp.\n3. Chạy git add shared.txt, rồi git commit.\n4. Kiểm tra git status và git log --oneline --graph.\n\n## Tự kiểm tra\nTệp không còn dấu xung đột, lịch đã thống nhất và không có merge đang dang dở. Nếu chưa muốn hợp nhất, git merge --abort quay lại trước lần merge; lưu thay đổi riêng trước khi bắt đầu bài tập.",
           "orderIndex": 3,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Tổng kết và dự án nhỏ",
-          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Dự án Git: quy trình nhóm cho tài liệu khóa học",
+          "textContent": "## Mục tiêu\nMô phỏng quy trình thay đổi có thể đọc và kiểm tra.\n\n## Yêu cầu\n1. Có README ghi cách chạy bài thực hành và quy ước làm việc.\n2. Tạo hai nhánh: cập nhật chương trình và cập nhật lịch học.\n3. Mỗi nhánh có commit nhỏ, thông điệp rõ, không chứa cấu hình riêng.\n4. Hợp nhất về main, xử lý một xung đột có ghi lý do chọn nội dung cuối.\n\n## Kiểm tra trước khi bàn giao\n```text\ngit status\ngit diff --check\ngit log --oneline --graph --all\n```\n\ngit diff --check kiểm tra một số lỗi khoảng trắng trong thay đổi chưa commit, không thay thế việc đọc nội dung hay chạy kiểm thử. Muốn kiểm tra một commit cụ thể có thể dùng git show --check.\n\n## Bàn giao\nNộp repository thực hành hoặc liên kết kho riêng cho bài tập, kèm danh sách nhánh/commit và giải thích xung đột đã xử lý. Nếu chưa có remote, ghi rõ mới thực hành cục bộ. Khi có remote, đọc lại diff trước push và tạo yêu cầu review trước hợp nhất.\n\n## Tự kiểm tra\nNgười khác đọc README có thể chạy lại bài tập. Main chứa cả hai tác vụ và lịch sử không mất. Không dùng reset --hard để né xung đột trong bài này.",
           "orderIndex": 4,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         }
       ],
-      "quiz": null
+      "quiz": {
+        "title": "Git: staging, nhánh và xung đột",
+        "passPercentage": 70,
+        "questions": [
+          {
+            "prompt": "git add README.md thực hiện việc gì?",
+            "options": [
+              "Gửi tệp lên GitHub",
+              "Xóa lịch sử",
+              "Đưa phiên bản hiện tại của tệp vào staging area",
+              "Tạo tài khoản Git"
+            ],
+            "correctIndex": 2,
+            "explanation": "git add chọn nội dung cho commit; push mới gửi commit tới remote."
+          },
+          {
+            "prompt": "Lệnh nào xem thay đổi đã được stage?",
+            "options": [
+              "git diff --cached",
+              "git remote -v",
+              "git branch -d",
+              "git init"
+            ],
+            "correctIndex": 0,
+            "explanation": "git diff --cached hiển thị khác biệt giữa staging area và commit hiện tại."
+          },
+          {
+            "prompt": "Lệnh nào tạo và chuyển sang nhánh feature?",
+            "options": [
+              "git commit feature",
+              "git switch -c feature",
+              "git add feature",
+              "git log feature"
+            ],
+            "correctIndex": 1,
+            "explanation": "switch -c tạo nhánh mới rồi chuyển working tree sang nhánh đó."
+          },
+          {
+            "prompt": "Khi merge có xung đột, cần làm gì trước khi commit?",
+            "options": [
+              "Giữ nguyên mọi dấu xung đột",
+              "Xóa repository",
+              "Push ngay",
+              "Chọn nội dung đúng, bỏ dấu xung đột và kiểm tra kết quả"
+            ],
+            "correctIndex": 3,
+            "explanation": "Cần quyết định nội dung theo yêu cầu rồi kiểm tra; Git chỉ báo các thay đổi không tự kết hợp được."
+          },
+          {
+            "prompt": "git diff --check có thay thế kiểm thử nghiệp vụ không?",
+            "options": [
+              "Có trong mọi dự án",
+              "Có nếu không có lỗi khoảng trắng",
+              "Không, nó chỉ kiểm tra một số vấn đề trong diff",
+              "Có nếu dùng GitHub"
+            ],
+            "correctIndex": 2,
+            "explanation": "Kiểm tra diff không chứng minh chương trình chạy đúng hay tài liệu đáp ứng yêu cầu."
+          }
+        ]
+      },
+      "targetAudience": "Sinh viên và lập trình viên muốn quản lý phiên bản mã nguồn.\nThành viên nhóm cần phối hợp thay đổi và xử lý xung đột khi làm dự án.",
+      "prerequisites": "Cài Git và chuẩn bị một thư mục dự án để thực hành.\nCó tài khoản GitHub miễn phí và biết thao tác tệp trên máy tính."
     },
     {
       "title": "Spring Boot: xây dựng API thực tế",
@@ -268,43 +582,105 @@
       "durationHours": 20,
       "teacher": "teacher",
       "status": "PUBLISHED",
-      "description": "Học từng bước qua ví dụ cụ thể, bài thực hành và dự án nhỏ. Khóa học giúp bạn xây dựng nền tảng vững chắc và tự tin áp dụng kiến thức.",
-      "learningOutcomes": "Hiểu các khái niệm nền tảng\nÁp dụng kiến thức vào bài thực hành\nHoàn thành một dự án nhỏ của riêng bạn",
+      "description": "Xây dựng API quản lý khóa học nhỏ với Spring Boot: controller và DTO, validation, service, JPA repository và phản hồi lỗi. Thực hành bắt đầu từ endpoint đọc, tiến tới tạo dữ liệu và kiểm thử các trường hợp không hợp lệ. Nội dung mẫu phục vụ đồ án.",
+      "learningOutcomes": "Tạo endpoint HTTP với controller và DTO tách khỏi entity\nKiểm tra dữ liệu đầu vào bằng Bean Validation\nChia trách nhiệm controller, service và repository\nLưu khóa học vào database thực hành và kiểm thử phản hồi thành công/lỗi",
       "lessons": [
         {
           "title": "Bắt đầu và chuẩn bị môi trường",
-          "textContent": "Bài 1: Bắt đầu và chuẩn bị môi trường\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "textContent": "## Mục tiêu\nTạo API chỉ đọc trước khi thêm cơ sở dữ liệu.\n\n## Chuẩn bị\nTạo dự án Spring Boot Java 21 với Spring Web, Validation và Spring Data JPA; thêm driver PostgreSQL khi bắt đầu phần lưu dữ liệu. Dùng dự án và database thực hành riêng. Đặt lớp controller dưới package gốc của ứng dụng để được component scan.\n\n```java\nimport java.util.List;\nimport org.springframework.web.bind.annotation.GetMapping;\nimport org.springframework.web.bind.annotation.RestController;\n\n@RestController\npublic class PracticeCourseController {\n    record CourseView(int id, String title) {}\n\n    @GetMapping(\"/api/practice-courses\")\n    public List<CourseView> list() {\n        return List.of(new CourseView(1, \"Java co ban\"));\n    }\n}\n```\n\n## Đối chiếu\nGửi GET /api/practice-courses bằng trình duyệt hoặc công cụ HTTP: phản hồi 200 với một phần tử có id 1 và title Java co ban. List.of ở đây chỉ minh họa endpoint đầu tiên; phần sau thay nguồn mẫu bằng repository.\n\n## Thực hành\nĐổi tên khóa mẫu, chạy lại và kiểm tra Content-Type JSON. Thử đường dẫn không tồn tại, ghi mã HTTP nhận được. Không gọi 404 là mất kết nối máy chủ.",
           "orderIndex": 1,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Các khái niệm cốt lõi",
-          "textContent": "Bài 2: Các khái niệm cốt lõi\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "DTO và kiểm tra dữ liệu đầu vào",
+          "textContent": "## Mục tiêu\nTừ chối yêu cầu tạo khóa có tên trống hoặc học phí âm.\n\n```java\nimport jakarta.validation.constraints.DecimalMin;\nimport jakarta.validation.constraints.NotBlank;\nimport jakarta.validation.constraints.NotNull;\nimport jakarta.validation.constraints.Size;\nimport java.math.BigDecimal;\n\npublic record PracticeCourseRequest(\n    @NotBlank @Size(max = 255) String title,\n    @NotNull @DecimalMin(\"0\") BigDecimal price\n) {}\n```\n\nTrong controller, tham số body cần `@Valid @RequestBody PracticeCourseRequest request`. @Valid kích hoạt kiểm tra ràng buộc; chỉ đặt annotation trên DTO mà không kiểm tra ở điểm nhận request chưa đủ. BigDecimal phù hợp cho số tiền hơn double.\n\n## Thực hành\n1. Gửi body có title Java và price 0: hợp lệ.\n2. Thử title chỉ có khoảng trắng: phải bị từ chối.\n3. Thử price -1 và thiếu price: phải bị từ chối.\n4. Tách DTO phản hồi khỏi entity để chỉ trả thông tin cần thiết.\n\n## Tự kiểm tra\nĐầu vào sai không tạo bản ghi. Phản hồi lỗi nêu trường cần sửa nhưng không trả stack trace hoặc thông tin kết nối database. Chưa coi DTO là lớp kiểm tra quyền; phân quyền là bước riêng ở backend.",
           "orderIndex": 2,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Thực hành qua ví dụ",
-          "textContent": "Bài 3: Thực hành qua ví dụ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Service, repository và transaction",
+          "textContent": "## Mục tiêu\nChuyển nguồn dữ liệu từ danh sách mẫu sang database thực hành.\n\n## Phân chia trách nhiệm\n- Controller nhận HTTP, kiểm tra DTO và chuyển yêu cầu.\n- Service xử lý quy tắc nghiệp vụ và ranh giới transaction.\n- Repository đọc/ghi entity.\n- DTO phản hồi chọn các trường được công khai.\n\n```java\nimport org.springframework.data.jpa.repository.JpaRepository;\n\npublic interface PracticeCourseRepository\n        extends JpaRepository<PracticeCourse, Long> {\n}\n```\n\nPracticeCourse cần @Entity, id với @Id/@GeneratedValue, title và price; định nghĩa schema/migration tương ứng trong dự án thực hành. Inject repository qua constructor của service. Hàm tạo nhận DTO, tạo entity, save rồi chuyển kết quả thành DTO phản hồi.\n\n## Thực hành\n1. Cấu hình PostgreSQL thực hành từ biến môi trường, không đưa mật khẩu vào source.\n2. Tạo một khóa và đọc lại từ repository.\n3. Khởi động lại dự án thực hành, kiểm tra bản ghi vẫn tồn tại.\n4. Nếu một thao tác ghi nhiều bảng phải thành công cùng nhau, đặt @Transactional trên hàm service phù hợp.\n\n## Tự kiểm tra\nGET đọc dữ liệu lưu thật, không trả List.of cũ. Không trả trực tiếp entity có quan hệ hoặc dữ liệu riêng. Transaction không thay thế unique constraint khi cần ngăn bản ghi trùng.",
           "orderIndex": 3,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         },
         {
-          "title": "Tổng kết và dự án nhỏ",
-          "textContent": "Bài 4: Tổng kết và dự án nhỏ\n\nMục tiêu\nSau bài này, bạn có thể giải thích khái niệm vừa học và áp dụng vào một ví dụ nhỏ.\n\nNội dung\nBắt đầu từ vấn đề thực tế, chia thành từng bước và kiểm tra kết quả ở mỗi bước. Ghi lại các câu hỏi để tự tìm hiểu thêm.\n\nThực hành\n1. Tóm tắt ba điều bạn vừa học.\n2. Tạo một ví dụ theo cách hiểu của bạn.\n3. Kiểm tra ví dụ với một trường hợp khác.\n\nĐây là nội dung mẫu của Course Management để trình diễn luồng học tập.",
+          "title": "Dự án Spring Boot: API khóa học có kiểm thử",
+          "textContent": "## Mục tiêu\nHoàn thiện API có dữ liệu lưu thật và phản hồi lỗi nhất quán.\n\n## Endpoint\n- GET /api/practice-courses: danh sách khóa.\n- GET /api/practice-courses/{id}: chi tiết, 404 khi không tồn tại.\n- POST /api/practice-courses: tạo từ title và price, 201 khi thành công.\n\n## Dữ liệu thử\n```json\n{\"title\":\"Java co ban\",\"price\":0}\n```\n\n## Tiêu chí\n1. Dữ liệu hợp lệ được lưu và đọc lại bằng id trả về.\n2. Tên trống, giá âm hoặc thiếu giá trả 400 và không tạo bản ghi.\n3. Id không tồn tại trả 404 với thông báo phù hợp.\n4. Lỗi nội bộ không lộ stack trace hoặc mật khẩu.\n5. DTO phản hồi không vô tình trả các trường riêng của entity.\n\n## Bàn giao\nNộp source, migration, hướng dẫn cấu hình môi trường và kết quả kiểm thử API. Dùng database kiểm thử riêng; không trỏ test xóa dữ liệu vào database demo.\n\n## Tự kiểm tra\nSau khi khởi động lại vẫn đọc được khóa đã tạo. Phân biệt 400, 404 và 500. Khi mở rộng cho nhiều vai trò, bổ sung kiểm tra quyền tại backend trước khi cho ghi; ẩn nút trên giao diện không đảm bảo quyền API.",
           "orderIndex": 4,
           "videoUrl": null,
           "published": true,
-          "contentFormat": "TEXT"
+          "contentFormat": "MARKDOWN"
         }
       ],
-      "quiz": null
+      "quiz": {
+        "title": "Spring Boot: DTO, validation và lưu dữ liệu",
+        "passPercentage": 70,
+        "questions": [
+          {
+            "prompt": "Trách nhiệm chính của controller là gì?",
+            "options": [
+              "Nhận HTTP và chuyển yêu cầu hợp lệ tới service",
+              "Lưu mọi mật khẩu trong source",
+              "Thay thế hoàn toàn database",
+              "Tự tạo mọi bảng cho từng request"
+            ],
+            "correctIndex": 0,
+            "explanation": "Controller xử lý giao tiếp HTTP; service và repository đảm nhiệm nghiệp vụ và lưu trữ."
+          },
+          {
+            "prompt": "Để kiểm tra ràng buộc DTO nhận từ request body, cần gì ở tham số controller?",
+            "options": [
+              "Chỉ @Entity",
+              "@Valid cùng @RequestBody",
+              "Chỉ @Table",
+              "Chỉ public"
+            ],
+            "correctIndex": 1,
+            "explanation": "@Valid kích hoạt Bean Validation cho DTO nhận bằng @RequestBody."
+          },
+          {
+            "prompt": "Kiểu nào nên dùng cho học phí cần tính chính xác thập phân?",
+            "options": [
+              "boolean",
+              "char",
+              "BigDecimal",
+              "double trong mọi trường hợp"
+            ],
+            "correctIndex": 2,
+            "explanation": "BigDecimal tránh sai số biểu diễn số thực nhị phân khi tính tiền."
+          },
+          {
+            "prompt": "GET chi tiết với id không tồn tại nên trả mã nào?",
+            "options": [
+              "200 với thành công giả",
+              "201",
+              "301",
+              "404"
+            ],
+            "correctIndex": 3,
+            "explanation": "404 thể hiện tài nguyên không tồn tại; không phải lỗi đầu vào định dạng hay lỗi nội bộ."
+          },
+          {
+            "prompt": "Ẩn nút tạo khóa trên giao diện đã đủ kiểm tra quyền chưa?",
+            "options": [
+              "Đủ vì không nhìn thấy nút",
+              "Đủ nếu trang dùng CSS",
+              "Chưa, backend phải kiểm tra quyền request",
+              "Đủ nếu API trả JSON"
+            ],
+            "correctIndex": 2,
+            "explanation": "Người dùng có thể gọi API trực tiếp; quyền phải được thực thi ở backend."
+          }
+        ]
+      },
+      "targetAudience": "Người đã học Java cơ bản và muốn xây dựng API.\nSinh viên hoặc lập trình viên muốn thực hành một ứng dụng backend nhỏ.",
+      "prerequisites": "Nắm lớp, đối tượng, collection và xử lý ngoại lệ trong Java.\nMáy tính có JDK 21, IDE, PostgreSQL và công cụ gửi HTTP như Postman."
     }
   ],
   "javaQuiz": {
@@ -429,7 +805,9 @@
             "explanation": "main chứa nội dung chính của trang HTML."
           }
         ]
-      }
+      },
+      "targetAudience": "Người muốn bắt đầu làm website bằng HTML.\nHọc viên thích học qua video và tự viết lại các ví dụ.",
+      "prerequisites": "Máy tính có trình duyệt và trình soạn mã.\nKết nối Internet để xem video; không cần kiến thức lập trình trước."
     },
     {
       "title": "JavaScript nhập môn · Demo YouTube",
@@ -510,7 +888,9 @@
             "explanation": "return trả kết quả và kết thúc lần gọi hàm."
           }
         ]
-      }
+      },
+      "targetAudience": "Người mới muốn học JavaScript để thêm tương tác cho website.\nHọc viên đã làm quen HTML và muốn luyện tư duy lập trình qua ví dụ.",
+      "prerequisites": "Máy tính có trình duyệt và VS Code.\nBiết cấu trúc HTML cơ bản; có Internet để xem video và thực hành."
     }
   ],
   "scenarioCourses": [
@@ -566,7 +946,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn học Python qua thao tác dữ liệu và bài tập nhỏ.\nSinh viên hoặc người đi làm cần tự động hóa công việc đơn giản.",
+      "prerequisites": "Máy tính có Python 3 và VS Code hoặc môi trường notebook.\nBiết thao tác tệp và thư mục; phần nhập môn không yêu cầu kinh nghiệm Python."
     },
     {
       "title": "React và giao diện tương tác · Nhập môn",
@@ -620,7 +1002,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn xây dựng giao diện web có tương tác bằng React.\nLập trình viên frontend cần luyện cách tổ chức component và trạng thái.",
+      "prerequisites": "Nắm HTML, CSS và JavaScript cơ bản, bao gồm hàm, mảng và đối tượng.\nMáy tính có Node.js, npm, trình soạn mã và trình duyệt."
     },
     {
       "title": "Phân tích dữ liệu · Nhập môn",
@@ -674,7 +1058,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người làm báo cáo muốn hiểu dữ liệu trước khi đưa ra nhận định.\nHọc viên cần thực hành làm sạch dữ liệu và trình bày kết quả bằng biểu đồ.",
+      "prerequisites": "Biết thao tác bảng tính và các phép tính cơ bản.\nChuẩn bị máy tính có Excel hoặc công cụ bảng tính tương đương và một tập dữ liệu mẫu."
     },
     {
       "title": "Figma cho sản phẩm số · Nhập môn",
@@ -880,7 +1266,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn biến ý tưởng sản phẩm số thành bản thiết kế giao diện.\nThành viên nhóm sản phẩm cần tạo prototype để trao đổi và lấy phản hồi.",
+      "prerequisites": "Tài khoản Figma miễn phí và máy tính có trình duyệt.\nChuẩn bị một màn hình hoặc luồng sử dụng muốn thiết kế; biết thao tác máy tính cơ bản."
     },
     {
       "title": "Kiểm thử phần mềm · Nhập môn",
@@ -934,7 +1322,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người mới tìm hiểu công việc kiểm thử và cách phát hiện lỗi có hệ thống.\nLập trình viên muốn viết tình huống kiểm thử cho tính năng của mình.",
+      "prerequisites": "Biết thao tác website và mô tả kết quả mong đợi của một tính năng.\nMáy tính có trình duyệt, công cụ ghi chú và một ứng dụng mẫu để kiểm thử."
     },
     {
       "title": "Docker và triển khai · Nhập môn",
@@ -988,7 +1378,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Lập trình viên muốn đóng gói ứng dụng và tạo môi trường chạy nhất quán.\nHọc viên cần làm quen container và quy trình triển khai cơ bản.",
+      "prerequisites": "Biết dùng dòng lệnh và chạy một ứng dụng đơn giản.\nMáy tính có Docker Desktop hoặc Docker Engine cùng môi trường được hỗ trợ."
     },
     {
       "title": "Tiếng Anh giao tiếp · Nhập môn",
@@ -1042,7 +1434,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn luyện diễn đạt trong các tình huống giao tiếp hằng ngày.\nHọc viên cần tăng sự tự tin khi nghe và nói những câu ngắn.",
+      "prerequisites": "Biết từ vựng và mẫu câu tiếng Anh cơ bản.\nChuẩn bị tai nghe, micro và nơi yên tĩnh để luyện nghe, nói."
     },
     {
       "title": "Viết và trình bày ý tưởng · Nhập môn",
@@ -1096,7 +1490,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn diễn đạt ý tưởng rõ ràng bằng văn bản và bài trình bày.\nSinh viên hoặc thành viên nhóm cần thuyết trình và trao đổi công việc.",
+      "prerequisites": "Chuẩn bị một chủ đề muốn giới thiệu và công cụ ghi chú hoặc soạn thảo.\nKhông yêu cầu kinh nghiệm thuyết trình; sẵn sàng luyện tập và nhận phản hồi."
     },
     {
       "title": "Excel cho công việc · Nhập môn",
@@ -1150,7 +1546,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người đi làm muốn xử lý bảng tính và báo cáo hiệu quả hơn.\nHọc viên cần luyện công thức, sắp xếp và tổng hợp dữ liệu trong Excel.",
+      "prerequisites": "Máy tính có Excel hoặc công cụ bảng tính tương đương.\nBiết mở, lưu tệp và nhập dữ liệu vào ô; chuẩn bị một bảng dữ liệu mẫu."
     },
     {
       "title": "Quản lý dự án · Nhập môn",
@@ -1204,7 +1602,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Thành viên nhóm muốn lập kế hoạch và theo dõi công việc rõ ràng.\nNgười bắt đầu điều phối dự án nhỏ hoặc bài tập nhóm.",
+      "prerequisites": "Chuẩn bị một dự án hoặc tình huống làm việc nhóm để thực hành.\nCó công cụ ghi chú hoặc bảng tính; không yêu cầu chứng chỉ quản lý dự án."
     },
     {
       "title": "Thiết kế hệ thống · Nhập môn",
@@ -1258,7 +1658,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Lập trình viên muốn hiểu cách các thành phần của ứng dụng kết nối với nhau.\nHọc viên cần luyện phân tích yêu cầu và lựa chọn phương án thiết kế.",
+      "prerequisites": "Hiểu cơ bản về HTTP, API và cơ sở dữ liệu.\nĐã thực hành một ứng dụng nhỏ và có công cụ vẽ sơ đồ hoặc giấy ghi chú."
     },
     {
       "title": "SQL nâng cao · Nhập môn",
@@ -1312,7 +1714,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người đã viết truy vấn SQL và muốn xử lý bài toán phức tạp hơn.\nLập trình viên hoặc người phân tích dữ liệu cần tổng hợp và tối ưu truy vấn.",
+      "prerequisites": "Nắm SELECT, WHERE, JOIN và GROUP BY trong SQL.\nCó PostgreSQL hoặc môi trường SQL tương đương cùng dữ liệu mẫu để thực hành."
     },
     {
       "title": "Python thực hành · Ứng dụng",
@@ -1366,7 +1770,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn học Python qua thao tác dữ liệu và bài tập nhỏ.\nSinh viên hoặc người đi làm cần tự động hóa công việc đơn giản.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Máy tính có Python 3 và VS Code hoặc môi trường notebook.\nBiết thao tác tệp và thư mục; phần nhập môn không yêu cầu kinh nghiệm Python.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "React và giao diện tương tác · Ứng dụng",
@@ -1420,7 +1826,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn xây dựng giao diện web có tương tác bằng React.\nLập trình viên frontend cần luyện cách tổ chức component và trạng thái.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Nắm HTML, CSS và JavaScript cơ bản, bao gồm hàm, mảng và đối tượng.\nMáy tính có Node.js, npm, trình soạn mã và trình duyệt.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "Phân tích dữ liệu · Ứng dụng",
@@ -1474,7 +1882,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người làm báo cáo muốn hiểu dữ liệu trước khi đưa ra nhận định.\nHọc viên cần thực hành làm sạch dữ liệu và trình bày kết quả bằng biểu đồ.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Biết thao tác bảng tính và các phép tính cơ bản.\nChuẩn bị máy tính có Excel hoặc công cụ bảng tính tương đương và một tập dữ liệu mẫu.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "Figma cho sản phẩm số · Ứng dụng",
@@ -1528,7 +1938,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn biến ý tưởng sản phẩm số thành bản thiết kế giao diện.\nThành viên nhóm sản phẩm cần tạo prototype để trao đổi và lấy phản hồi.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Tài khoản Figma miễn phí và máy tính có trình duyệt.\nChuẩn bị một màn hình hoặc luồng sử dụng muốn thiết kế; biết thao tác máy tính cơ bản.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "Kiểm thử phần mềm · Ứng dụng",
@@ -1582,7 +1994,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người mới tìm hiểu công việc kiểm thử và cách phát hiện lỗi có hệ thống.\nLập trình viên muốn viết tình huống kiểm thử cho tính năng của mình.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Biết thao tác website và mô tả kết quả mong đợi của một tính năng.\nMáy tính có trình duyệt, công cụ ghi chú và một ứng dụng mẫu để kiểm thử.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "Docker và triển khai · Ứng dụng",
@@ -1636,7 +2050,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Lập trình viên muốn đóng gói ứng dụng và tạo môi trường chạy nhất quán.\nHọc viên cần làm quen container và quy trình triển khai cơ bản.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Biết dùng dòng lệnh và chạy một ứng dụng đơn giản.\nMáy tính có Docker Desktop hoặc Docker Engine cùng môi trường được hỗ trợ.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "Tiếng Anh giao tiếp · Ứng dụng",
@@ -1690,7 +2106,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn luyện diễn đạt trong các tình huống giao tiếp hằng ngày.\nHọc viên cần tăng sự tự tin khi nghe và nói những câu ngắn.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Biết từ vựng và mẫu câu tiếng Anh cơ bản.\nChuẩn bị tai nghe, micro và nơi yên tĩnh để luyện nghe, nói.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "Viết và trình bày ý tưởng · Ứng dụng",
@@ -1744,7 +2162,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn diễn đạt ý tưởng rõ ràng bằng văn bản và bài trình bày.\nSinh viên hoặc thành viên nhóm cần thuyết trình và trao đổi công việc.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Chuẩn bị một chủ đề muốn giới thiệu và công cụ ghi chú hoặc soạn thảo.\nKhông yêu cầu kinh nghiệm thuyết trình; sẵn sàng luyện tập và nhận phản hồi.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "Excel cho công việc · Ứng dụng",
@@ -1798,7 +2218,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người đi làm muốn xử lý bảng tính và báo cáo hiệu quả hơn.\nHọc viên cần luyện công thức, sắp xếp và tổng hợp dữ liệu trong Excel.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Máy tính có Excel hoặc công cụ bảng tính tương đương.\nBiết mở, lưu tệp và nhập dữ liệu vào ô; chuẩn bị một bảng dữ liệu mẫu.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "Quản lý dự án · Ứng dụng",
@@ -1852,7 +2274,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Thành viên nhóm muốn lập kế hoạch và theo dõi công việc rõ ràng.\nNgười bắt đầu điều phối dự án nhỏ hoặc bài tập nhóm.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Chuẩn bị một dự án hoặc tình huống làm việc nhóm để thực hành.\nCó công cụ ghi chú hoặc bảng tính; không yêu cầu chứng chỉ quản lý dự án.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "Thiết kế hệ thống · Ứng dụng",
@@ -1906,7 +2330,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Lập trình viên muốn hiểu cách các thành phần của ứng dụng kết nối với nhau.\nHọc viên cần luyện phân tích yêu cầu và lựa chọn phương án thiết kế.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Hiểu cơ bản về HTTP, API và cơ sở dữ liệu.\nĐã thực hành một ứng dụng nhỏ và có công cụ vẽ sơ đồ hoặc giấy ghi chú.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "SQL nâng cao · Ứng dụng",
@@ -1960,7 +2386,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người đã viết truy vấn SQL và muốn xử lý bài toán phức tạp hơn.\nLập trình viên hoặc người phân tích dữ liệu cần tổng hợp và tối ưu truy vấn.\nNgười đã học phần nhập môn hoặc có kiến thức tương đương và muốn áp dụng vào tình huống thực tế.",
+      "prerequisites": "Nắm SELECT, WHERE, JOIN và GROUP BY trong SQL.\nCó PostgreSQL hoặc môi trường SQL tương đương cùng dữ liệu mẫu để thực hành.\nHoàn thành phần nhập môn cùng chủ đề hoặc tự thực hiện được các bài tập cơ bản."
     },
     {
       "title": "Python thực hành · Dự án",
@@ -2014,7 +2442,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn học Python qua thao tác dữ liệu và bài tập nhỏ.\nSinh viên hoặc người đi làm cần tự động hóa công việc đơn giản.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Máy tính có Python 3 và VS Code hoặc môi trường notebook.\nBiết thao tác tệp và thư mục; phần nhập môn không yêu cầu kinh nghiệm Python.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     },
     {
       "title": "React và giao diện tương tác · Dự án",
@@ -2068,7 +2498,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn xây dựng giao diện web có tương tác bằng React.\nLập trình viên frontend cần luyện cách tổ chức component và trạng thái.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Nắm HTML, CSS và JavaScript cơ bản, bao gồm hàm, mảng và đối tượng.\nMáy tính có Node.js, npm, trình soạn mã và trình duyệt.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     },
     {
       "title": "Phân tích dữ liệu · Dự án",
@@ -2122,7 +2554,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người làm báo cáo muốn hiểu dữ liệu trước khi đưa ra nhận định.\nHọc viên cần thực hành làm sạch dữ liệu và trình bày kết quả bằng biểu đồ.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Biết thao tác bảng tính và các phép tính cơ bản.\nChuẩn bị máy tính có Excel hoặc công cụ bảng tính tương đương và một tập dữ liệu mẫu.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     },
     {
       "title": "Figma cho sản phẩm số · Dự án",
@@ -2176,7 +2610,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn biến ý tưởng sản phẩm số thành bản thiết kế giao diện.\nThành viên nhóm sản phẩm cần tạo prototype để trao đổi và lấy phản hồi.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Tài khoản Figma miễn phí và máy tính có trình duyệt.\nChuẩn bị một màn hình hoặc luồng sử dụng muốn thiết kế; biết thao tác máy tính cơ bản.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     },
     {
       "title": "Kiểm thử phần mềm · Dự án",
@@ -2230,7 +2666,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người mới tìm hiểu công việc kiểm thử và cách phát hiện lỗi có hệ thống.\nLập trình viên muốn viết tình huống kiểm thử cho tính năng của mình.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Biết thao tác website và mô tả kết quả mong đợi của một tính năng.\nMáy tính có trình duyệt, công cụ ghi chú và một ứng dụng mẫu để kiểm thử.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     },
     {
       "title": "Docker và triển khai · Dự án",
@@ -2284,7 +2722,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Lập trình viên muốn đóng gói ứng dụng và tạo môi trường chạy nhất quán.\nHọc viên cần làm quen container và quy trình triển khai cơ bản.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Biết dùng dòng lệnh và chạy một ứng dụng đơn giản.\nMáy tính có Docker Desktop hoặc Docker Engine cùng môi trường được hỗ trợ.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     },
     {
       "title": "Tiếng Anh giao tiếp · Dự án",
@@ -2338,7 +2778,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn luyện diễn đạt trong các tình huống giao tiếp hằng ngày.\nHọc viên cần tăng sự tự tin khi nghe và nói những câu ngắn.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Biết từ vựng và mẫu câu tiếng Anh cơ bản.\nChuẩn bị tai nghe, micro và nơi yên tĩnh để luyện nghe, nói.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     },
     {
       "title": "Viết và trình bày ý tưởng · Dự án",
@@ -2392,7 +2834,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người muốn diễn đạt ý tưởng rõ ràng bằng văn bản và bài trình bày.\nSinh viên hoặc thành viên nhóm cần thuyết trình và trao đổi công việc.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Chuẩn bị một chủ đề muốn giới thiệu và công cụ ghi chú hoặc soạn thảo.\nKhông yêu cầu kinh nghiệm thuyết trình; sẵn sàng luyện tập và nhận phản hồi.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     },
     {
       "title": "Excel cho công việc · Dự án",
@@ -2446,7 +2890,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người đi làm muốn xử lý bảng tính và báo cáo hiệu quả hơn.\nHọc viên cần luyện công thức, sắp xếp và tổng hợp dữ liệu trong Excel.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Máy tính có Excel hoặc công cụ bảng tính tương đương.\nBiết mở, lưu tệp và nhập dữ liệu vào ô; chuẩn bị một bảng dữ liệu mẫu.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     },
     {
       "title": "Quản lý dự án · Dự án",
@@ -2500,7 +2946,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Thành viên nhóm muốn lập kế hoạch và theo dõi công việc rõ ràng.\nNgười bắt đầu điều phối dự án nhỏ hoặc bài tập nhóm.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Chuẩn bị một dự án hoặc tình huống làm việc nhóm để thực hành.\nCó công cụ ghi chú hoặc bảng tính; không yêu cầu chứng chỉ quản lý dự án.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     },
     {
       "title": "Thiết kế hệ thống · Dự án",
@@ -2554,7 +3002,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Lập trình viên muốn hiểu cách các thành phần của ứng dụng kết nối với nhau.\nHọc viên cần luyện phân tích yêu cầu và lựa chọn phương án thiết kế.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Hiểu cơ bản về HTTP, API và cơ sở dữ liệu.\nĐã thực hành một ứng dụng nhỏ và có công cụ vẽ sơ đồ hoặc giấy ghi chú.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     },
     {
       "title": "SQL nâng cao · Dự án",
@@ -2608,7 +3058,9 @@
           "contentFormat": "TEXT"
         }
       ],
-      "quiz": null
+      "quiz": null,
+      "targetAudience": "Người đã viết truy vấn SQL và muốn xử lý bài toán phức tạp hơn.\nLập trình viên hoặc người phân tích dữ liệu cần tổng hợp và tối ưu truy vấn.\nHọc viên muốn kết nối các kiến thức đã học thành một bài thực hành hoặc dự án hoàn chỉnh.",
+      "prerequisites": "Nắm SELECT, WHERE, JOIN và GROUP BY trong SQL.\nCó PostgreSQL hoặc môi trường SQL tương đương cùng dữ liệu mẫu để thực hành.\nĐã học phần ứng dụng hoặc có kinh nghiệm tương đương; chuẩn bị một ý tưởng và thời gian để làm dự án."
     }
   ],
   "scenario": {
@@ -2646,5 +3098,42 @@
         }
       ]
     }
-  }
+  },
+  "courseFitDefaults": [
+    {
+      "category": "Lập trình",
+      "targetAudience": "Người muốn củng cố kỹ năng lập trình qua từng bài học.\nHọc viên cần luyện tập và xây dựng ví dụ nhỏ theo chương trình.",
+      "prerequisites": "Máy tính có trình soạn mã và trình duyệt.\nChuẩn bị môi trường theo hướng dẫn của bài đầu tiên và thời gian để thực hành."
+    },
+    {
+      "category": "Dữ liệu",
+      "targetAudience": "Người muốn đọc, xử lý và trình bày dữ liệu dạng bảng.\nHọc viên cần áp dụng kiến thức vào báo cáo hoặc bài thực hành.",
+      "prerequisites": "Máy tính có công cụ bảng tính hoặc môi trường dữ liệu phù hợp với bài học.\nBiết thao tác tệp và chuẩn bị dữ liệu mẫu để thực hành."
+    },
+    {
+      "category": "Thiết kế",
+      "targetAudience": "Người muốn luyện tư duy thiết kế và trình bày ý tưởng trực quan.\nHọc viên cần tạo sản phẩm mẫu để trao đổi và nhận phản hồi.",
+      "prerequisites": "Máy tính có trình duyệt và công cụ thiết kế theo hướng dẫn của khóa.\nChuẩn bị một ý tưởng sản phẩm để thực hành."
+    },
+    {
+      "category": "Công cụ",
+      "targetAudience": "Người muốn làm việc hiệu quả hơn với các công cụ trong chương trình.\nHọc viên cần luyện quy trình thao tác qua tình huống cụ thể.",
+      "prerequisites": "Máy tính có quyền cài đặt công cụ phục vụ bài học.\nBiết thao tác tệp, thư mục và chuẩn bị một ví dụ để thực hành."
+    },
+    {
+      "category": "Ngoại ngữ",
+      "targetAudience": "Người muốn luyện ngoại ngữ qua tình huống giao tiếp.\nHọc viên cần thực hành nghe và diễn đạt đều đặn.",
+      "prerequisites": "Thiết bị có tai nghe, micro và Internet.\nChuẩn bị nơi yên tĩnh và thời gian luyện tập theo từng bài."
+    },
+    {
+      "category": "Kỹ năng",
+      "targetAudience": "Người muốn phát triển kỹ năng học tập và làm việc qua thực hành.\nHọc viên cần áp dụng nội dung vào tình huống cá nhân hoặc làm việc nhóm.",
+      "prerequisites": "Chuẩn bị công cụ ghi chú và một tình huống muốn cải thiện.\nSẵn sàng thực hành, tự đánh giá kết quả và tiếp nhận phản hồi."
+    },
+    {
+      "category": "",
+      "targetAudience": "Học viên muốn tìm hiểu chủ đề của khóa học theo từng bước.\nNgười cần luyện tập qua ví dụ và các bài thực hành trong chương trình.",
+      "prerequisites": "Thiết bị có trình duyệt và kết nối Internet.\nChuẩn bị công cụ theo hướng dẫn của bài đầu tiên và thời gian để thực hành."
+    }
+  ]
 }

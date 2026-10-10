@@ -22,8 +22,11 @@ public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final com.example.course_management.service.AuditLogService audit;
 
-  public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+  public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
+      com.example.course_management.service.AuditLogService audit) {
+    this.audit = audit;
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
   }
@@ -69,18 +72,22 @@ public class UserServiceImpl implements UserService {
       throw new ForbiddenException("Không được phép thay đổi role của một ADMIN khác");
     }
 
+    var previousRole = user.getRole();
     user.setRole(req.getRole());
     user.setAuthVersion(user.getAuthVersion() + 1);
     user.setUpdatedAt(LocalDateTime.now());
+    audit.recordCurrent("USER_ROLE_CHANGED", "USER", userId, user.getUsername(), previousRole.name(), req.getRole().name());
     return toResponse(userRepository.save(user));
   }
 
   @Override
   public UserResponse updateStatus(Integer userId, UpdateStatusRequest req) {
     User user = lockedUserOrThrow(userId);
+    var previousStatus = user.getIsActive();
     user.setIsActive(req.getIsActive());
     user.setAuthVersion(user.getAuthVersion() + 1);
     user.setUpdatedAt(LocalDateTime.now());
+    audit.recordCurrent("USER_STATUS_CHANGED", "USER", userId, user.getUsername(), String.valueOf(previousStatus), String.valueOf(req.getIsActive()));
     return toResponse(userRepository.save(user));
   }
 

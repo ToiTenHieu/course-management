@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class LessonResourceService {
   public record Resource(Integer resourceId, String name, String mediaType, int size) {}
   public record Download(Resource resource, byte[] content) {}
+  public record ValidatedFile(String name, String mediaType, byte[] content) {}
   private final JdbcTemplate jdbc;
   private final LessonService lessons;
   private final LessonRepository repository;
@@ -39,18 +40,11 @@ public class LessonResourceService {
 
   public List<Resource> upload(Integer id, MultipartFile file, CustomUserDetails actor) {
     manager(id, actor);
-    if (file.isEmpty() || file.getSize() > settings.maxFileBytes())
-      throw new BadRequestException("Chọn tài liệu từ 1 byte đến " + settings.maxFileBytes() + " byte");
     if (jdbc.queryForObject("SELECT COUNT(*) FROM lesson_resources WHERE lesson_id=?", Long.class, id) >= settings.maxResourcesPerLesson())
       throw new BadRequestException("Mỗi bài tối đa " + settings.maxResourcesPerLesson() + " tài liệu");
-    byte[] bytes;
-    try { bytes = file.getBytes(); }
-    catch (java.io.IOException ex) { throw new BadRequestException("Không đọc được tài liệu, hãy thử lại"); }
-    String original = file.getOriginalFilename() == null ? "tai-lieu" : file.getOriginalFilename();
-    String name = original.replace('\\', '/');
-    name = name.substring(name.lastIndexOf('/') + 1).replaceAll("[\\p{Cntrl}]", "").trim();
-    if (name.isBlank() || name.length() > 160) throw new BadRequestException("Tên tài liệu từ 1 đến 160 ký tự");
-    String type = mediaType(name, bytes);
+    var validated = validateFile(file);
+    byte[] bytes = validated.content();
+    String name = validated.name(), type = validated.mediaType();
     jdbc.update("INSERT INTO lesson_resources(lesson_id,name,media_type,file_size,content) VALUES (?,?,?,?,?)",
         id, name, type, bytes.length, bytes);
     return list(id, actor);
@@ -78,6 +72,19 @@ public class LessonResourceService {
     var courseId = repository.findCourseId(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài học"));
     var course = courses.findLockedById(courseId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khóa học"));
     policy.manager(course, actor);
+  }
+
+  public ValidatedFile validateFile(MultipartFile file) {
+    if (file.isEmpty() || file.getSize() > settings.maxFileBytes())
+      throw new BadRequestException("Chọn tệp từ 1 byte đến " + settings.maxFileBytes() + " byte");
+    byte[] bytes;
+    try { bytes = file.getBytes(); }
+    catch (java.io.IOException ex) { throw new BadRequestException("Không đọc được tệp, hãy thử lại"); }
+    String name = file.getOriginalFilename() == null ? "tai-lieu.txt" : file.getOriginalFilename();
+    name = name.replace('\\', '/');
+    name = name.substring(name.lastIndexOf('/') + 1).replaceAll("[\\p{Cntrl}]", "").trim();
+    if (name.isBlank() || name.length() > 160) throw new BadRequestException("Tên tệp từ 1 đến 160 ký tự");
+    return new ValidatedFile(name,mediaType(name,bytes),bytes);
   }
 
   private String mediaType(String name, byte[] b) {

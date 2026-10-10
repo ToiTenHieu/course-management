@@ -16,11 +16,20 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Course {
 
+  @Column(name = "curriculum_revision", nullable = false)
+  private Integer curriculumRevision = 0;
+
   private String category;
   private String level;
 
   @Column(columnDefinition = "TEXT")
   private String learningOutcomes;
+
+  @Column(columnDefinition = "TEXT")
+  private String prerequisites;
+
+  @Column(columnDefinition = "TEXT")
+  private String targetAudience;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

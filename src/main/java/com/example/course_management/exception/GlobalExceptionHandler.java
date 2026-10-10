@@ -10,6 +10,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+  @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+  public ResponseEntity<ApiResponse<Void>> responseStatus(org.springframework.web.server.ResponseStatusException ex) {
+    return ResponseEntity.status(ex.getStatusCode()).cacheControl(org.springframework.http.CacheControl.noStore())
+        .body(ApiResponse.error(ex.getReason()==null?"Yêu cầu chưa được xử lý":ex.getReason()));
+  }
   @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
   public ResponseEntity<ApiResponse<Void>> integrity(Exception ex) {
     return ResponseEntity.status(409)
