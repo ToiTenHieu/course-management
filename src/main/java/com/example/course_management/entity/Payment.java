@@ -37,6 +37,9 @@ public class Payment {
   @Column(name = "transfer_note", unique = true, length = 50)
   private String transferNote;
 
+  @Column(name = "rejection_reason", length = 1000)
+  private String rejectionReason;
+
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt = ApplicationTime.now();
 

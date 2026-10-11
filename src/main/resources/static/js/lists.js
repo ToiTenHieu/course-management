@@ -1,4 +1,5 @@
 import { api } from "./api.js";
+import { loginUrl } from './navigation.js';
 
 let listInstance = 0;
 
@@ -144,7 +145,7 @@ export async function mountPagedList({
       retry.textContent = "Thử lại";
       retry.onclick = () => refresh(0, true);
       count.append(retry);
-      if (error.status === 401) location.href = "/login.html";
+      if (error.status === 401) location.href = loginUrl();
     } finally {
       if (request === revision && rows.dataset.listInstance === instance)
         rows.setAttribute("aria-busy", "false");

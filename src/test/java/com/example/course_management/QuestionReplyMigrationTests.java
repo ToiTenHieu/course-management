@@ -10,6 +10,24 @@ import org.springframework.jdbc.datasource.init.ScriptUtils;
 
 class QuestionReplyMigrationTests {
   @Test
+  void questionRequestMigrationPreservesLegacyRowsAndScopesUniqueKeysToTheStudent() throws Exception {
+    try (var connection = DriverManager.getConnection("jdbc:h2:mem:question_keys_" + UUID.randomUUID() + ";MODE=PostgreSQL", "sa", "")) {
+      try (var statement = connection.createStatement()) {
+        statement.execute("CREATE TABLE lesson_questions (question_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, body TEXT)");
+        statement.execute("INSERT INTO lesson_questions VALUES (1,1,'Legacy'),(2,1,'Legacy second')");
+      }
+      ScriptUtils.executeSqlScript(connection, new ClassPathResource("db/migration/V24__question_request_keys.sql"));
+      try (var statement = connection.createStatement()) {
+        try (var rows = statement.executeQuery("SELECT body,client_request_id FROM lesson_questions WHERE question_id=1")) {
+          assertTrue(rows.next()); assertEquals("Legacy", rows.getString(1)); assertNull(rows.getString(2));
+        }
+        statement.execute("INSERT INTO lesson_questions VALUES (3,1,'New','request'),(4,2,'Peer','request')");
+        assertThrows(java.sql.SQLException.class, () -> statement.execute("INSERT INTO lesson_questions VALUES (5,1,'Duplicate','request')"));
+      }
+    }
+  }
+
+  @Test
   void migrationPreservesLegacyAnswersIncludingHiddenQuestionsWithoutChangingThem() throws Exception {
     try (var connection = DriverManager.getConnection("jdbc:h2:mem:legacy_replies_" + UUID.randomUUID() + ";MODE=PostgreSQL", "sa", "")) {
       try (var statement = connection.createStatement()) {

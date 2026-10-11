@@ -16,6 +16,7 @@ public class PaymentResponse {
   private BigDecimal amount;
   private String status;
   private String transferNote;
+  private String rejectionReason;
   private LocalDateTime createdAt;
   private LocalDateTime confirmedAt;
 }

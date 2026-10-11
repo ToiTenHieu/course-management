@@ -36,9 +36,9 @@ public class LessonQuestionController {
   @PreAuthorize("hasRole('STUDENT')")
   public ApiResponse<LessonQuestionResponse> ask(
       @PathVariable Integer lessonId,
-      @Valid @RequestBody QuestionTextRequest request,
+      @Valid @RequestBody CreateLessonQuestionRequest request,
       @AuthenticationPrincipal CustomUserDetails actor) {
-    return ApiResponse.success("Đã gửi câu hỏi", service.ask(lessonId, request.body(), actor));
+    return ApiResponse.success("Đã gửi câu hỏi", service.ask(lessonId, request.body(), request.clientRequestId(), actor));
   }
 
   @PutMapping("/api/questions/{id}/answer")

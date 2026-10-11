@@ -1,4 +1,29 @@
 @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap");
+.assessment-intro { max-width: 760px; }
+.payment-reason { display: block; min-width: 170px; max-width: 340px; white-space: normal; overflow-wrap: anywhere; margin-top: 8px; }
+button[data-unavailable="true"] { cursor: not-allowed; }
+.assessment-intro form { display: grid; gap: 18px; }
+.assessment-intro .btn { justify-self: start; }
+.assessment-question { min-width: 0; margin: 22px 0; }
+.assessment-question legend { padding: 0 10px; font-weight: 700; color: var(--brand); }
+.assessment-option { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; margin: 10px 0; cursor: pointer; font-weight: 400; overflow-wrap: anywhere; }
+.assessment-option:has(input:checked) { background: #edf5e7; border-color: var(--brand); }
+.assessment-option input[type="radio"] { width: 18px; height: 18px; min-height: 18px; flex: 0 0 18px; margin: 3px 0 0; padding: 0; accent-color: var(--brand); }
+.assessment-result .section-heading { flex-wrap: wrap; }
+.assessment-score { background: var(--lime); color: var(--brand); padding: 14px 22px; border-radius: 16px; font-size: 28px; font-weight: 800; white-space: nowrap; }
+.assessment-metrics { display: flex; flex-wrap: wrap; gap: 16px 32px; margin: 20px 0; }
+.assessment-metrics strong { display: block; font-size: 20px; }
+.assessment-roadmap { list-style: none; padding: 0; }
+.assessment-roadmap > li { display: flex; gap: 18px; margin: 18px 0; }
+.assessment-roadmap > li > div { min-width: 0; overflow-wrap: anywhere; }
+.assessment-step-number { display: grid; place-items: center; flex: 0 0 36px; height: 36px; background: var(--lime); border-radius: 50%; font-weight: 700; }
+.assessment-courses { padding: 0; list-style: none; }
+.assessment-courses li { padding: 10px 0; border-top: 1px solid var(--line); }
+.assessment-courses small { display: block; }
+.assessment-review { border-top: 1px solid var(--line); padding: 14px 0; overflow-wrap: anywhere; }
+.assessment-review summary { cursor: pointer; font-weight: 600; }
+.assessment-review p { margin: 12px 0 0; }
+@media (max-width: 700px) { .assessment-roadmap > li { gap: 10px; } .assessment-question { padding: 16px; } }
 :root {
   --ink: #172e2a;
   --muted: #61726b;
@@ -3516,4 +3541,19 @@ dialog > form {
   .recovery-mail { padding: 16px; }
   .recovery-mail .btn { width: 100%; }
   .recovery-mail [data-copy] { margin-left: 0; }
+}
+@media (max-width: 600px) {
+  .payments-table, .payments-table tbody { display: block; width: 100%; min-width: 0; }
+  .payments-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .payments-table tr { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); padding: 8px 0; }
+  .payments-table td { min-width: 0; padding: 12px; white-space: normal; overflow-wrap: anywhere; border: 0; }
+  .payments-table td:nth-child(1), .payments-table td:nth-child(4), .payments-table td:nth-child(5), .payments-table td[colspan] { grid-column: 1 / -1; }
+  .payments-table td::before { display: block; font-size: 11px; color: var(--muted); margin-bottom: 7px; }
+  .payments-table td:nth-child(1)::before { content: 'Khóa học'; }
+  .payments-table td:nth-child(2)::before { content: 'Số tiền'; }
+  .payments-table td:nth-child(3)::before { content: 'Nội dung CK'; }
+  .payments-table td:nth-child(4)::before { content: 'Trạng thái'; }
+  .payments-table td:nth-child(5)::before, .payments-table td[colspan]::before { content: none; }
+  .payments-table .payment-reason { min-width: 0; max-width: none; }
+  .payments-table .row-actions { flex-wrap: wrap; }
 }

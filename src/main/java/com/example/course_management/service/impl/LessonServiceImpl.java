@@ -22,13 +22,15 @@ public class LessonServiceImpl implements LessonService {
   private final ContentPolicy policy;
   private final ProgressCalculator calculator;
   private final LessonDraftService drafts;
+  private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
   public LessonServiceImpl(
       LessonRepository lessons,
       CourseRepository courses,
       LessonProgressRepository progress,
       ContentPolicy policy,
-      ProgressCalculator calculator, LessonDraftService drafts) {
+      ProgressCalculator calculator, LessonDraftService drafts, org.springframework.jdbc.core.JdbcTemplate jdbc) {
+    this.jdbc = jdbc;
     this.lessons = lessons;
     this.courses = courses;
     this.progress = progress;
@@ -105,6 +107,7 @@ public class LessonServiceImpl implements LessonService {
     var c = lockedCourse(courseId);
     policy.manager(c, actor);
     var l = lesson(id);
+    if (!Boolean.TRUE.equals(r.getIsPublished())) requireRemainingPublishedLesson(c, l);
     l.setIsPublished(r.getIsPublished());
     l.setUpdatedAt(ApplicationTime.now());
     lessons.saveAndFlush(l);
@@ -113,15 +116,32 @@ public class LessonServiceImpl implements LessonService {
   }
 
   public void deleteLesson(Integer id, CustomUserDetails actor) {
-    var l = lesson(id);
-    var c = lockedCourse(l.getCourse().getCourseId());
+    var courseId = lessons.findCourseId(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài học"));
+    var c = lockedCourse(courseId);
     policy.manager(c, actor);
+    var l = lesson(id);
+    requireRemainingPublishedLesson(c, l);
+    boolean hasActivity = Boolean.TRUE.equals(jdbc.queryForObject("""
+        SELECT CASE WHEN
+          EXISTS (SELECT 1 FROM lesson_progress WHERE lesson_id=?) OR
+          EXISTS (SELECT 1 FROM lesson_questions WHERE lesson_id=?) OR
+          EXISTS (SELECT 1 FROM quiz_attempts a JOIN lesson_quiz_versions v ON v.quiz_version_id=a.quiz_version_id WHERE v.lesson_id=?) OR
+          EXISTS (SELECT 1 FROM assignment_submissions s JOIN lesson_assignments a ON a.assignment_id=s.assignment_id WHERE a.lesson_id=?)
+        THEN TRUE ELSE FALSE END
+        """, Boolean.class, id, id, id, id));
+    if (hasActivity) throw new ConflictException("Bài học đã có hoạt động học, ghi chú hoặc bài nộp. Hãy ẩn bài để giữ lịch sử, thay vì xóa.");
     c.setCurriculumRevision(c.getCurriculumRevision() + 1);
     progress.deleteByLesson_LessonId(id);
     progress.flush();
     lessons.delete(l);
     lessons.flush();
     calculator.recalculateCourse(c.getCourseId());
+  }
+
+  private void requireRemainingPublishedLesson(Course course, Lesson lesson) {
+    if (course.getStatus() == CourseStatus.PUBLISHED && Boolean.TRUE.equals(lesson.getIsPublished())
+        && lessons.countByCourse_CourseIdAndIsPublishedTrue(course.getCourseId()) <= 1)
+      throw new ConflictException("Đây là bài xuất bản cuối cùng. Xuất bản bài thay thế hoặc nhờ quản trị viên chuyển khóa về bản nháp trước khi ẩn/xóa.");
   }
 
   public LessonPreviewResponse getContentPreview(Integer id, CustomUserDetails actor) {

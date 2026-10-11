@@ -16,7 +16,9 @@ Mỗi học viên nộp một lần cho mỗi bài tập. Lượt nộp giữ ng
 
 Quyền tải tệp được kiểm tra ở máy chủ: chủ bài nộp còn quyền học hoặc giảng viên phụ trách/admin. Học viên khác không xem được bài nộp hay danh sách lớp. Giảng viên vẫn xem lịch sử của học viên đã ngừng học. Bài/khóa nháp và đăng ký đã ngừng học chặn học viên theo quyền phòng học hiện có.
 
-UUID và hash nội dung giúp thử lại cùng lượt nộp không tạo trùng; khóa theo khóa học bảo vệ yêu cầu đồng thời. Đề hoặc điểm thay đổi trong lúc người dùng thao tác trả 409. Lỗi lưu giữ văn bản trên trang. Điểm bài tập độc lập với tiến độ đọc bài và quiz. Chưa có hạn nộp, nộp lại nhiều phiên bản, email/thông báo điểm hoặc chứng nhận.
+UUID và hash nội dung giúp thử lại cùng lượt nộp không tạo trùng; khóa theo khóa học bảo vệ yêu cầu đồng thời. Đề hoặc điểm thay đổi trong lúc người dùng thao tác trả 409. Khi mất phản hồi nộp bài, trang kiểm tra bài đã lưu trước khi gửi lại; giữ nguyên văn bản, tệp và UUID trong lúc chưa rõ kết quả. Nút **Kiểm tra / thử lại bài nộp** tiếp tục bằng yêu cầu gốc. Nếu xác nhận xung đột phiên bản đề mà chưa có bài nộp, có thể sửa hoặc tải lại đề. Nội dung đang soạn chỉ giữ trong trang hiện tại, chưa lưu qua tải lại toàn bộ trang. Điểm bài tập độc lập với tiến độ đọc bài và quiz. Chưa có hạn nộp, nộp lại nhiều phiên bản, email/thông báo điểm hoặc chứng nhận.
+
+Khi lọc **Chỉ bài chưa chấm**, lưu điểm loại bài khỏi danh sách và cập nhật tổng số; trang cuối trống được đưa về trang còn bài. Nếu đang soạn nhận xét cho bài khác, giữ form đó thay vì tải lại toàn bộ danh sách. Chuyển trang/lọc/tải lại cảnh báo trước khi bỏ nội dung chưa lưu.
 
 API:
 
@@ -36,8 +38,10 @@ Admin mở **Báo cáo**, chọn từ/đến ngày và **Xem báo cáo**. Tối 
 
 API admin: `GET /api/reports/activity?from=YYYY-MM-DD&to=YYYY-MM-DD&page=0&size=20` và `GET /api/reports/activity/export?from=...&to=...`.
 
+Khi tải báo cáo, nút xem/phân trang/xuất được khóa để không nhảy trang do bấm liên tục. Lỗi có nút **Thử tải lại báo cáo**. Đổi khoảng ngày xóa số liệu cũ khỏi phần báo cáo hoạt động và cần bấm xem để áp dụng; phản hồi cũ đến muộn không ghi đè. Nếu số trang giảm, chuyển về trang hợp lệ. Xuất CSV có trạng thái đang xuất; lỗi cho phép thử lại. Đổi khoảng ngày trong khi chờ CSV sẽ bỏ kết quả xuất cũ, cần áp dụng khoảng mới trước khi xuất tiếp.
+
 ## Dữ liệu và kiểm tra
 
-Flyway V18 thêm chương, liên kết bài, revision, bài tập/bài nộp và chỉ mục báo cáo; giữ dữ liệu cũ. Xóa bài học xóa bài tập/bài nộp liên quan như quiz và hỏi đáp; dùng ẩn bài/lưu trữ khóa để giữ lịch sử.
+Flyway V18 thêm chương, liên kết bài, revision, bài tập/bài nộp và chỉ mục báo cáo; giữ dữ liệu cũ. API chặn xóa bài có tiến độ, ghi chú, hỏi đáp, lượt làm quiz hoặc bài nộp; dùng ẩn bài/lưu trữ khóa để giữ lịch sử. Khóa đang xuất bản phải còn ít nhất một bài xuất bản: xuất bản bài thay thế hoặc nhờ admin chuyển khóa về nháp trước khi ẩn/xóa bài cuối.
 
 Kiểm thử backend mới bao gồm bảo toàn ghi chú khi sắp xếp; sai quyền/CSRF/chương ngoại khóa; xung đột; riêng tư/tệp/đề cũ; nộp lặp và đồng thời; điểm được chấm lại; đăng ký ngừng học; ranh giới ngày/doanh thu/CSV. Xem kết quả thực chạy trong `KE_HOACH_KIEM_THU.md`.

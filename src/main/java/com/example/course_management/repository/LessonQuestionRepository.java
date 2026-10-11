@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 
 public interface LessonQuestionRepository extends JpaRepository<LessonQuestion, Integer> {
+  java.util.Optional<LessonQuestion> findByStudent_UserIdAndClientRequestId(Integer studentId, String clientRequestId);
+
   @EntityGraph(attributePaths = {"student", "answeredBy"})
   @Query(
       "SELECT q FROM LessonQuestion q WHERE q.lesson.lessonId = :lessonId AND (:manager = true OR"

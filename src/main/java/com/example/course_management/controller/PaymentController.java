@@ -70,8 +70,10 @@ public class PaymentController {
   @PutMapping("/{paymentId}/reject")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<PaymentResponse> reject(
-      @PathVariable Integer paymentId, @AuthenticationPrincipal CustomUserDetails actor) {
+      @PathVariable Integer paymentId,
+      @Valid @RequestBody(required=false) com.example.course_management.dto.request.RejectPaymentRequest request,
+      @AuthenticationPrincipal CustomUserDetails actor) {
     return ApiResponse.success(
-        "Đã từ chối yêu cầu thanh toán", paymentService.rejectPayment(paymentId, actor));
+        "Đã từ chối yêu cầu thanh toán", paymentService.rejectPayment(paymentId, request == null ? null : request.reason(), actor));
   }
 }

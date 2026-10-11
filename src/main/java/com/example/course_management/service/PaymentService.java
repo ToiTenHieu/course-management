@@ -18,4 +18,6 @@ public interface PaymentService {
   PaymentResponse confirmPayment(Integer paymentId, CustomUserDetails actor);
 
   PaymentResponse rejectPayment(Integer paymentId, CustomUserDetails actor);
+
+  PaymentResponse rejectPayment(Integer paymentId, String reason, CustomUserDetails actor);
 }

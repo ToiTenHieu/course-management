@@ -1,14 +1,16 @@
 import { dateTime } from './dates.js';
 import { api, appConfig } from './api.js';
 import { enhanceForms } from './experience.js';
+import { createSubmissionRecovery } from './submission-recovery.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date = dateTime;
 window.addEventListener('beforeunload', event => {
   if (document.querySelector('.lesson-assignment form[data-dirty="true"],.lesson-assignment[data-pending="true"]')) {event.preventDefault();event.returnValue='';}
 });
 export function assignmentCanLeave(root = document) {
-  if (root.querySelector('.lesson-assignment[data-pending="true"]')) return false;
-  return !root.querySelector('.lesson-assignment form[data-dirty="true"]') || confirm('Bỏ nội dung bài tập chưa lưu/nộp để chuyển bài?');
+  if (root.matches?.('.lesson-assignment[data-pending="true"]') || root.closest?.('.lesson-assignment[data-pending="true"]')
+      || root.querySelector('.lesson-assignment[data-pending="true"]')) return false;
+  return !root.querySelector('.lesson-assignment form[data-dirty="true"]') || confirm('Rời phần bài tập đang sửa? Nội dung chưa gửi sẽ mất. Nếu vừa lỗi nộp bài, kết quả có thể đã được lưu; mở lại để kiểm tra.');
 }
 function submissionMarkup(s) {
   return `<article class="assignment-submission"><div class="section-heading"><h4>${esc(s.studentName)}</h4><span class="badge ${s.score===null?'warm':'good'}">${s.score===null?'Chờ chấm':s.score+'/100'}</span></div><p class="hint">Nộp ${esc(date(s.submittedAt))} · Phiên bản đề ${s.assignmentRevision}</p><details><summary>Đề tại thời điểm nộp: ${esc(s.assignmentTitle)}</summary><p class="assignment-text">${esc(s.assignmentInstructions)}</p></details>${s.answer?`<p class="assignment-text">${esc(s.answer)}</p>`:''}${s.fileName?`<a class="text-link" href="/api/assignment-submissions/${s.submissionId}/file" target="_blank" rel="noopener noreferrer">Tải bài nộp: ${esc(s.fileName)}</a>`:''}${s.score!==null?`<p><strong>Nhận xét của ${esc(s.gradedByName)}</strong> · ${esc(date(s.gradedAt))}</p><p class="assignment-text">${esc(s.feedback || 'Chưa có nhận xét')}</p>`:''}</article>`;
@@ -16,6 +18,10 @@ function submissionMarkup(s) {
 export function mountAssignment(root, lessonId, manager = false) {
   root.className += ' lesson-assignment';
   let definition, own, limits, request=0, page=0, ungradedOnly=false, key=crypto.randomUUID();
+  const submission = createSubmissionRecovery(
+    payload => api(`/lessons/${lessonId}/assignment/submissions`, 'POST', payload),
+    () => api(`/lessons/${lessonId}/assignment`),
+  );
   const pending = value => {root.dataset.pending=String(value);root.querySelectorAll('input,textarea,select,button').forEach(el=>{if(value){el.dataset.wasDisabled=String(el.disabled);el.disabled=true;}else if(el.dataset.wasDisabled!==undefined){el.disabled=el.dataset.wasDisabled==='true';delete el.dataset.wasDisabled;}});};
   const status = message => {root.querySelector('[data-status]').textContent=message;};
   const track = form => {form.addEventListener('input',()=>form.dataset.dirty='true');enhanceForms(form.parentElement);};
@@ -47,12 +53,12 @@ export function mountAssignment(root, lessonId, manager = false) {
         const file=form.elements.file.files[0];
         if(!form.elements.answer.value.trim() && !file){status('Nhập bài làm hoặc chọn tệp đính kèm');form.elements.answer.focus();return;}
         if(file && file.size>limits.maxFileBytes){status('Tệp vượt quá dung lượng cho phép');return;}
-        if(!confirm('Nộp bài tập này? Bạn có thể xem lại bài và nhận xét sau khi nộp.'))return;
+        if(!submission.unresolved && !confirm('Nộp bài tập này? Bạn có thể xem lại bài và nhận xét sau khi nộp.'))return;
         const data=new FormData(form);if(!file)data.delete('file');data.append('expectedRevision',String(definition.revision));data.append('submissionKey',key);
         pending(true);status('Đang nộp bài…');
-        try{own=await api(`/lessons/${lessonId}/assignment/submissions`,'POST',data);form.dataset.dirty='false';draw();status('Đã nộp bài, chờ giảng viên chấm');}
-        catch(error){status(error.message+' Nội dung bài làm vẫn được giữ.');}
-        finally{pending(false);}
+        try{own=await submission.submit(data);form.dataset.dirty='false';draw();status('Đã lưu bài nộp. Bạn có thể xem lại bài và nhận xét.');}
+        catch(error){status(error.message+(submission.unresolved?' Chưa xác định được kết quả. Bài làm được giữ nguyên; chọn kiểm tra / thử lại để nhận kết quả trước khi sửa.':' Nội dung bài làm vẫn được giữ.'));}
+        finally{pending(false);if(form.isConnected){form.querySelectorAll('textarea,input').forEach(el=>el.disabled=submission.unresolved);form.querySelector('button').textContent=submission.unresolved?'Kiểm tra / thử lại bài nộp':'Nộp bài tập';}}
       };
     }
     if(own && !manager) body.querySelector('[data-reload]').onclick=load;
@@ -65,6 +71,7 @@ export function mountAssignment(root, lessonId, manager = false) {
     try{
       const list=await api(`/lessons/${lessonId}/assignment/submissions?`+new URLSearchParams({page:String(page),size:'5',ungradedOnly:String(ungradedOnly)}));
       if(current!==request || !root.isConnected)return;
+      if(page>0 && page>=list.totalPages){page=Math.max(0,list.totalPages-1);return loadSubmissions();}
       target.innerHTML=`<div class="section-heading"><h4>${list.totalElements} bài nộp ${ungradedOnly?'chờ chấm':''}</h4><label class="checkbox-label"><input type="checkbox" data-ungraded ${ungradedOnly?'checked':''}> Chỉ bài chưa chấm</label></div>${list.content.map(s=>`${submissionMarkup(s)}<form data-grade="${s.submissionId}" class="assignment-grade"><label>Điểm (0–100)<input type="number" name="score" required min="0" max="100" step="1" value="${s.score??''}"></label><label>Nhận xét<textarea name="feedback" maxlength="10000" rows="3">${esc(s.feedback||'')}</textarea></label><button class="btn secondary compact">${s.score===null?'Lưu điểm':'Cập nhật điểm'}</button><p data-grade-status role="status"></p></form>`).join('')||'<p class="hint">Chưa có bài nộp phù hợp.</p>'}<nav class="pagination" aria-label="Phân trang bài nộp"><button class="chip" data-prev ${page===0?'disabled':''}>← Trước</button><span>Trang ${page+1}/${Math.max(1,list.totalPages)}</span><button class="chip" data-next ${page+1>=list.totalPages?'disabled':''}>Sau →</button><button class="chip" data-refresh>Tải lại bài nộp</button></nav>`;
       target.querySelector('[data-ungraded]').onchange=event=>{if(!assignmentCanLeave(target)){event.target.checked=ungradedOnly;return;}ungradedOnly=event.target.checked;page=0;loadSubmissions();};
       for(const [attribute,delta] of [['prev',-1],['next',1],['refresh',0]]) target.querySelector(`[data-${attribute}]`).onclick=()=>{if(assignmentCanLeave(target)){page+=delta;loadSubmissions();}};
@@ -73,14 +80,31 @@ export function mountAssignment(root, lessonId, manager = false) {
         form.onsubmit=async event=>{
           event.preventDefault();if(!form.reportValidity() || root.dataset.pending==='true')return;
           const s=list.content.find(s=>s.submissionId===Number(form.dataset.grade));pending(true);status('Đang lưu điểm…');form.querySelector('[data-grade-status]').textContent='';
-          try{const updated=await api(`/assignment-submissions/${s.submissionId}/grade`,'PUT',{expectedRevision:s.gradeRevision,score:Number(form.elements.score.value),feedback:form.elements.feedback.value});Object.assign(s,updated);form.previousElementSibling.outerHTML=submissionMarkup(updated);form.dataset.dirty='false';form.querySelector('button').textContent='Cập nhật điểm';form.querySelector('[data-grade-status]').textContent='';status('Đã lưu điểm');}
+          try{
+            const updated=await api(`/assignment-submissions/${s.submissionId}/grade`,'PUT',{expectedRevision:s.gradeRevision,score:Number(form.elements.score.value),feedback:form.elements.feedback.value});
+            Object.assign(s,updated);form.previousElementSibling.outerHTML=submissionMarkup(updated);form.dataset.dirty='false';
+            form.querySelector('button').textContent='Cập nhật điểm';form.querySelector('[data-grade-status]').textContent='';status('Đã lưu điểm');
+            if(ungradedOnly) {
+              if(!target.querySelector('form[data-dirty="true"]')) await loadSubmissions();
+              else {
+                form.previousElementSibling.remove();form.remove();list.totalElements--;
+                list.totalPages=Math.ceil(list.totalElements/5);
+                target.querySelector('h4').textContent=`${list.totalElements} bài nộp chờ chấm`;
+                target.querySelector('.pagination span').textContent=`Trang ${page+1}/${Math.max(1,list.totalPages)}`;
+                const next=target.querySelector('[data-next]');
+                next.disabled=page+1>=list.totalPages;next.dataset.wasDisabled=String(next.disabled);
+                status('Đã lưu điểm và bỏ bài khỏi danh sách chờ chấm. Các nhận xét khác đang soạn vẫn được giữ.');
+              }
+            }
+          }
           catch(error){form.querySelector('[data-grade-status]').textContent=error.message;}
           finally{pending(false);}
         };
       });
-    }catch(error){target.innerHTML='<p role="status"></p><button class="btn secondary compact">Thử tải lại bài nộp</button>';target.querySelector('p').textContent=error.message;target.querySelector('button').onclick=loadSubmissions;}
+    }catch(error){if(current!==request || !root.isConnected || !target.isConnected)return;target.innerHTML='<p role="status"></p><button class="btn secondary compact">Thử tải lại bài nộp</button>';target.querySelector('p').textContent=error.message;target.querySelector('button').onclick=loadSubmissions;}
   }
   async function load() {
+    submission.reset();
     root.innerHTML='<p class="hint" role="status">Đang tải bài tập…</p>';
     try{const [view,config]=await Promise.all([api(`/lessons/${lessonId}/assignment`),appConfig()]);if(!root.isConnected)return;definition=view.assignment;own=view.submission;limits=config.learning;key=crypto.randomUUID();draw();}
     catch(error){root.innerHTML='<p role="status"></p><button class="btn secondary compact">Thử tải lại bài tập</button>';root.querySelector('p').textContent=error.message;root.querySelector('button').onclick=load;}

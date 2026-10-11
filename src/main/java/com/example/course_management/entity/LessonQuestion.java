@@ -26,6 +26,9 @@ public class LessonQuestion {
   @Column(nullable = false, columnDefinition = "TEXT")
   private String body;
 
+  @Column(length = 36)
+  private String clientRequestId;
+
   @Column(columnDefinition = "TEXT")
   private String answer;
 

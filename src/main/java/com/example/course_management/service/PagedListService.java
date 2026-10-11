@@ -109,6 +109,7 @@ public class PagedListService {
         .amount(p.getAmount())
         .status(p.getStatus().name())
         .transferNote(p.getTransferNote())
+        .rejectionReason(p.getRejectionReason())
         .createdAt(p.getCreatedAt())
         .confirmedAt(p.getConfirmedAt())
         .build();

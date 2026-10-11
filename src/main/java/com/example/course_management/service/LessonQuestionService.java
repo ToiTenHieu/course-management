@@ -69,6 +69,10 @@ public class LessonQuestionService {
   }
 
   public LessonQuestionResponse ask(Integer lessonId, String body, CustomUserDetails actor) {
+    return ask(lessonId, body, null, actor);
+  }
+
+  public LessonQuestionResponse ask(Integer lessonId, String body, String clientRequestId, CustomUserDetails actor) {
     var courseId =
         lessons
             .findCourseId(lessonId)
@@ -78,10 +82,23 @@ public class LessonQuestionService {
     access(lesson, actor);
     if (actor.getUser().getRole() != Role.STUDENT)
       throw new ForbiddenException("Chỉ học viên được đặt câu hỏi");
+    String content = text(body);
+    String key = clientRequestId == null ? null : requestKey(clientRequestId);
+    if (key != null) {
+      var existing = questions.findByStudent_UserIdAndClientRequestId(actor.getUser().getUserId(), key);
+      if (existing.isPresent()) {
+        var saved = existing.get();
+        if (!saved.getLesson().getLessonId().equals(lessonId) || !saved.getBody().equals(content))
+          throw new ConflictException("Mã gửi đã được sử dụng cho câu hỏi khác");
+        if (saved.getIsHidden()) throw missing();
+        return response(saved, replies.countVisible(saved.getQuestionId(), false));
+      }
+    }
     var q = new LessonQuestion();
     q.setLesson(lesson);
     q.setStudent(actor.getUser());
-    q.setBody(text(body));
+    q.setBody(content);
+    q.setClientRequestId(key);
     questions.saveAndFlush(q);
     notify(lesson.getCourse().getTeacher(), "Có câu hỏi mới trong bài: " + lesson.getTitle(), q);
     return response(q);
@@ -121,9 +138,7 @@ public class LessonQuestionService {
     if (actor.getUser().getRole() != Role.STUDENT && !policy.manages(q.getLesson().getCourse(), actor))
       throw new ForbiddenException("Bạn không phụ trách khóa học này");
     String content = text(body);
-    if (clientRequestId == null || !clientRequestId.matches("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"))
-      throw new BadRequestException("Mã gửi phản hồi không hợp lệ");
-    String key = clientRequestId.toLowerCase(Locale.ROOT);
+    String key = requestKey(clientRequestId);
     var existing = replies.findByAuthor_UserIdAndClientRequestId(actor.getUser().getUserId(), key);
     if (existing.isPresent()) {
       var saved = existing.get();
@@ -227,6 +242,12 @@ public class LessonQuestionService {
     if (value == null || value.isBlank() || value.length() > 5000)
       throw new BadRequestException("Nội dung cần từ 1 đến 5000 ký tự");
     return value.strip();
+  }
+
+  private String requestKey(String value) {
+    if (value == null || !value.matches("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"))
+      throw new BadRequestException("Mã gửi không hợp lệ");
+    return value.toLowerCase(Locale.ROOT);
   }
 
   private void notify(User recipient, String message, LessonQuestion q) {

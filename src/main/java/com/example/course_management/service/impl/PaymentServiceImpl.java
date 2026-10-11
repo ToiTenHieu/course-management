@@ -162,6 +162,16 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Override
   public PaymentResponse rejectPayment(Integer paymentId, CustomUserDetails actor) {
+    return rejectPayment(paymentId, null, actor);
+  }
+
+  @Override
+  public PaymentResponse rejectPayment(Integer paymentId, String reason, CustomUserDetails actor) {
+    if (reason != null && (reason.isBlank() || reason.length() > 1000))
+      throw new BadRequestException("Nhập lý do từ chối, tối đa 1000 ký tự");
+    String explanation = reason == null
+        ? "Vui lòng liên hệ quản trị viên để đối chiếu yêu cầu này trước khi tạo yêu cầu mới."
+        : reason.strip();
     Integer studentId = findStudentIdOrThrow(paymentId);
     users
         .findLockedById(studentId)
@@ -174,8 +184,16 @@ public class PaymentServiceImpl implements PaymentService {
       throw new BadRequestException("Yêu cầu thanh toán này đã được xử lý trước đó");
     }
     payment.setStatus(PaymentStatus.REJECTED);
+    payment.setRejectionReason(explanation);
     payment.setConfirmedAt(ApplicationTime.now());
     payment.setConfirmedBy(actor.getUser());
+    Notification notice = new Notification();
+    notice.setUser(payment.getStudent());
+    notice.setType("PAYMENT_REJECTED");
+    notice.setMessage("Yêu cầu " + payment.getTransferNote() + " cho khóa " + payment.getCourse().getTitle()
+        + " đã bị từ chối. Lý do: " + explanation);
+    notice.setTargetUrl("/my-payments.html?status=REJECTED");
+    notifications.save(notice);
     audit.record(actor, "PAYMENT_REJECTED", "PAYMENT", paymentId, payment.getCourse().getTitle(), "PENDING", "REJECTED");
     return toResponse(paymentRepository.save(payment));
   }
@@ -198,6 +216,7 @@ public class PaymentServiceImpl implements PaymentService {
         .amount(p.getAmount())
         .status(p.getStatus().name())
         .transferNote(p.getTransferNote())
+        .rejectionReason(p.getRejectionReason())
         .createdAt(p.getCreatedAt())
         .confirmedAt(p.getConfirmedAt())
         .build();

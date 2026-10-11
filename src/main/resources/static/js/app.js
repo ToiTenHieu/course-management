@@ -1,4 +1,6 @@
 import { dateOnly } from './dates.js';
+import { mountLearningAssessment } from './learning-assessment.js';
+import { loginDestination, loginUrl } from './navigation.js';
 import { mountCurriculumEditor, curriculumCanLeave } from "./curriculum.js";
 import { mountAssignment, assignmentCanLeave } from "./assignments.js";
 import { mountActivityReport } from "./activity-report.js";
@@ -140,6 +142,7 @@ function shell(title, subtitle, content, actions = "") {
     ...(user.role === "STUDENT"
       ? [
           ["my-courses", "play", "Việc học của tôi"],
+          ["learning-assessment", "chart", "Kiểm tra đầu vào"],
           ["wishlist", "heart", "Khóa quan tâm"],
           ["my-payments", "card", "Thanh toán"],
         ]
@@ -186,7 +189,7 @@ async function action(fn, button) {
   } catch (e) {
     toast(e.message, true);
     if (e.status === 401)
-      setTimeout(() => (location.href = "/login.html"), 1200);
+      setTimeout(() => (location.href = loginUrl()), 1200);
   } finally {
     setPending(button, false);
   }
@@ -530,14 +533,7 @@ async function login() {
           toast("Tài khoản đã sẵn sàng. Hãy đăng nhập.");
         } else {
           await api("/auth/login", "POST", data);
-          const next = params.get("next");
-          location.href =
-            next &&
-            /^\/(?:course-detail|courses|my-courses|learn|wishlist|teacher)\.html(?:\?[^#]*)?(?:#[a-zA-Z0-9_-]+)?$/.test(
-              next,
-            )
-              ? next
-              : "/dashboard.html";
+          location.href = loginDestination(params.get("next"));
         }
       } catch (error) {
         $("#authError").innerHTML = errorBox(error);
@@ -571,6 +567,7 @@ async function dashboard() {
   let body = "",
     actions = "";
   if (student) {
+    actions = link("Kiểm tra đầu vào →", "/learning-assessment.html", "btn secondary");
     const [enrollments, payments] = await Promise.all([
       api("/lists/enrollments?status=ENROLLED&size=3"),
       api("/lists/payments?status=PENDING&size=1"),
@@ -1185,6 +1182,7 @@ async function detail() {
         Number($("#questionLesson").value),
         manager,
         target,
+        user.userId,
       );
     }
     $("#questionLesson").onchange = () => {
@@ -1199,6 +1197,20 @@ async function detail() {
     discussion(Number(discussionParams.get("questionId")) || null);
   }
   if (manager) {
+    const publishedLessons = lessons.filter(l => l.isPublished);
+    if (c.status === "PUBLISHED" && publishedLessons.length === 1) {
+      const note = document.createElement("p");
+      note.id = "lastPublishedLessonNotice";
+      note.className = "notice";
+      note.textContent = "Khóa đang mở phải có ít nhất một bài xuất bản. Xuất bản bài thay thế hoặc nhờ quản trị viên chuyển khóa về bản nháp trước khi ẩn/xóa bài cuối cùng.";
+      $("#curriculum").prepend(note);
+      for (const selector of [`[data-publish="${publishedLessons[0].lessonId}"]`, `[data-delete-lesson="${publishedLessons[0].lessonId}"]`]) {
+        const button = app.querySelector(selector);
+        button.disabled = true;
+        button.dataset.unavailable = "true";
+        button.setAttribute("aria-describedby", note.id);
+      }
+    }
     $("#addLesson").onclick = () =>
       action(() =>
         lessonEditor(
@@ -1238,7 +1250,7 @@ async function detail() {
         (b.onclick = () =>
           confirmAction(
             "Xóa bài học",
-            "Bài học, tiến độ, hỏi đáp và lịch sử quiz của bài sẽ được xóa. Tiến độ khóa học sẽ được tính lại.",
+            "Chỉ xóa bài chưa có hoạt động học. Bài có ghi chú, tiến độ, hỏi đáp, quiz đã làm hoặc bài nộp cần được ẩn để giữ lịch sử.",
             async () => {
               await api("/lessons/" + b.dataset.deleteLesson, "DELETE");
               await refreshAfterWrite(detail);
@@ -1579,7 +1591,7 @@ async function learn() {
       mountAssignment(assignmentContainer, lessonId);
       discussion.className = "lesson-discussion";
       $("#lessonContent").append(discussion);
-      mountQuestions(discussion, lessonId, false);
+      mountQuestions(discussion, lessonId, false, null, user.userId);
       if (resource) {
         resource.target = "_blank";
         resource.rel = "noopener noreferrer";
@@ -1788,14 +1800,14 @@ async function payments() {
     admin
       ? "Đối chiếu chuyển khoản và cấp quyền học cho học viên."
       : "Theo dõi yêu cầu và trạng thái đăng ký khóa học.",
-    `<div class="stats">${stat("Đang chờ", stats.PENDING, "Chờ đối chiếu chuyển khoản", "clock")}${stat("Đã xác nhận", stats.CONFIRMED, "Đã cấp quyền học", "check")}${stat("Đã từ chối", stats.REJECTED, "Có thể tạo yêu cầu mới", "card")}</div><div class="catalog-toolbar"><label class="search-box">${icon("search")}<input id="paymentSearch" type="search" placeholder="Tìm khóa, học viên hoặc mã CK" aria-label="Tìm thanh toán"></label><select id="paymentSort" aria-label="Sắp xếp thanh toán"><option value="old">Cũ nhất trước</option><option value="new">Mới nhất trước</option></select><select id="paymentFilter" aria-label="Lọc trạng thái"><option value="">Mọi trạng thái</option>${["PENDING", "CONFIRMED", "REJECTED"].map((v) => `<option value="${v}">${labels[v]}</option>`).join("")}</select><p class="hint">Thanh toán chuyển khoản được quản trị viên xác nhận thủ công.</p></div>${statusTabs(
+    `<div class="stats">${stat("Đang chờ", stats.PENDING, "Chờ đối chiếu chuyển khoản", "clock")}${stat("Đã xác nhận", stats.CONFIRMED, "Đã cấp quyền học", "check")}${stat("Đã từ chối", stats.REJECTED, "Xem lý do và đối chiếu trước khi gửi lại", "card")}</div><div class="catalog-toolbar"><label class="search-box">${icon("search")}<input id="paymentSearch" type="search" placeholder="Tìm khóa, học viên hoặc mã CK" aria-label="Tìm thanh toán"></label><select id="paymentSort" aria-label="Sắp xếp thanh toán"><option value="old">Cũ nhất trước</option><option value="new">Mới nhất trước</option></select><select id="paymentFilter" aria-label="Lọc trạng thái"><option value="">Mọi trạng thái</option>${["PENDING", "CONFIRMED", "REJECTED"].map((v) => `<option value="${v}">${labels[v]}</option>`).join("")}</select><p class="hint">Thanh toán chuyển khoản được quản trị viên xác nhận thủ công.</p></div>${statusTabs(
       [
         ["", "Tất cả"],
         ["PENDING", "Chờ xác nhận"],
         ["CONFIRMED", "Đã xác nhận"],
         ["REJECTED", "Đã từ chối"],
       ],
-    )}<p id="listCount" class="result-count" role="status" aria-live="polite"></p><div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Khóa học${admin ? " / học viên" : ""}</th><th>Số tiền</th><th>Nội dung CK</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="paymentRows"></tbody></table></div></div><nav id="listPager" class="pagination" aria-label="Phân trang thanh toán"></nav>`,
+    )}<p id="listCount" class="result-count" role="status" aria-live="polite"></p><div class="panel table-panel"><div class="table-wrap"><table class="payments-table"><thead><tr><th>Khóa học${admin ? " / học viên" : ""}</th><th>Số tiền</th><th>Nội dung CK</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="paymentRows"></tbody></table></div></div><nav id="listPager" class="pagination" aria-label="Phân trang thanh toán"></nav>`,
   );
   function draw() {
     const list = data;
@@ -1803,7 +1815,7 @@ async function payments() {
       list
         .map(
           (p) =>
-            `<tr><td><strong>${esc(p.courseTitle)}</strong><small>${admin ? esc(p.studentName) + " · " : ""}${date(p.createdAt)}</small></td><td><strong>${money(p.amount)}</strong></td><td><code>${esc(p.transferNote)}</code></td><td>${badge(p.status)}</td><td><div class="row-actions">${p.status === "PENDING" ? (admin ? `<button class="text-link" data-confirm="${p.paymentId}">Xác nhận</button><button class="text-link danger" data-reject="${p.paymentId}">Từ chối</button>` : `<button class="text-link" data-bank="${p.paymentId}">Hướng dẫn CK</button>`) : link("Xem khóa học", "/course-detail.html?id=" + p.courseId, "text-link")}</div></td></tr>`,
+            `<tr><td><strong>${esc(p.courseTitle)}</strong><small>${admin ? esc(p.studentName) + " · " : ""}${date(p.createdAt)}</small></td><td><strong>${money(p.amount)}</strong></td><td><code>${esc(p.transferNote)}</code></td><td>${badge(p.status)}${p.status === "REJECTED" ? `<small class="payment-reason">Lý do: ${esc(p.rejectionReason || "Yêu cầu cũ chưa có lý do được lưu. Liên hệ quản trị viên để đối chiếu.")}</small>` : ""}</td><td><div class="row-actions">${p.status === "PENDING" ? (admin ? `<button class="text-link" data-confirm="${p.paymentId}">Xác nhận</button><button class="text-link danger" data-reject="${p.paymentId}">Từ chối</button>` : `<button class="text-link" data-bank="${p.paymentId}">Hướng dẫn CK</button>`) : link("Xem khóa học", "/course-detail.html?id=" + p.courseId, "text-link")}</div></td></tr>`,
         )
         .join("") ||
       '<tr><td colspan="5">Chưa có yêu cầu thanh toán.</td></tr>';
@@ -1823,13 +1835,15 @@ async function payments() {
     document.querySelectorAll("[data-reject]").forEach(
       (b) =>
         (b.onclick = () =>
-          confirmAction(
+          showDialog(
             "Từ chối yêu cầu",
-            "Học viên có thể tạo yêu cầu mới sau khi yêu cầu này bị từ chối.",
-            async () => {
-              await api("/payments/" + b.dataset.reject + "/reject", "PUT");
+            `<p>Lý do sẽ được lưu và thông báo cho học viên. Nếu học viên đã chuyển tiền, cần đối chiếu trước khi yêu cầu chuyển lại.</p>${textarea("Lý do từ chối", "reason", "", 'required maxlength="1000"')}`,
+            async (data) => {
+              await api("/payments/" + b.dataset.reject + "/reject", "PUT", data);
+              toast("Đã từ chối và thông báo cho học viên");
               await refreshAfterWrite(payments);
             },
+            "Từ chối và thông báo",
           )),
     );
     document
@@ -2065,6 +2079,12 @@ async function settings() {
   };
 }
 
+async function learningAssessment() {
+  if (user.role !== "STUDENT") throw new ApiError("Kiểm tra đầu vào dành cho học viên.", 403);
+  shell("Kiểm tra đầu vào", "Tìm điểm bắt đầu và lộ trình phù hợp với mục tiêu, kiến thức và thời gian của bạn.", '<div id="learningAssessment"></div>');
+  await mountLearningAssessment($("#learningAssessment"), user.userId);
+}
+
 async function audit() {
   if (user.role !== "ADMIN") throw new ApiError("Lịch sử thao tác dành cho quản trị viên.", 403);
   shell("Lịch sử thao tác", "Tra cứu thanh toán, quyền tài khoản và trạng thái khóa học.", '<section class="panel" id="auditLog"></section>');
@@ -2160,6 +2180,7 @@ async function start() {
     if (!user && page === "course-detail") return await guestDetail();
     const routes = {
       dashboard,
+      "learning-assessment": learningAssessment,
       courses,
       "course-detail": detail,
       teacher: teacherPage,
@@ -2181,7 +2202,7 @@ async function start() {
     await resumeWishlistIntent();
   } catch (error) {
     if (error.status === 401) {
-      location.replace("/login.html?" + new URLSearchParams({ next: location.pathname + location.search + location.hash }));
+      location.replace(loginUrl());
       return;
     }
     if (user) {

@@ -1,6 +1,7 @@
 import { dateTime } from './dates.js';
 import { api, appConfig } from "./api.js";
 import { enhanceForms } from "./experience.js";
+import { createSessionDraft } from './session-draft.js';
 
 const esc = (value) =>
   String(value ?? "").replace(
@@ -11,8 +12,6 @@ const esc = (value) =>
       ],
   );
 let letters = [];
-const editorDrafts = new Map();
-const selections = new Map();
 const date = dateTime;
 const blankQuestion = () => ({
   prompt: "",
@@ -25,6 +24,18 @@ export function mountQuiz(root, lessonId, manager, userId) {
   const draftKey = `${userId}:${lessonId}`;
   const pendingKey = `cm-quiz-pending:${draftKey}`;
   let settings;
+  let durable=true;
+  const editorDraft = createSessionDraft(`cm-quiz-editor:${draftKey}`, value => !!settings && !!value
+    && Number.isInteger(value.expectedRevision) && value.expectedRevision>=0
+    && typeof value.title==='string' && value.title.length<=255
+    && typeof value.published==='boolean' && Number.isFinite(value.passPercentage)
+    && value.passPercentage>=0 && value.passPercentage<=100
+    && Array.isArray(value.questions) && value.questions.length>=1 && value.questions.length<=settings.maxQuizQuestions
+    && value.questions.every(q=>typeof q?.prompt==='string' && q.prompt.length<=5000
+      && typeof q.explanation==='string' && q.explanation.length<=5000
+      && Number.isInteger(q.correctIndex) && q.correctIndex>=0 && q.correctIndex<settings.quizOptionCount
+      && Array.isArray(q.options) && q.options.length===settings.quizOptionCount
+      && q.options.every(o=>typeof o==='string' && o.length<=1000)));
   let quiz = null,
     revision = 0,
     resultRevision = 0,
@@ -32,6 +43,9 @@ export function mountQuiz(root, lessonId, manager, userId) {
     historyPage = 0,
     busy = false;
   const active = () => root.isConnected;
+  window.addEventListener('beforeunload',event=>{
+    if(active() && (busy || !durable)){event.preventDefault();event.returnValue='';}
+  });
   function pending() {
     try {
       const saved = JSON.parse(sessionStorage.getItem(pendingKey) || "null");
@@ -57,6 +71,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
       if (value) sessionStorage.setItem(pendingKey, JSON.stringify(value));
       else sessionStorage.removeItem(pendingKey);
     } catch {
+      durable=false;
       /* The same mounted form still retains the submission key if storage is unavailable. */
     }
   }
@@ -88,9 +103,11 @@ export function mountQuiz(root, lessonId, manager, userId) {
   function renderStudent() {
     const saved = pending();
     const shown = saved?.quiz || quiz;
+    const answerDraft=shown?createSessionDraft(`cm-quiz-answers:${draftKey}:${shown.quizVersionId}`,value=>Array.isArray(value)
+      && value.length===shown.questions.length && value.every(a=>a===null || Number.isInteger(a)&&a>=0&&a<letters.length)):null;
     const values =
       saved?.payload.answers ||
-      selections.get(`${draftKey}:${shown?.quizVersionId}`) ||
+      answerDraft?.read() ||
       [];
     let inFlight = saved;
     root.innerHTML =
@@ -102,15 +119,15 @@ export function mountQuiz(root, lessonId, manager, userId) {
     const form = root.querySelector(".quiz-form");
     const status = root.querySelector(".quiz-status");
     if (form) {
-      form.onchange = () =>
-        selections.set(
-          `${draftKey}:${shown.quizVersionId}`,
-          shown.questions.map((_, i) =>
+      form.onchange = () => {
+        durable=answerDraft.write(shown.questions.map((_, i) =>
             form.querySelector(`input[name=q${i}]:checked`)
               ? Number(form.querySelector(`input[name=q${i}]:checked`).value)
               : null,
-          ),
-        );
+          ));
+        status.textContent=durable?'Đã giữ các đáp án trong tab này; nộp quiz để lưu kết quả.':'Trình duyệt không giữ được đáp án qua tải trang. Giữ trang này mở để tiếp tục.';
+      };
+      if(!saved && values.some(v=>v!==null))status.textContent='Đã khôi phục các đáp án đang chọn. Bạn có thể tiếp tục làm bài.';
       form.onsubmit = async (event) => {
         event.preventDefault();
         if (busy) return;
@@ -140,7 +157,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
             inFlight.payload,
           );
           setPending(null);
-          selections.delete(`${draftKey}:${shown.quizVersionId}`);
+          answerDraft.clear();durable=true;
           if (!active()) return;
           status.textContent =
             "Đã lưu kết quả. Bạn có thể xem lại trong lịch sử.";
@@ -254,7 +271,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
       header +
       `<div class="quiz-management-summary"><span class="badge ${quiz?.published ? "good" : "muted"}">${quiz ? (quiz.published ? "Quiz đã xuất bản" : "Quiz đang nháp") + ` · Phiên bản ${quiz.revision}` : "Chưa có quiz"}</span><button class="btn secondary compact" data-edit>Soạn quiz</button></div><div class="quiz-editor"></div><div class="quiz-statistics"></div>`;
     root.querySelector("[data-edit]").onclick = renderEditor;
-    if (editorDrafts.has(draftKey)) renderEditor();
+    if (editorDraft.read()) renderEditor();
     if (quiz) loadStatistics();
   }
   async function loadStatistics() {
@@ -272,7 +289,8 @@ export function mountQuiz(root, lessonId, manager, userId) {
   }
   function renderEditor() {
     const container = root.querySelector(".quiz-editor");
-    const model = editorDrafts.get(draftKey) || {
+    const restored = editorDraft.read();
+    const model = restored || {
       expectedRevision: quiz?.revision || 0,
       title: quiz?.title || "Kiểm tra sau bài học",
       passPercentage: quiz?.passPercentage || settings.defaultPassPercentage,
@@ -284,6 +302,15 @@ export function mountQuiz(root, lessonId, manager, userId) {
     };
     container.innerHTML = `<p class="hint">1–${settings.maxQuizQuestions} câu, mỗi câu có ${settings.quizOptionCount} lựa chọn và một đáp án đúng. Giải thích giúp học viên hiểu vì sao. Mỗi lần lưu tạo phiên bản mới và giữ lịch sử cũ. Bỏ xuất bản sẽ ẩn đề hiện tại với học viên.</p><form class="quiz-editor-form"><label>Tên quiz<input name="title" required maxlength="255" value="${esc(model.title)}"></label><label>Mức đạt (%)<input name="passPercentage" type="number" required min="1" max="100" value="${model.passPercentage}"></label><label class="quiz-option"><input type="checkbox" name="published" ${model.published ? "checked" : ""}><span>Xuất bản quiz cho học viên</span></label><div class="quiz-editor-questions">${model.questions.map((q, i) => `<fieldset data-question-index="${i}"><legend>Câu ${i + 1}</legend><label>Nội dung câu ${i + 1}<textarea name="prompt${i}" required rows="3" maxlength="5000">${esc(q.prompt)}</textarea></label>${q.options.map((o, j) => `<label>Lựa chọn ${letters[j]} của câu ${i + 1}<input name="option${i}_${j}" required maxlength="1000" value="${esc(o)}"></label>`).join("")}<label>Đáp án đúng của câu ${i + 1}<select name="correct${i}">${letters.map((letter, j) => `<option value="${j}" ${q.correctIndex === j ? "selected" : ""}>${letter}</option>`).join("")}</select></label><label>Giải thích câu ${i + 1}<textarea name="explanation${i}" required maxlength="5000" rows="3">${esc(q.explanation)}</textarea></label>${model.questions.length > 1 ? `<button type="button" class="text-link danger" data-remove="${i}">Bỏ câu ${i + 1}</button>` : ""}</fieldset>`).join("")}</div><div class="quiz-editor-actions"><button type="button" class="btn secondary compact" data-add ${model.questions.length >= settings.maxQuizQuestions ? "disabled" : ""}>Thêm câu hỏi</button><button type="submit" class="btn compact">Lưu quiz</button><button type="button" class="text-link" data-cancel>Đóng trình soạn</button></div><p class="quiz-editor-status" role="status" aria-live="polite"></p></form>`;
     const form = container.querySelector("form");
+    const draftStatus=document.createElement('p');draftStatus.className='hint';draftStatus.setAttribute('role','status');form.prepend(draftStatus);
+    if(restored)draftStatus.textContent=`Đã khôi phục bản soạn dựa trên phiên bản ${model.expectedRevision}. Phiên bản hiện tại: ${quiz?.revision||0}.`;
+    const remember=value=>{
+      durable=editorDraft.write(value);
+      draftStatus.textContent=durable?'Đã giữ bản soạn trong tab này. Lưu quiz để tạo phiên bản trên máy chủ.':'Trình duyệt không giữ được bản soạn qua tải trang. Giữ trang này mở để tránh mất nội dung.';
+    };
+    const discard=document.createElement('button');discard.type='button';discard.className='text-link danger';discard.textContent='Bỏ bản soạn';
+    discard.onclick=()=>{if(!busy && confirm('Bỏ bản soạn và quay về quiz đã lưu?')){editorDraft.clear();durable=true;renderEditor();}};
+    form.querySelector('.quiz-editor-actions').append(discard);
     enhanceForms(container);
     function collect() {
       const data = new FormData(form);
@@ -300,13 +327,13 @@ export function mountQuiz(root, lessonId, manager, userId) {
         })),
       };
     }
-    form.oninput = () => editorDrafts.set(draftKey, collect());
+    form.oninput = () => remember(collect());
     form.onchange = form.oninput;
     container.querySelector("[data-add]").onclick = () => {
       const value = collect();
       if (value.questions.length >= settings.maxQuizQuestions) return;
       value.questions.push(blankQuestion());
-      editorDrafts.set(draftKey, value);
+      remember(value);
       renderEditor();
     };
     container.querySelectorAll("[data-remove]").forEach(
@@ -314,19 +341,19 @@ export function mountQuiz(root, lessonId, manager, userId) {
         (b.onclick = () => {
           const value = collect();
           value.questions.splice(Number(b.dataset.remove), 1);
-          editorDrafts.set(draftKey, value);
+          remember(value);
           renderEditor();
         }),
     );
     container.querySelector("[data-cancel]").onclick = () => {
-      editorDrafts.set(draftKey, collect());
+      remember(collect());
       container.innerHTML = "";
     };
     form.onsubmit = async (event) => {
       event.preventDefault();
       if (busy) return;
       const value = collect();
-      editorDrafts.set(draftKey, value);
+      remember(value);
       busy = true;
       const status = form.querySelector(".quiz-editor-status");
       form
@@ -335,7 +362,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
       status.textContent = "Đang lưu phiên bản mới…";
       try {
         quiz = await api(`/lessons/${lessonId}/quiz`, "PUT", value);
-        editorDrafts.delete(draftKey);
+        editorDraft.clear();durable=true;
         if (active()) renderManager();
       } catch (error) {
         if (!active()) return;
@@ -367,7 +394,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
             button.textContent = "Dùng phiên bản mới làm cơ sở lưu";
             button.onclick = () => {
               model.expectedRevision = latest.revision;
-              editorDrafts.set(draftKey, collect());
+              remember(collect());
               status.textContent =
                 "Có thể lưu bản soạn thành phiên bản kế tiếp.";
             };
