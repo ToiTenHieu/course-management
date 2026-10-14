@@ -44,7 +44,7 @@ export async function mountCurriculumEditor(courseId, lessons, refresh) {
       group.ondragover = event => { if (dragged) { event.preventDefault();event.dataTransfer.dropEffect='move'; } };
       group.ondrop = event => { if (!dragged) return;event.preventDefault();const row=event.target.closest('[data-item]'),gi=Number(group.dataset.dropGroup);move(...dragged,gi,row?Number(row.dataset.item):plan.groups[gi].lessonIds.length);dragged=null; };
     });
-    content.querySelector('[data-reload]').onclick = async () => { if (dirty && !confirm('Bỏ thay đổi đang sắp xếp và tải lại?')) return;await load(); };
+    content.querySelector('[data-reload]').onclick = async () => { if (busy || dirty && !confirm('Bỏ thay đổi đang sắp xếp và tải lại?')) return;await load(); };
     content.querySelector('[data-save]').onclick = async () => {
       if (busy || !assignmentCanLeave()) return;
       const invalid=[...content.querySelectorAll('[data-title]')].find(i => !i.value.trim());
@@ -61,8 +61,24 @@ export async function mountCurriculumEditor(courseId, lessons, refresh) {
     };
   }
   async function load() {
-    try { plan=await api(`/courses/${courseId}/curriculum`);dirty=false;root.dataset.dirty='false';draw(); }
-    catch(error) { content.innerHTML='<p role="status"></p><button class="btn secondary compact" type="button">Thử tải lại</button>';content.querySelector('p').textContent=error.message;content.querySelector('button').onclick=load; }
+    if (busy || !root.isConnected) return;
+    busy=true;root.dataset.pending='true';root.setAttribute('aria-busy','true');
+    const controls=[...content.querySelectorAll('button,input,select')].map(el=>[el,el.disabled]);
+    const draggable=[...content.querySelectorAll('[draggable]')];
+    controls.forEach(([el])=>el.disabled=true);draggable.forEach(el=>el.draggable=false);
+    const status=content.querySelector('[data-status]');if(status)status.textContent='Đang tải chương trình…';
+    try {
+      const loaded=await api(`/courses/${courseId}/curriculum`);
+      if (!root.isConnected) return;
+      plan=loaded;dirty=false;root.dataset.dirty='false';draw();
+    } catch(error) {
+      if (!root.isConnected) return;
+      if (plan) content.querySelector('[data-status]').textContent=error.message+' Nội dung đang sắp xếp vẫn được giữ. Bạn có thể tiếp tục sửa hoặc thử tải lại.';
+      else { content.innerHTML='<p role="status"></p><button class="btn secondary compact" type="button">Thử tải lại</button>';content.querySelector('p').textContent=error.message;content.querySelector('button').onclick=load; }
+    } finally {
+      busy=false;root.dataset.pending='false';root.removeAttribute('aria-busy');
+      controls.forEach(([el,disabled])=>el.disabled=disabled);draggable.forEach(el=>el.draggable=true);
+    }
   }
   root.ontoggle = () => { if(root.open && !plan) load(); };
 }

@@ -80,7 +80,24 @@ export function video(value) {
 export async function mountResources(root, lessonId, manager = false, insertImage) {
   root.setAttribute("aria-busy", "true");
   root.innerHTML = '<p class="hint" role="status">Đang tải tài liệu đính kèm…</p>';
-  let limits;
+  let limits, busy = false;
+  const begin = message => {
+    if (busy || !root.isConnected) return false;
+    busy = true; root.dataset.pending = "true"; root.setAttribute("aria-busy", "true");
+    root.querySelectorAll("button,input").forEach(control => control.disabled = true);
+    root.querySelector("[data-status]").textContent = message;
+    return true;
+  };
+  const end = () => { busy = false; root.dataset.pending = "false"; root.setAttribute("aria-busy", "false"); };
+  const recover = error => {
+    if (!root.isConnected) return;
+    const status = root.querySelector("[data-status]");
+    status.textContent = `${error.message} Tải lại danh sách để kiểm tra kết quả trước khi thao tác tiếp.`;
+    const retry = document.createElement("button");
+    retry.type = "button"; retry.className = "text-link"; retry.textContent = "Thử tải lại tài liệu";
+    retry.onclick = () => mountResources(root, lessonId, manager, insertImage);
+    status.after(retry);
+  };
   const sizeLabel = () => {
     const units = ["byte", "KB", "MB", "GB"];
     let size = limits.maxFileBytes, unit = 0;
@@ -88,30 +105,33 @@ export async function mountResources(root, lessonId, manager = false, insertImag
     return `${size.toLocaleString("vi-VN", {maximumFractionDigits: 2})} ${units[unit]}`;
   };
   const render = (items) => {
+    if (!root.isConnected) return;
     root.innerHTML = `<h3>Tài liệu đính kèm</h3>${manager ? `<p class="hint">PDF, TXT, PNG, JPG, WebP · Tối đa ${sizeLabel()}/file, ${limits.maxResourcesPerLesson} file/bài. Tải lên và xóa tài liệu có hiệu lực ngay.</p><label>Tải tài liệu<input type="file" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp" data-upload ${items.length >= limits.maxResourcesPerLesson ? "disabled" : ""}></label>` : '<p class="hint">Mở tài liệu để xem hoặc tải xuống và thực hành cùng bài học.</p>'}<div class="resource-items">${items.map(r => `<div class="resource-item"><a href="/api/lesson-resources/${r.resourceId}/content" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a><small>${Math.ceil(r.size / 1024)} KB</small>${manager ? `<button type="button" class="text-link danger" data-remove="${r.resourceId}">Xóa</button>${r.mediaType.startsWith("image/") ? `<button type="button" class="text-link" data-image="${r.resourceId}">Chèn ảnh vào bài</button>` : ""}` : ""}</div>`).join("") || '<p class="muted-text">Chưa có tài liệu đính kèm.</p>'}</div><p data-status role="status"></p>`;
     if (!manager) return;
     root.querySelector("[data-upload]").onchange = async (e) => {
       const file = e.target.files[0];
-      if (!file) return;
+      if (!file || busy) return;
       const status = root.querySelector("[data-status]");
       if (file.size > limits.maxFileBytes) { status.textContent = `Mỗi tài liệu tối đa ${sizeLabel()}`; e.target.value = ""; return; }
       const body = new FormData(); body.append("file", file);
-      e.target.disabled = true; status.textContent = "Đang tải tài liệu…";
+      if (!begin("Đang tải tài liệu…")) return;
       try { render(await api(`/lessons/${lessonId}/resources`, "POST", body)); }
-      catch (error) { status.textContent = error.message; e.target.disabled = false; e.target.value = ""; }
+      catch (error) { e.target.value = ""; recover(error); }
+      finally { end(); }
     };
     root.querySelectorAll("[data-remove]").forEach(button => { button.onclick = async () => {
-      if (!window.confirm("Xóa tài liệu này? Ảnh đã chèn từ tài liệu sẽ không còn hiển thị.")) return;
-      button.disabled = true;
-      try { await api(`/lesson-resources/${button.dataset.remove}`, "DELETE"); render(await api(`/lessons/${lessonId}/resources`)); }
-      catch (error) { root.querySelector("[data-status]").textContent = error.message; button.disabled = false; }
+      if (busy || !window.confirm("Xóa tài liệu này? Ảnh đã chèn từ tài liệu sẽ không còn hiển thị.")) return;
+      if (!begin("Đang xóa tài liệu…")) return;
+      try { await api(`/lesson-resources/${button.dataset.remove}`, "DELETE"); render(items.filter(item => String(item.resourceId) !== button.dataset.remove)); }
+      catch (error) { recover(error); }
+      finally { end(); }
     }; });
-    root.querySelectorAll("[data-image]").forEach(button => { button.onclick = () => insertImage?.(`![Mô tả ảnh](/api/lesson-resources/${button.dataset.image}/content)`); });
+    root.querySelectorAll("[data-image]").forEach(button => { button.onclick = () => { if (!busy) insertImage?.(`![Mô tả ảnh](/api/lesson-resources/${button.dataset.image}/content)`); }; });
   };
   try {
     limits = (await appConfig()).learning;
     render(await api(`/lessons/${lessonId}/resources`));
   }
-  catch (error) { root.innerHTML = `<p role="alert">${esc(error.message)}</p><button type="button" class="text-link">Thử tải lại tài liệu</button>`; root.querySelector("button").onclick = () => mountResources(root, lessonId, manager, insertImage); }
+  catch (error) { if (root.isConnected) { root.innerHTML = `<p role="alert">${esc(error.message)}</p><button type="button" class="text-link">Thử tải lại tài liệu</button>`; root.querySelector("button").onclick = () => mountResources(root, lessonId, manager, insertImage); } }
   finally { root.setAttribute("aria-busy", "false"); }
 }

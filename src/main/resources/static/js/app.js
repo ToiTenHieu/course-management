@@ -14,6 +14,7 @@ import { api, ApiError, appConfig } from "./api.js";
 import { mountQuestions } from "./questions.js";
 import { mountQuiz } from "./quiz.js";
 import { mountLessonDraft } from "./lesson-drafts.js";
+import { createLessonNoteDraft } from './lesson-note-draft.js';
 import { mountResources } from "./lesson-content.js";
 import { enhanceForms, wireNavigation, setPending, lessonBody } from "./experience.js";
 import {
@@ -232,7 +233,7 @@ function showDialog(title, body, onSubmit, submit = "Lưu thay đổi") {
       modal.close();
     } catch (error) {
       $("#dialogError").innerHTML = errorBox(error);
-      status.textContent = "Chưa đóng: nội dung đang soạn vẫn được giữ. Hãy thử lưu nháp lại.";
+      status.textContent = "Chưa đóng: nội dung đang soạn vẫn được giữ. Hoàn tất thao tác đang chờ rồi thử lại.";
     } finally {
       closing = false;
       controls.forEach(input => { input.disabled = false; });
@@ -253,7 +254,7 @@ function showDialog(title, body, onSubmit, submit = "Lưu thay đổi") {
   $("#closeModal").onclick = $("#cancelModal").onclick = close;
   modal.oncancel = (event) => { event.preventDefault(); close(); };
   const beforeUnload = (event) => {
-    if (!dirty()) return;
+    if (!dirty() && !form.querySelector('[data-pending="true"]')) return;
     event.preventDefault(); event.returnValue = "";
   };
   window.addEventListener("beforeunload", beforeUnload);
@@ -995,6 +996,7 @@ async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
     lesson ? "Chỉnh sửa bài học" : "Thêm bài học",
     `<div class="editor-intro"><span class="eyebrow">CHĂM CHÚT TỪNG BÀI HỌC</span><p>${lesson?.isPublished ? "Bài đang xuất bản. Thay đổi được lưu sẽ cập nhật nội dung học viên đọc." : "Lưu nội dung trước, sau đó xuất bản từ chương trình khóa học."}</p></div><div class="editor-tabs" role="tablist" aria-label="Soạn bài học"><button type="button" id="editLessonTab" role="tab" aria-selected="true" aria-controls="lessonEditPanel">1. Soạn nội dung</button><button type="button" id="previewLessonTab" role="tab" aria-selected="false" aria-controls="lessonPreviewPanel" tabindex="-1">2. Xem trước</button></div><section id="lessonEditPanel" role="tabpanel" aria-labelledby="editLessonTab">${field("Tiêu đề bài học", "title", lesson?.title || "", "text", true, 'maxlength="255" placeholder="Ví dụ: Tạo ứng dụng đầu tiên"')}${field("Thứ tự", "orderIndex", lesson?.orderIndex || nextOrder, "number", true, 'min="1"')}${field("Liên kết tài liệu hoặc video", "contentUrl", lesson?.contentUrl || "", "url", false, 'maxlength="500" placeholder="https://…" aria-describedby="resourceHint"')}<p class="hint" id="resourceHint">Dùng liên kết HTTP/HTTPS. Học viên mở tài liệu hoặc video trong thẻ mới.</p>${select("Định dạng nội dung", "contentFormat", [["TEXT", "Văn bản thường"], ["MARKDOWN", "Nội dung có cấu trúc"]], lesson?.contentFormat || "MARKDOWN")}${field("Video trong phòng học", "videoUrl", lesson?.videoUrl || "", "url", false, 'maxlength="500" placeholder="https://www.youtube.com/watch?v=…" aria-describedby="videoHint"')}<p class="hint" id="videoHint">Dán link YouTube để xem ngay trong phòng học, không cần tải video lên. Có thể dùng link kèm mốc thời gian, ví dụ &amp;t=90s. Với video mượn cho demo, ghi tên kênh và nguồn trong nội dung bài học.</p><div class="content-toolbar" aria-label="Công cụ soạn nội dung"><button type="button" data-insert="heading">Tiêu đề</button><button type="button" data-insert="bold">In đậm</button><button type="button" data-insert="list">Danh sách</button><button type="button" data-insert="code">Đoạn mã</button><button type="button" data-insert="link">Liên kết</button><button type="button" data-insert="image">Ảnh</button></div>${textarea("Nội dung bài học", "textContent", lesson?.textContent || "", 'rows="10" maxlength="100000" aria-describedby="contentHint"')}<p class="hint" id="contentHint">Gợi ý: mục tiêu bài → giải thích → ví dụ → bài thực hành. Chế độ có cấu trúc hỗ trợ # tiêu đề, **in đậm**, danh sách, đoạn mã và ảnh. HTML được hiển thị như văn bản.</p></section><section id="lessonPreviewPanel" class="lesson-preview" role="tabpanel" aria-labelledby="previewLessonTab" hidden tabindex="0"></section>`,
     async (d) => {
+      if (files.dataset.pending === "true") throw new Error("Tài liệu đang được xử lý. Hãy chờ trước khi lưu bài học.");
       await draftEditor.prepare(d);
       d.orderIndex = Number(d.orderIndex);
       d.contentUrl = d.contentUrl || null;
@@ -1014,7 +1016,10 @@ async function lessonEditor(courseId, lesson, done, nextOrder = 1) {
   modal.addEventListener("close", () => modal.classList.remove("lesson-editor-dialog"), { once: true });
   const form = $("#dialogForm"), edit = $("#editLessonTab"), preview = $("#previewLessonTab");
   draftEditor = mountLessonDraft(form, courseId, lesson, draft);
-  dialog.beforeClose(() => draftEditor.flush());
+  dialog.beforeClose(() => {
+    if (files.dataset.pending === "true") throw new Error("Tài liệu đang được xử lý. Hãy chờ trước khi đóng trình soạn.");
+    return draftEditor.flush();
+  });
   $("#discardMessage").textContent = "Đóng trình soạn? Hệ thống sẽ lưu bản nháp trước khi đóng. Bài học chỉ cập nhật khi chọn Lưu thay đổi.";
   $("#discardChanges").textContent = "Đóng, giữ bản nháp";
   const resourceInput = form.elements.contentUrl;
@@ -1480,6 +1485,12 @@ async function learn() {
   let revision = 0,
     saving = false,
     savedText = "";
+  let completing = false;
+  const noteDrafts = new Map();
+  const noteDraft = lessonId => {
+    if (!noteDrafts.has(lessonId)) noteDrafts.set(lessonId, createLessonNoteDraft(user.userId, id, lessonId));
+    return noteDrafts.get(lessonId);
+  };
   shell(
     "Phòng học",
     e.courseTitle,
@@ -1521,6 +1532,7 @@ async function learn() {
       await api(`/enrollments/${id}/notes/${current}`, "PUT", { note });
       savedText = note;
       dirtyNote = false;
+      noteDraft(current).clear();
       status.textContent = "Đã lưu. Chỉ bạn có thể xem ghi chú này.";
       return true;
     } catch (error) {
@@ -1596,36 +1608,78 @@ async function learn() {
         resource.target = "_blank";
         resource.rel = "noopener noreferrer";
       }
-      $("#lessonNote").oninput = () => {
+      const input = $("#lessonNote"), noteStatus = $("#noteStatus");
+      const recordNote = () => {
         dirtyNote = $("#lessonNote").value !== savedText;
-        $("#noteStatus").textContent = dirtyNote
-          ? "Chưa lưu · " + $("#lessonNote").value.length + "/10000 ký tự"
+        const durable = noteDraft(lessonId).write(input.value, savedText);
+        noteStatus.textContent = dirtyNote
+          ? `Chưa lưu · ${input.value.length}/10000 ký tự · ${durable ? 'Đã giữ bản đang soạn trong tab này.' : 'Trình duyệt chưa giữ được bản nháp qua tải trang; hãy lưu ghi chú.'}`
           : "Ghi chú đã lưu.";
       };
+      input.oninput = recordNote;
+      const recovered = noteDraft(lessonId).read(savedText);
+      if (recovered?.conflict) {
+        input.readOnly = true;
+        const notice = document.createElement('div');
+        notice.className = 'notice';
+        notice.innerHTML = '<div><p>Ghi chú trên máy chủ đã thay đổi từ khi bạn soạn bản nháp. Chọn bản muốn tiếp tục trước khi chỉnh sửa.</p><details><summary>Xem bản đang soạn trong tab</summary><p class="profile-biography"></p></details><div class="row-actions"><button type="button" class="btn secondary compact" data-recover>Dùng bản đang soạn</button><button type="button" class="btn secondary compact" data-server>Giữ bản trên máy chủ</button></div></div>';
+        notice.querySelector('details p').textContent = recovered.note || '(Ghi chú trống)';
+        input.before(notice);
+        notice.querySelector('[data-recover]').onclick = () => {
+          input.readOnly = false; input.value = recovered.note; notice.remove(); recordNote(); input.focus();
+        };
+        notice.querySelector('[data-server]').onclick = () => {
+          noteDraft(lessonId).clear(); input.readOnly = false; notice.remove(); input.focus();
+        };
+      } else if (recovered) {
+        input.value = recovered.note;
+        dirtyNote = input.value !== savedText;
+        noteStatus.textContent = 'Đã khôi phục ghi chú đang soạn trong tab này. Lưu ghi chú để cập nhật trên máy chủ.';
+      }
       $("#saveNote").onclick = saveNotes;
       const attached = document.createElement("section");
       attached.className = "lesson-attachments";
       $(".lesson-footer").before(attached);
       mountResources(attached, l.lessonId);
-      $("#completeLesson").onclick = (event) =>
-        action(async () => {
+      $("#completeLesson").disabled = entry.isCompleted || completing;
+      $("#completeLesson").onclick = async (event) => {
+        if (completing || entry.isCompleted) return;
+        completing = true;
+        const button = event.currentTarget;
+        setPending(button, true);
+        try {
           if (!(await saveNotes())) return;
-          const completionRevision = revision;
           e = await api(
             `/enrollments/${id}/complete_lesson/${lessonId}`,
             "PUT",
           );
-          if (current !== lessonId || revision !== completionRevision) {
-            drawNav();
-            return;
-          }
+          drawNav();
           toast(
             Number(e.progressPercentage) === 100
               ? "Chúc mừng! Bạn đã hoàn thành khóa học."
               : "Đã ghi nhận tiến độ của bạn",
           );
-          await load(lessonId, "replaceState");
-        }, event.currentTarget);
+          if (current === lessonId) $("#completionBadge").innerHTML = badge("COMPLETED");
+          if (Number(e.progressPercentage) === 100 && !$(".completion-notice")) {
+            const notice = document.createElement('div');
+            notice.className = 'notice completion-notice';
+            notice.innerHTML = icon("check") + '<div><strong>Bạn đã hoàn thành khóa học!</strong><p>Ôn lại những điều quan trọng hoặc chia sẻ trải nghiệm để giúp học viên khác chọn khóa học.</p>' + link("Đánh giá khóa học →", "/course-detail.html?id=" + e.courseId + "#reviews", "text-link") + '</div>';
+            $(".private-notes").after(notice);
+          }
+        } catch (error) {
+          toast(error.message, true);
+          if (error.status === 401) setTimeout(() => location.href = loginUrl(), 1200);
+        } finally {
+          completing = false;
+          setPending(button, false);
+          const activeButton = $("#completeLesson");
+          const completed = e.lessons.find(l => l.lessonId === current)?.isCompleted;
+          if (activeButton) {
+            activeButton.disabled = !!completed;
+            if (completed) activeButton.innerHTML = icon("check") + ' Đã hoàn thành';
+          }
+        }
+      };
       if ($("#previousLesson"))
         $("#previousLesson").onclick = () => load(previous.lessonId);
       if ($("#nextLesson"))
@@ -1999,22 +2053,29 @@ async function profile() {
   $("#profileForm").onsubmit = (e) => {
     e.preventDefault();
     action(async () => {
-      const publicDraft = teacherProfile
-        ? Object.fromEntries(new FormData($("#teacherProfileForm"))) : null;
-      user = {
-        ...user,
-        ...(await api(
-          "/users/" + user.userId,
-          "PUT",
-          Object.fromEntries(new FormData(e.target)),
-        )),
-      };
-      toast("Đã cập nhật hồ sơ");
-      await profile();
-      if (publicDraft) for (const key of ["biography", "expertise"]) {
-        const input = $("#teacherProfileForm").elements[key];
-        input.value = publicDraft[key] || "";
-        input.dispatchEvent(new Event("input", { bubbles: true }));
+      const form = e.target;
+      const fields = [...form.querySelectorAll("input")];
+      const data = Object.fromEntries(new FormData(form));
+      $("#profileError").replaceChildren();
+      fields.forEach(input => { input.readOnly = true; });
+      try {
+        const saved = await api("/users/" + user.userId, "PUT", data);
+        user = { ...user, ...saved };
+        for (const key of ["fullName", "email"]) {
+          form.elements[key].value = user[key];
+          form.elements[key].dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        // Keep the other forms mounted, including edits made while this request was pending.
+        $(".profile-summary h2").textContent = user.fullName;
+        $(".account strong").textContent = user.fullName;
+        document.querySelectorAll(".profile-summary .avatar, .account .avatar, .top-actions .avatar")
+          .forEach(avatar => { avatar.textContent = initials(user.fullName); });
+        toast("Đã cập nhật hồ sơ");
+      } catch (error) {
+        $("#profileError").innerHTML = errorBox(error);
+        throw error;
+      } finally {
+        fields.forEach(input => { input.readOnly = false; });
       }
     }, e.submitter);
   };
@@ -2028,12 +2089,23 @@ async function profile() {
       return;
     }
     action(async () => {
-      await api("/users/" + user.userId + "/password", "PUT", {
-        oldPassword: d.oldPassword,
-        newPassword: d.newPassword,
-      });
-      toast("Đã đổi mật khẩu. Vui lòng đăng nhập lại.");
-      setTimeout(() => (location.href = "/login.html"), 1000);
+      $("#passwordError").replaceChildren();
+      const fields = [...e.target.querySelectorAll("input")];
+      fields.forEach(input => { input.readOnly = true; });
+      try {
+        await api("/users/" + user.userId + "/password", "PUT", {
+          oldPassword: d.oldPassword,
+          newPassword: d.newPassword,
+        });
+        e.target.reset();
+        toast("Đã đổi mật khẩu. Vui lòng đăng nhập lại.");
+        setTimeout(() => (location.href = "/login.html"), 1000);
+      } catch (error) {
+        $("#passwordError").innerHTML = errorBox(error);
+        throw error;
+      } finally {
+        fields.forEach(input => { input.readOnly = false; });
+      }
     }, e.submitter);
   };
 }
@@ -2056,22 +2128,71 @@ async function settings() {
     ${field("Mã BIN ngân hàng (cho QR)", "bankBin", values.bankBin || "", "text", false, 'inputmode="numeric" pattern="[0-9]{6}" maxlength="6" aria-describedby="bankQrHint"')}
     ${field("Số tài khoản", "bankAccount", values.bankAccount, "text", true, 'maxlength="255"')}
     ${field("Chủ tài khoản", "bankHolder", values.bankHolder, "text", true, 'maxlength="255"')}
-    </div><p class="hint" id="bankQrHint">Nhập mã BIN 6 chữ số đúng với ngân hàng nhận để bật QR; để trống để dùng chuyển khoản thủ công. Tài khoản cho QR gồm 1–19 ký tự chữ hoặc số. Kiểm tra mã BIN và tài khoản trước khi lưu. Ảnh QR được tải từ VietQR.io bằng thông tin chuyển khoản.</p></section><div id="settingsError" role="alert"></div><div class="row-actions"><button class="btn" type="submit">Lưu cài đặt</button><span class="hint" id="settingsStatus" role="status">Thay đổi có hiệu lực sau khi lưu. Tải lại các trang đang mở để nhận cài đặt mới.</span></div></form>`);
-  $("#settingsForm").onsubmit = event => {
+    </div><p class="hint" id="bankQrHint">Nhập mã BIN 6 chữ số đúng với ngân hàng nhận để bật QR; để trống để dùng chuyển khoản thủ công. Tài khoản cho QR gồm 1–19 ký tự chữ hoặc số. Kiểm tra mã BIN và tài khoản trước khi lưu. Ảnh QR được tải từ VietQR.io bằng thông tin chuyển khoản.</p></section><div id="settingsError" role="alert"></div><div class="row-actions"><button class="btn" type="submit">Lưu cài đặt</button><button class="btn secondary" type="button" id="reloadSettings">Tải cài đặt mới nhất</button><span class="hint" id="settingsStatus" role="status">Thay đổi có hiệu lực sau khi lưu. Tải lại các trang đang mở để nhận cài đặt mới.</span></div></form>`);
+  const form = $("#settingsForm"), reload = $("#reloadSettings"), status = $("#settingsStatus");
+  const snapshot = () => JSON.stringify([...new FormData(form)]);
+  let baseline = snapshot(), busy = false;
+  const fields = [...form.querySelectorAll("input")];
+  const lock = value => {
+    busy = value;
+    fields.forEach(input => { input.readOnly = value; });
+    reload.disabled = value;
+  };
+  const applyValues = () => {
+    for (const input of fields) {
+      input.value = input.name === "maxFileMB" ? values.maxFileBytes / mb : values[input.name] ?? "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    baseline = snapshot();
+  };
+  form.addEventListener("input", () => {
+    if (!busy) status.textContent = snapshot() !== baseline ? "Có thay đổi chưa lưu." : "Cài đặt khớp với bản đã tải.";
+  });
+  reload.onclick = () => {
+    if (busy || snapshot() !== baseline && !confirm("Bỏ thay đổi chưa lưu và tải cài đặt mới nhất?")) return;
+    action(async () => {
+      lock(true);
+      form.querySelector('[type="submit"]').disabled = true;
+      $("#settingsError").replaceChildren();
+      status.textContent = "Đang tải cài đặt mới nhất…";
+      try {
+        values = (await api("/settings")).values;
+        applyValues();
+        status.textContent = "Đã tải cài đặt mới nhất. Bạn có thể chỉnh sửa và lưu.";
+      } catch (error) {
+        $("#settingsError").innerHTML = errorBox(error);
+        status.textContent = "Chưa tải được cài đặt mới. Nội dung đang nhập vẫn được giữ.";
+        throw error;
+      } finally {
+        lock(false);
+        form.querySelector('[type="submit"]').disabled = false;
+      }
+    });
+  };
+  form.onsubmit = event => {
     event.preventDefault();
+    if (busy) return;
     action(async () => {
       $("#settingsError").replaceChildren();
       const data = Object.fromEntries(new FormData(event.target));
       data.maxFileBytes = Math.round(Number(data.maxFileMB) * mb);
       delete data.maxFileMB;
       for (const key of ["maxResourcesPerLesson", "maxQuizQuestions", "defaultPassPercentage"]) data[key] = Number(data[key]);
+      lock(true);
+      status.textContent = "Đang lưu cài đặt…";
       try {
         values = await api("/settings", "PUT", { ...data, revision: values.revision });
+        applyValues();
+        status.textContent = "Đã lưu cài đặt. Tải lại các trang đang mở để nhận thay đổi.";
       } catch (error) {
         $("#settingsError").innerHTML = errorBox(error);
+        status.textContent = error.status === 409
+          ? "Nội dung đang nhập vẫn được giữ. Tải cài đặt mới nhất trước khi sửa và lưu lại."
+          : "Chưa xác nhận lưu cài đặt. Nội dung đang nhập vẫn được giữ.";
         throw error;
+      } finally {
+        lock(false);
       }
-      $("#settingsStatus").textContent = "Đã lưu cài đặt. Tải lại các trang đang mở để nhận thay đổi.";
       toast("Đã lưu cài đặt");
       try { uiConfig = await appConfig(true); }
       catch { toast("Cài đặt đã lưu. Tải lại trang để cập nhật giao diện.", true); }

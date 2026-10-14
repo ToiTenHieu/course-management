@@ -9,14 +9,17 @@ const escapeText = (value) => String(value ?? "").replace(/[&<>"']/g,
 export function setPending(button, pending, text = "Đang xử lý…") {
   if (!button) return;
   if (pending) {
-    pendingContent.set(button, button.innerHTML);
+    if (!pendingContent.has(button)) pendingContent.set(button, { html: button.innerHTML, disabled: button.disabled });
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
     button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span>' + escapeText(text);
   } else {
-    button.disabled = false;
     button.removeAttribute("aria-busy");
-    if (pendingContent.has(button)) button.innerHTML = pendingContent.get(button);
+    if (pendingContent.has(button)) {
+      const initial = pendingContent.get(button);
+      button.innerHTML = initial.html;
+      button.disabled = initial.disabled;
+    }
     pendingContent.delete(button);
   }
 }
