@@ -87,6 +87,8 @@ $env:GEMINI_API_KEY = 'key-cua-ban'
 # Tùy chọn: $env:GEMINI_MODEL = 'gemini-3.5-flash-lite'; $env:AI_REQUESTS_PER_MINUTE = '10'
 ```
 
+Khi có key, làm tiếp 9 test case cần Gemini thật và cập nhật tài liệu theo [hướng dẫn hoàn tất kiểm thử AI](docs/HOAN_TAT_KIEM_THU_AI_VOI_KEY_GEMINI.md).
+
 Mỗi người dùng tối đa `AI_REQUESTS_PER_MINUTE` lượt Trợ giảng/soạn quiz mỗi phút. Gói miễn phí của Gemini có giới hạn riêng theo phút/ngày và Google có thể dùng dữ liệu gửi lên để cải thiện dịch vụ, nên chỉ dùng cho demo. Test tự động dùng AI giả lập, không gọi Gemini.
 
 ## Cấu hình và database
