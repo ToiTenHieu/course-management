@@ -97,7 +97,8 @@ class AiFeatureTests {
     mvc.perform(post("/api/lessons/" + lesson.getLessonId() + "/ai/tutor").with(csrf())
         .contentType("application/json").content("{\"question\":\"x\"}")).andExpect(status().isUnauthorized());
     mvc.perform(post("/api/lessons/" + lesson.getLessonId() + "/ai/tutor").with(csrf()).session(login(student))
-        .contentType("application/json").content("{\"question\":\"  \"}")).andExpect(status().isBadRequest());
+        .contentType("application/json").content("{\"question\":\"  \"}")).andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Hãy nhập câu hỏi cho trợ giảng AI"));
   }
 
   @Test
@@ -132,6 +133,9 @@ class AiFeatureTests {
     assertThrows(BadRequestException.class, () -> ai.quizDraft(lesson.getLessonId(), 11, actor(teacher)));
     mvc.perform(post("/api/lessons/" + lesson.getLessonId() + "/quiz/ai-draft").with(csrf()).session(login(student))
         .contentType("application/json").content("{\"count\":3}")).andExpect(status().isForbidden());
+    mvc.perform(post("/api/lessons/" + lesson.getLessonId() + "/quiz/ai-draft").with(csrf()).session(login(teacher))
+        .contentType("application/json").content("{\"count\":11}")).andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Số câu cần từ 1 đến 10"));
     when(client.generate(anyString(), anyList(), notNull())).thenReturn("không phải JSON");
     var error = assertThrows(ResponseStatusException.class, () -> ai.quizDraft(lesson.getLessonId(), 3, actor(teacher)));
     assertEquals(502, error.getStatusCode().value());
