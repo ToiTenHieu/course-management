@@ -1,5 +1,6 @@
 import { dateTime } from './dates.js';
 import { mountPagedList } from './lists.js';
+import { api, appConfig } from './api.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const labels = {ENROLLED:'Đang học',COMPLETED:'Hoàn thành',DROPPED:'Ngừng học'};
 const number = value => Number(value).toLocaleString('vi-VN',{maximumFractionDigits:1});
@@ -9,6 +10,22 @@ export async function mountCourseStudents(courseId) {
   section.className = 'panel'; section.id = 'students';
   section.innerHTML = `<div class="section-heading"><div><h2>Học viên trong khóa</h2><p>Theo dõi tiến độ và những câu hỏi cần phản hồi.</p></div></div><div id="courseStudentSummary" class="student-summary"></div><div class="catalog-toolbar"><label class="search-box"><input type="search" id="courseStudentSearch" aria-label="Tìm học viên trong khóa" placeholder="Tên hoặc tài khoản học viên"></label><select id="courseStudentStatus" aria-label="Trạng thái học viên"><option value="">Tất cả trạng thái</option><option value="ENROLLED">Đang học</option><option value="COMPLETED">Hoàn thành</option><option value="DROPPED">Ngừng học</option></select><select id="courseStudentSort" aria-label="Sắp xếp học viên"><option value="name">Tên A–Z</option><option value="progress">Tiến độ giảm dần</option></select></div><p class="hint">Điểm quiz tính trên mọi lượt nộp trong khóa, kể cả phiên bản cũ. Hoạt động gần nhất gồm mở bài, làm quiz và gửi câu hỏi/phản hồi.</p><p id="courseStudentCount" class="result-count" role="status" aria-live="polite"></p><div id="courseStudentRows" class="student-report-list"></div><nav id="courseStudentPager" class="pagination" aria-label="Phân trang học viên trong khóa"></nav>`;
   document.querySelector('#reviews').before(section);
+  appConfig().then(config => {
+    if (!config?.ai?.enabled || !section.isConnected) return;
+    const box = document.createElement('div');
+    box.className = 'ai-insights';
+    box.innerHTML = `<button type="button" class="btn secondary compact" data-ai-insights>Nhận xét lớp bằng AI</button><p class="hint">AI đọc số liệu tiến độ, quiz và câu hỏi chờ phản hồi để gợi ý học viên cần chú ý. Tên học viên không được gửi cho AI.</p><div class="ai-turn ai-turn-assistant" hidden><strong>Nhận xét của AI</strong><p></p></div><p role="status" aria-live="polite"></p>`;
+    section.querySelector('#courseStudentSummary').after(box);
+    const button = box.querySelector('button'), result = box.querySelector('.ai-turn'), note = box.querySelector('[role=status]');
+    button.onclick = async () => {
+      button.disabled = true; note.textContent = 'AI đang phân tích lớp…';
+      try {
+        const data = await api(`/courses/${courseId}/ai/insights`, 'POST', {});
+        result.querySelector('p').textContent = data.answer; result.hidden = false; note.textContent = '';
+      } catch (error) { note.textContent = error.message; }
+      finally { button.disabled = false; }
+    };
+  }).catch(() => {});
   const tab = document.createElement('a'); tab.href = '#students'; tab.textContent = 'Học viên';
   document.querySelector('.detail-tabs').append(tab);
   let publishedLessons = 0;

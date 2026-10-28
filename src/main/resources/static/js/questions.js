@@ -233,7 +233,9 @@ export function mountQuestions(root, lessonId, manager, questionId = null, userI
       success();
       committed = true;
       if (!active()) return;
-      status.textContent = message;
+      status.textContent = saved?.hidden && delivery
+        ? "Đã gửi. Hệ thống kiểm duyệt tự động tạm ẩn nội dung này để giảng viên xem lại trước khi hiển thị."
+        : message;
       await load();
     } catch (error) {
       if (delivery) delivery.failed(error, payload.retry);

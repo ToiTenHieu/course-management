@@ -24,6 +24,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
   const draftKey = `${userId}:${lessonId}`;
   const pendingKey = `cm-quiz-pending:${draftKey}`;
   let settings;
+  let aiEnabled = false, editorNotice = "";
   let durable=true;
   const editorDraft = createSessionDraft(`cm-quiz-editor:${draftKey}`, value => !!settings && !!value
     && Number.isInteger(value.expectedRevision) && value.expectedRevision>=0
@@ -81,7 +82,9 @@ export function mountQuiz(root, lessonId, manager, userId) {
     ++resultRevision;
     root.innerHTML = header + '<p role="status">Đang tải quiz…</p>';
     try {
-      settings = (await appConfig()).learning;
+      const config = await appConfig();
+      settings = config.learning;
+      aiEnabled = manager && !!config.ai?.enabled;
       letters = Array.from({length: settings.quizOptionCount}, (_, index) => String.fromCharCode(65 + index));
       const loaded = await api(`/lessons/${lessonId}/quiz`);
       if (!active() || request !== revision) return;
@@ -304,6 +307,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
     const form = container.querySelector("form");
     const draftStatus=document.createElement('p');draftStatus.className='hint';draftStatus.setAttribute('role','status');form.prepend(draftStatus);
     if(restored)draftStatus.textContent=`Đã khôi phục bản soạn dựa trên phiên bản ${model.expectedRevision}. Phiên bản hiện tại: ${quiz?.revision||0}.`;
+    if(editorNotice){draftStatus.textContent=editorNotice;editorNotice="";}
     const remember=value=>{
       durable=editorDraft.write(value);
       draftStatus.textContent=durable?'Đã giữ bản soạn trong tab này. Lưu quiz để tạo phiên bản trên máy chủ.':'Trình duyệt không giữ được bản soạn qua tải trang. Giữ trang này mở để tránh mất nội dung.';
@@ -311,6 +315,41 @@ export function mountQuiz(root, lessonId, manager, userId) {
     const discard=document.createElement('button');discard.type='button';discard.className='text-link danger';discard.textContent='Bỏ bản soạn';
     discard.onclick=()=>{if(!busy && confirm('Bỏ bản soạn và quay về quiz đã lưu?')){editorDraft.clear();durable=true;renderEditor();}};
     form.querySelector('.quiz-editor-actions').append(discard);
+    if (aiEnabled) {
+      const limit = Math.min(10, settings.maxQuizQuestions);
+      const ai = document.createElement("div");
+      ai.className = "quiz-ai-draft";
+      ai.innerHTML = `<label>Số câu AI soạn<input type="number" name="aiCount" min="1" max="${limit}" value="${Math.min(5, limit)}"></label><button type="button" class="btn secondary compact" data-ai-draft>Soạn nháp bằng AI</button><p class="hint">AI đọc phần văn bản của bài và đề xuất câu hỏi. Câu hỏi chỉ được thêm vào bản soạn; hãy kiểm tra đáp án trước khi lưu.</p>`;
+      form.querySelector('.quiz-editor-actions').before(ai);
+      ai.querySelector("[data-ai-draft]").onclick = async () => {
+        if (busy) return;
+        const value = collect();
+        const room = settings.maxQuizQuestions - value.questions.filter(q => q.prompt.trim()).length;
+        const count = Math.min(Number(ai.querySelector("input").value) || 0, limit, room);
+        const status = form.querySelector(".quiz-editor-status");
+        if (count < 1) { status.textContent = `Quiz đã đủ ${settings.maxQuizQuestions} câu hoặc số câu chưa hợp lệ.`; return; }
+        busy = true;
+        form.querySelectorAll("input,textarea,select,button").forEach((n) => (n.disabled = true));
+        status.textContent = "AI đang soạn câu hỏi…";
+        try {
+          const drafted = await api(`/lessons/${lessonId}/quiz/ai-draft`, "POST", { count });
+          if (!active()) return;
+          // Blank placeholder questions are replaced so the draft does not start with an empty item.
+          value.questions = [...value.questions.filter(q => q.prompt.trim() || q.options.some(o => o.trim())), ...drafted]
+            .slice(0, settings.maxQuizQuestions);
+          remember(value);
+          editorNotice = `AI đã thêm ${drafted.length} câu vào bản soạn. Kiểm tra nội dung và đáp án trước khi lưu quiz.`;
+          busy = false;
+          renderEditor();
+          return;
+        } catch (error) {
+          if (active()) status.textContent = error.message + ". Bản soạn hiện tại không thay đổi.";
+        }
+        busy = false;
+        form.querySelectorAll("input,textarea,select,button").forEach((n) => (n.disabled = false));
+        form.querySelector("[data-add]").disabled = model.questions.length >= settings.maxQuizQuestions;
+      };
+    }
     enhanceForms(container);
     function collect() {
       const data = new FormData(form);

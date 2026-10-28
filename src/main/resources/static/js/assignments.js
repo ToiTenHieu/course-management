@@ -17,6 +17,7 @@ function submissionMarkup(s) {
 }
 export function mountAssignment(root, lessonId, manager = false) {
   root.className += ' lesson-assignment';
+  let aiEnabled=false;
   let definition, own, limits, request=0, page=0, ungradedOnly=false, key=crypto.randomUUID();
   const submission = createSubmissionRecovery(
     payload => api(`/lessons/${lessonId}/assignment/submissions`, 'POST', payload),
@@ -72,11 +73,25 @@ export function mountAssignment(root, lessonId, manager = false) {
       const list=await api(`/lessons/${lessonId}/assignment/submissions?`+new URLSearchParams({page:String(page),size:'5',ungradedOnly:String(ungradedOnly)}));
       if(current!==request || !root.isConnected)return;
       if(page>0 && page>=list.totalPages){page=Math.max(0,list.totalPages-1);return loadSubmissions();}
-      target.innerHTML=`<div class="section-heading"><h4>${list.totalElements} bài nộp ${ungradedOnly?'chờ chấm':''}</h4><label class="checkbox-label"><input type="checkbox" data-ungraded ${ungradedOnly?'checked':''}> Chỉ bài chưa chấm</label></div>${list.content.map(s=>`${submissionMarkup(s)}<form data-grade="${s.submissionId}" class="assignment-grade"><label>Điểm (0–100)<input type="number" name="score" required min="0" max="100" step="1" value="${s.score??''}"></label><label>Nhận xét<textarea name="feedback" maxlength="10000" rows="3">${esc(s.feedback||'')}</textarea></label><button class="btn secondary compact">${s.score===null?'Lưu điểm':'Cập nhật điểm'}</button><p data-grade-status role="status"></p></form>`).join('')||'<p class="hint">Chưa có bài nộp phù hợp.</p>'}<nav class="pagination" aria-label="Phân trang bài nộp"><button class="chip" data-prev ${page===0?'disabled':''}>← Trước</button><span>Trang ${page+1}/${Math.max(1,list.totalPages)}</span><button class="chip" data-next ${page+1>=list.totalPages?'disabled':''}>Sau →</button><button class="chip" data-refresh>Tải lại bài nộp</button></nav>`;
+      target.innerHTML=`<div class="section-heading"><h4>${list.totalElements} bài nộp ${ungradedOnly?'chờ chấm':''}</h4><label class="checkbox-label"><input type="checkbox" data-ungraded ${ungradedOnly?'checked':''}> Chỉ bài chưa chấm</label></div>${list.content.map(s=>`${submissionMarkup(s)}<form data-grade="${s.submissionId}" class="assignment-grade"><label>Điểm (0–100)<input type="number" name="score" required min="0" max="100" step="1" value="${s.score??''}"></label><label>Nhận xét<textarea name="feedback" maxlength="10000" rows="3">${esc(s.feedback||'')}</textarea></label><button class="btn secondary compact">${s.score===null?'Lưu điểm':'Cập nhật điểm'}</button>${aiEnabled&&s.answer?'<button type="button" class="text-link" data-ai-grade>Gợi ý điểm bằng AI</button>':''}<p data-grade-status role="status"></p></form>`).join('')||'<p class="hint">Chưa có bài nộp phù hợp.</p>'}<nav class="pagination" aria-label="Phân trang bài nộp"><button class="chip" data-prev ${page===0?'disabled':''}>← Trước</button><span>Trang ${page+1}/${Math.max(1,list.totalPages)}</span><button class="chip" data-next ${page+1>=list.totalPages?'disabled':''}>Sau →</button><button class="chip" data-refresh>Tải lại bài nộp</button></nav>`;
       target.querySelector('[data-ungraded]').onchange=event=>{if(!assignmentCanLeave(target)){event.target.checked=ungradedOnly;return;}ungradedOnly=event.target.checked;page=0;loadSubmissions();};
       for(const [attribute,delta] of [['prev',-1],['next',1],['refresh',0]]) target.querySelector(`[data-${attribute}]`).onclick=()=>{if(assignmentCanLeave(target)){page+=delta;loadSubmissions();}};
       target.querySelectorAll('[data-grade]').forEach(form=>{
         track(form);
+        const suggest=form.querySelector('[data-ai-grade]');
+        if(suggest) suggest.onclick=async()=>{
+          if(root.dataset.pending==='true')return;
+          const note=form.querySelector('[data-grade-status]');suggest.disabled=true;note.textContent='AI đang đọc bài làm…';
+          try{
+            const g=await api(`/assignment-submissions/${form.dataset.grade}/ai-grade`,'POST',{});
+            if(!form.isConnected)return;
+            // Only fills the form: the teacher reviews and saves the grade.
+            form.elements.score.value=g.score;form.elements.feedback.value=g.feedback;
+            form.dispatchEvent(new Event('input',{bubbles:true}));
+            note.textContent='Đã điền gợi ý của AI. Xem lại, chỉnh sửa rồi bấm lưu điểm.';
+          }catch(error){if(form.isConnected)note.textContent=error.message;}
+          finally{suggest.disabled=false;}
+        };
         form.onsubmit=async event=>{
           event.preventDefault();if(!form.reportValidity() || root.dataset.pending==='true')return;
           const s=list.content.find(s=>s.submissionId===Number(form.dataset.grade));pending(true);status('Đang lưu điểm…');form.querySelector('[data-grade-status]').textContent='';
@@ -106,7 +121,7 @@ export function mountAssignment(root, lessonId, manager = false) {
   async function load() {
     submission.reset();
     root.innerHTML='<p class="hint" role="status">Đang tải bài tập…</p>';
-    try{const [view,config]=await Promise.all([api(`/lessons/${lessonId}/assignment`),appConfig()]);if(!root.isConnected)return;definition=view.assignment;own=view.submission;limits=config.learning;key=crypto.randomUUID();draw();}
+    try{const [view,config]=await Promise.all([api(`/lessons/${lessonId}/assignment`),appConfig()]);if(!root.isConnected)return;definition=view.assignment;own=view.submission;limits=config.learning;aiEnabled=!!config.ai?.enabled;key=crypto.randomUUID();draw();}
     catch(error){root.innerHTML='<p role="status"></p><button class="btn secondary compact">Thử tải lại bài tập</button>';root.querySelector('p').textContent=error.message;root.querySelector('button').onclick=load;}
   }
   load();

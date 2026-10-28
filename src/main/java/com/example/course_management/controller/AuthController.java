@@ -24,6 +24,7 @@ public class AuthController {
   private final com.example.course_management.config.DemoAccountSeeder demoAccounts;
   private final com.example.course_management.config.PasswordRecoverySettings recovery;
   private final com.example.course_management.security.AuthRequestLimiter limiter;
+  private final com.example.course_management.config.AiSettings ai;
 
   @Value("${app.demo.enabled:false}")
   private boolean demo;
@@ -32,8 +33,10 @@ public class AuthController {
       com.example.course_management.config.LearningSettings settings,
       com.example.course_management.config.DemoAccountSeeder demoAccounts,
       com.example.course_management.config.PasswordRecoverySettings recovery,
-      com.example.course_management.security.AuthRequestLimiter limiter) {
+      com.example.course_management.security.AuthRequestLimiter limiter,
+      com.example.course_management.config.AiSettings ai) {
     this.limiter = limiter;
+    this.ai = ai;
     this.recovery = recovery;
     this.authService = authService;
     this.userService = userService;
@@ -52,6 +55,7 @@ public class AuthController {
     config.put("demo", demo);
     config.put("passwordRecovery", Map.of("enabled",recovery.enabled(),"demoMailbox",recovery.demoMailbox()));
     config.put("learning", settings.publicSettings());
+    config.put("ai", Map.of("enabled", ai.enabled()));
     if (demo) config.put("demoAccounts", demoAccounts.loginAccounts());
     return ApiResponse.success("OK", config);
   }

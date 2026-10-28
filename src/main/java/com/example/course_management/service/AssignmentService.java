@@ -109,6 +109,11 @@ public class AssignmentService {
     if (count==0) throw new ConflictException("Bài đã được chấm lại. Tải danh sách để xem điểm mới.");
     return jdbc.queryForObject(select()+" WHERE s.submission_id=?",this::map,submissionId);
   }
+  /** A submission for its course manager, e.g. to prepare an AI grading suggestion. */
+  public Submission managedSubmission(int id, CustomUserDetails actor) {
+    var l=lesson(submissionLesson(id)); policy.manager(l.getCourse(),actor);
+    return jdbc.queryForObject(select()+" WHERE s.submission_id=?",this::map,id);
+  }
   public Download download(int id, CustomUserDetails actor) {
     var l=lesson(submissionLesson(id));
     var s=jdbc.queryForObject(select()+" WHERE s.submission_id=?",this::map,id);

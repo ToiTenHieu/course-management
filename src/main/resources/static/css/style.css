@@ -3557,3 +3557,99 @@ dialog > form {
   .payments-table .payment-reason { min-width: 0; max-width: none; }
   .payments-table .row-actions { flex-wrap: wrap; }
 }
+
+/* AI tutor */
+.lesson-ai-tutor:not(:empty) {
+  margin: 28px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+.lesson-ai-tutor h3 {
+  margin: 0;
+}
+.lesson-ai-tutor .section-heading p {
+  margin: 8px 0 0;
+}
+.ai-tutor-log {
+  display: grid;
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  margin: 16px 0;
+}
+.ai-turn {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+.ai-turn-assistant {
+  border-left: 3px solid var(--brand);
+}
+.ai-turn p {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+}
+.ai-tutor-form {
+  display: grid;
+  gap: 12px;
+}
+.ai-tutor-form textarea {
+  width: 100%;
+  max-width: 100%;
+}
+.quiz-ai-draft {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 14px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+.quiz-ai-draft label {
+  max-width: 160px;
+}
+.quiz-ai-draft .hint {
+  flex-basis: 100%;
+  margin: 0;
+}
+.ai-insights {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+}
+.ai-insights .hint {
+  margin: 0;
+}
+.ai-recommendations form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+}
+.ai-recommendations label {
+  flex: 1 1 260px;
+}
+.ai-recommendations input {
+  width: 100%;
+}
+.ai-recommendation-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+.ai-recommendation-list article {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+.ai-recommendation-list h3 {
+  margin: 6px 0;
+}

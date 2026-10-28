@@ -13,6 +13,8 @@ import { initWishlist, wishlistButton, hydrateWishlist, resumeWishlistIntent } f
 import { api, ApiError, appConfig } from "./api.js";
 import { mountQuestions } from "./questions.js";
 import { mountQuiz } from "./quiz.js";
+import { mountAiTutor } from "./ai-tutor.js";
+import { mountAiRecommendations } from "./ai-recommendations.js";
 import { mountLessonDraft } from "./lesson-drafts.js";
 import { createLessonNoteDraft } from './lesson-note-draft.js';
 import { mountResources } from "./lesson-content.js";
@@ -686,6 +688,7 @@ async function dashboard() {
     actions,
   );
   if (student) await mountWeeklyGoal();
+  if (student) mountAiRecommendations();
 }
 async function courseEditor(course, done) {
   const teachers =
@@ -1597,6 +1600,10 @@ async function learn() {
       const quizContainer = document.createElement("section");
       quizContainer.className = "lesson-quiz";
       $("#lessonContent").append(quizContainer);
+      const tutorContainer = document.createElement("section");
+      tutorContainer.className = "lesson-ai-tutor";
+      quizContainer.before(tutorContainer);
+      mountAiTutor(tutorContainer, lessonId);
       mountQuiz(quizContainer, lessonId, false, user.userId);
       const assignmentContainer = document.createElement("section");
       $("#lessonContent").append(assignmentContainer);

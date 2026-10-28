@@ -69,6 +69,26 @@ Sáu khóa nền có 24 bài thực hành riêng theo chủ đề và sáu quiz 
 
 Profile demo còn tạo bộ tình huống theo vai trò: 36 khóa mới (xuất bản/nháp/lưu trữ), 26 học viên `student_scenario_1`–`student_scenario_26`, giảng viên `teacher_scenario`, chương trình dài, 12 lượt đăng ký cho `student_demo`, thanh toán chờ/xác nhận/từ chối, tiến độ/ghi chú, 26 đánh giá, câu hỏi và bài làm quiz. Mật khẩu mẫu vẫn là `Demo123!`; bốn học viên mẫu cuối bị khóa để kiểm tra bộ lọc. Dữ liệu được tạo qua nghiệp vụ, lưu PostgreSQL. Flyway V8 ghi nhận bộ mẫu đã hoàn tất; khởi động lại không tạo trùng, không khôi phục dữ liệu đã xóa hoặc ghi đè phần đã sửa. Profile thông thường không chạy bộ mẫu.
 
+## Trợ lý AI (Gemini, tùy chọn)
+
+- **Trợ giảng AI** trong phòng học: học viên đã đăng ký hỏi về nội dung bài; AI chỉ dựa vào phần văn bản của bài và không làm hộ bài tập/quiz.
+- **Soạn nháp quiz bằng AI**: trong trình soạn quiz, giảng viên chọn số câu (tối đa 10); câu hỏi chỉ được thêm vào bản soạn, giảng viên kiểm tra rồi mới lưu. Câu không hợp lệ bị loại, đáp án được xáo vị trí.
+- **Tóm tắt bài**: nút trong khung Trợ giảng; mỗi phiên bản nội dung bài chỉ gọi AI một lần, các học viên sau dùng lại bản tóm tắt.
+- **Gợi ý chấm bài tập**: giảng viên bấm "Gợi ý điểm bằng AI" ở bài nộp có phần văn bản; AI điền sẵn điểm và nhận xét vào form, giảng viên sửa rồi tự bấm lưu. AI không đọc tệp đính kèm.
+- **Nhận xét lớp**: trong mục Học viên của khóa, AI phân tích tiến độ, điểm quiz, hoạt động và câu hỏi chờ phản hồi để chỉ ra học viên cần chú ý. Tên học viên được thay bằng mã trước khi gửi và đổi lại khi hiển thị.
+- **Gợi ý khóa học**: ở Tổng quan của học viên, AI chọn tối đa 3 khóa đang mở chưa đăng ký dựa trên khóa đang học, khóa quan tâm, kết quả kiểm tra đầu vào và mục tiêu tự nhập.
+- **Kiểm duyệt hỏi đáp**: câu hỏi/phản hồi của học viên bị AI gắn cờ (xúc phạm, spam, lộ thông tin cá nhân…) được lưu ở trạng thái ẩn và thông báo lý do cho giảng viên để duyệt. Khi AI lỗi hoặc tắt, bài vẫn được đăng bình thường.
+
+AI tắt mặc định. Lấy key miễn phí tại Google AI Studio rồi đặt biến môi trường trước khi chạy (không ghi key vào repo):
+
+```powershell
+$env:AI_PROVIDER = 'gemini'
+$env:GEMINI_API_KEY = 'key-cua-ban'
+# Tùy chọn: $env:GEMINI_MODEL = 'gemini-3.5-flash-lite'; $env:AI_REQUESTS_PER_MINUTE = '10'
+```
+
+Mỗi người dùng tối đa `AI_REQUESTS_PER_MINUTE` lượt Trợ giảng/soạn quiz mỗi phút. Gói miễn phí của Gemini có giới hạn riêng theo phút/ngày và Google có thể dùng dữ liệu gửi lên để cải thiện dịch vụ, nên chỉ dùng cho demo. Test tự động dùng AI giả lập, không gọi Gemini.
+
 ## Cấu hình và database
 
 Đăng nhập admin → **Cài đặt** để lưu giới hạn tài liệu/quiz, các giá trị điền sẵn và thông tin ngân hàng vào bảng `application_settings`. Thay đổi áp dụng ở backend ngay sau khi lưu; tải lại trang để cập nhật giao diện. Khóa, bài, URL YouTube, quiz và tài khoản tiếp tục chỉnh qua giao diện và lưu trong database. `src/main/resources/demo/catalog.json` chỉ khởi tạo dữ liệu demo lần đầu. Xem [dữ liệu và cài đặt](docs/CAU_HINH_VA_DU_LIEU_DEMO.md).

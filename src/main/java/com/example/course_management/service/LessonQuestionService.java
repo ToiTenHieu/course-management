@@ -20,6 +20,7 @@ public class LessonQuestionService {
   private final NotificationRepository notifications;
   private final ContentPolicy policy;
   private final QuestionReplyRepository replies;
+  private final AiAssistantService ai;
 
   public LessonQuestionService(
       LessonQuestionRepository questions,
@@ -27,13 +28,15 @@ public class LessonQuestionService {
       CourseRepository courses,
       NotificationRepository notifications,
       ContentPolicy policy,
-      QuestionReplyRepository replies) {
+      QuestionReplyRepository replies,
+      AiAssistantService ai) {
     this.questions = questions;
     this.lessons = lessons;
     this.courses = courses;
     this.notifications = notifications;
     this.policy = policy;
     this.replies = replies;
+    this.ai = ai;
   }
 
   @Transactional(readOnly = true)
@@ -68,11 +71,20 @@ public class LessonQuestionService {
     return response(q, replies.countVisible(id, policy.manages(q.getLesson().getCourse(), actor)));
   }
 
+  /** Trusted callers such as the demo seeder; posts from learners go through AI screening. */
   public LessonQuestionResponse ask(Integer lessonId, String body, CustomUserDetails actor) {
-    return ask(lessonId, body, null, actor);
+    return ask(lessonId, body, null, actor, false);
   }
 
   public LessonQuestionResponse ask(Integer lessonId, String body, String clientRequestId, CustomUserDetails actor) {
+    return ask(lessonId, body, clientRequestId, actor, true);
+  }
+
+  private LessonQuestionResponse ask(
+      Integer lessonId, String body, String clientRequestId, CustomUserDetails actor, boolean screen) {
+    // Screen before taking the course lock so a slow AI call never blocks other writers.
+    var flag = screen && actor.getUser().getRole() == Role.STUDENT
+        ? screen(lesson(lessonId), body, actor) : Optional.<String>empty();
     var courseId =
         lessons
             .findCourseId(lessonId)
@@ -99,8 +111,11 @@ public class LessonQuestionService {
     q.setStudent(actor.getUser());
     q.setBody(content);
     q.setClientRequestId(key);
+    q.setIsHidden(flag.isPresent());
     questions.saveAndFlush(q);
-    notify(lesson.getCourse().getTeacher(), "Có câu hỏi mới trong bài: " + lesson.getTitle(), q);
+    notify(lesson.getCourse().getTeacher(), flag
+        .map(reason -> "AI đã tạm ẩn một câu hỏi trong bài " + lesson.getTitle() + " để chờ duyệt: " + reason)
+        .orElse("Có câu hỏi mới trong bài: " + lesson.getTitle()), q);
     return response(q);
   }
 
@@ -108,7 +123,7 @@ public class LessonQuestionService {
     lockQuestionCourse(id);
     var q = question(id);
     policy.manager(q.getLesson().getCourse(), actor);
-    append(q, text(body), null, actor);
+    append(q, text(body), null, actor, null);
     return response(q);
   }
 
@@ -128,6 +143,8 @@ public class LessonQuestionService {
   }
 
   public QuestionReplyResponse reply(Integer id, String body, String clientRequestId, CustomUserDetails actor) {
+    var flag = actor.getUser().getRole() == Role.STUDENT
+        ? screen(question(id).getLesson(), body, actor) : Optional.<String>empty();
     lockQuestionCourse(id);
     var q = question(id);
     access(q.getLesson(), actor);
@@ -147,7 +164,7 @@ public class LessonQuestionService {
       if (saved.getIsHidden() && !policy.manages(q.getLesson().getCourse(), actor)) throw missing();
       return replyResponse(saved);
     }
-    return replyResponse(append(q, content, key, actor));
+    return replyResponse(append(q, content, key, actor, flag.orElse(null)));
   }
 
   public QuestionReplyResponse replyVisibility(Integer id, boolean hidden, CustomUserDetails actor) {
@@ -167,7 +184,7 @@ public class LessonQuestionService {
     return replyResponse(r);
   }
 
-  private QuestionReply append(LessonQuestion q, String body, String key, CustomUserDetails actor) {
+  private QuestionReply append(LessonQuestion q, String body, String key, CustomUserDetails actor, String flag) {
     if (q.getIsHidden()) throw new BadRequestException("Hiện lại câu hỏi trước khi trả lời");
     var r = new QuestionReply();
     r.setQuestion(q);
@@ -175,7 +192,14 @@ public class LessonQuestionService {
     r.setAuthorRole(actor.getUser().getRole());
     r.setBody(body);
     r.setClientRequestId(key);
+    r.setIsHidden(flag != null);
     replies.saveAndFlush(r);
+    var teacher = q.getLesson().getCourse().getTeacher();
+    if (flag != null) {
+      if (Boolean.TRUE.equals(teacher.getIsActive()))
+        notify(teacher, "AI đã tạm ẩn một phản hồi trong bài " + q.getLesson().getTitle() + " để chờ duyệt: " + flag, q);
+      return r;
+    }
     if (policy.manages(q.getLesson().getCourse(), actor)) {
       q.setAnswer(body);
       q.setAnsweredBy(actor.getUser());
@@ -184,7 +208,6 @@ public class LessonQuestionService {
     }
     var recipients = new LinkedHashMap<Integer, User>();
     recipients.put(q.getStudent().getUserId(), q.getStudent());
-    var teacher = q.getLesson().getCourse().getTeacher();
     recipients.put(teacher.getUserId(), teacher);
     recipients.remove(actor.getUser().getUserId());
     recipients.values().stream().filter(u -> Boolean.TRUE.equals(u.getIsActive())).forEach(u ->
@@ -212,6 +235,12 @@ public class LessonQuestionService {
     if (!lesson.getIsPublished()) throw new ResourceNotFoundException("Không tìm thấy bài học");
     if (!policy.enrolled(lesson.getCourse(), actor))
       throw new ForbiddenException("Đăng ký khóa học để tham gia hỏi đáp");
+  }
+
+  /** Validates access and length first so unauthorised or invalid posts never reach the AI provider. */
+  private Optional<String> screen(Lesson lesson, String body, CustomUserDetails actor) {
+    access(lesson, actor);
+    return ai.screen(text(body));
   }
 
   private void lockQuestionCourse(Integer id) {
