@@ -45,7 +45,9 @@ $env:DB_PASSWORD = 'mat-khau-postgresql-tren-may-ban'
 
 Mở http://127.0.0.1:8080. Script khởi động Java nền, chỉ báo sẵn sàng khi `/api/auth/ready` trả HTTP 200 sau khi hoàn tất tạo dữ liệu demo, ghi log/PID vào `target/local-demo`. Dừng bằng `scripts/stop-demo.ps1`. Khi thay source, dừng demo, build lại rồi khởi động. Dùng `-SkipBuild` nếu đã đóng gói; `-Port 8081` để đổi cổng, `-StartupTimeoutSeconds 120` để tăng thời gian chờ. Cổng được chọn theo thứ tự tham số `-Port`, biến `PORT`, file cục bộ, mặc định 8080. Cổng bị chiếm hoặc tiến trình đang chạy chưa sẵn sàng được báo rõ; khởi động thất bại dọn tiến trình vừa tạo và PID. Trên máy đang làm việc, cấu hình database cục bộ có thể được đọc từ `target/local-demo/application-local.properties`; file này nằm trong thư mục bị Git bỏ qua.
 
-Linux/macOS hoặc chạy foreground:
+macOS/Linux: `./scripts/start-demo.sh` (thêm `--skip-build`, `--ai`, `--port 8081` như bản PowerShell), dừng bằng `./scripts/stop-demo.sh`. Cài đặt từ đầu trên Mac: [chạy bản demo trên macOS](docs/CHAY_TREN_MAC.md).
+
+Chạy foreground:
 
 ```bash
 export DB_PASSWORD='mat-khau-postgresql-tren-may-ban'
