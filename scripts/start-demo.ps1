@@ -1,7 +1,8 @@
 param(
     [switch]$SkipBuild,
     [ValidateRange(1, 65535)][int]$Port = 8080,
-    [ValidateRange(5, 300)][int]$StartupTimeoutSeconds = 90
+    [ValidateRange(5, 300)][int]$StartupTimeoutSeconds = 90,
+    [switch]$Ai
 )
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path $PSScriptRoot -Parent
@@ -49,6 +50,14 @@ $taskJava = if ($env:JAVA_HOME) { Join-Path $env:JAVA_HOME 'bin/java.exe' } else
 if (-not (Test-Path -LiteralPath $taskJava)) { throw 'JAVA_HOME does not point to a working JDK. See README.md.' }
 if (-not (Test-Path -LiteralPath $taskLocalConfig) -and -not $env:DB_PASSWORD) {
     throw 'Set DB_PASSWORD before starting. See README.md.'
+}
+if ($Ai) {
+    if (-not $env:GEMINI_API_KEY) {
+        $taskKey = Read-Host 'Dan GEMINI_API_KEY roi nhan Enter' -AsSecureString
+        $env:GEMINI_API_KEY = [Net.NetworkCredential]::new('', $taskKey).Password
+    }
+    if (-not $env:GEMINI_API_KEY) { throw 'GEMINI_API_KEY is empty.' }
+    $env:AI_PROVIDER = 'gemini'
 }
 if (-not $SkipBuild) {
     & (Join-Path $taskRoot 'mvnw.cmd') -B -ntp -DskipTests package
