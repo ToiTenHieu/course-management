@@ -45,7 +45,7 @@ $env:DB_PASSWORD = 'mat-khau-postgresql-tren-may-ban'
 
 Mở http://127.0.0.1:8080. Script khởi động Java nền, chỉ báo sẵn sàng khi `/api/auth/ready` trả HTTP 200 sau khi hoàn tất tạo dữ liệu demo, ghi log/PID vào `target/local-demo`. Dừng bằng `scripts/stop-demo.ps1`. Khi thay source, dừng demo, build lại rồi khởi động. Dùng `-SkipBuild` nếu đã đóng gói; `-Port 8081` để đổi cổng, `-StartupTimeoutSeconds 120` để tăng thời gian chờ. Cổng được chọn theo thứ tự tham số `-Port`, biến `PORT`, file cục bộ, mặc định 8080. Cổng bị chiếm hoặc tiến trình đang chạy chưa sẵn sàng được báo rõ; khởi động thất bại dọn tiến trình vừa tạo và PID. Trên máy đang làm việc, cấu hình database cục bộ có thể được đọc từ `target/local-demo/application-local.properties`; file này nằm trong thư mục bị Git bỏ qua.
 
-macOS/Linux: `./scripts/start-demo.sh` (thêm `--skip-build`, `--ai`, `--port 8081` như bản PowerShell), dừng bằng `./scripts/stop-demo.sh`. Cài đặt từ đầu trên Mac: [chạy bản demo trên macOS](docs/CHAY_TREN_MAC.md).
+macOS/Linux: `./scripts/start-demo.sh` (thêm `--skip-build`, `--port 8081` như bản PowerShell), dừng bằng `./scripts/stop-demo.sh`. Cài đặt từ đầu trên Mac: [chạy bản demo trên macOS](docs/CHAY_TREN_MAC.md).
 
 Chạy foreground:
 
@@ -71,7 +71,7 @@ Sáu khóa nền có 24 bài thực hành riêng theo chủ đề và sáu quiz 
 
 Profile demo còn tạo bộ tình huống theo vai trò: 36 khóa mới (xuất bản/nháp/lưu trữ), 26 học viên `student_scenario_1`–`student_scenario_26`, giảng viên `teacher_scenario`, chương trình dài, 12 lượt đăng ký cho `student_demo`, thanh toán chờ/xác nhận/từ chối, tiến độ/ghi chú, 26 đánh giá, câu hỏi và bài làm quiz. Mật khẩu mẫu vẫn là `Demo123!`; bốn học viên mẫu cuối bị khóa để kiểm tra bộ lọc. Dữ liệu được tạo qua nghiệp vụ, lưu PostgreSQL. Flyway V8 ghi nhận bộ mẫu đã hoàn tất; khởi động lại không tạo trùng, không khôi phục dữ liệu đã xóa hoặc ghi đè phần đã sửa. Profile thông thường không chạy bộ mẫu.
 
-## Trợ lý AI (Gemini, tùy chọn)
+## Trợ lý AI (Gemini)
 
 - **Trợ giảng AI** trong phòng học: học viên đã đăng ký hỏi về nội dung bài; AI chỉ dựa vào phần văn bản của bài và không làm hộ bài tập/quiz.
 - **Soạn nháp quiz bằng AI**: trong trình soạn quiz, giảng viên chọn số câu (tối đa 10); câu hỏi chỉ được thêm vào bản soạn, giảng viên kiểm tra rồi mới lưu. Câu không hợp lệ bị loại, đáp án được xáo vị trí.
@@ -81,15 +81,9 @@ Profile demo còn tạo bộ tình huống theo vai trò: 36 khóa mới (xuất
 - **Gợi ý khóa học**: ở Tổng quan của học viên, AI chọn tối đa 3 khóa đang mở chưa đăng ký dựa trên khóa đang học, khóa quan tâm, kết quả kiểm tra đầu vào và mục tiêu tự nhập.
 - **Kiểm duyệt hỏi đáp**: câu hỏi/phản hồi của học viên bị AI gắn cờ (xúc phạm, spam, lộ thông tin cá nhân…) được lưu ở trạng thái ẩn và thông báo lý do cho giảng viên để duyệt. Khi AI lỗi hoặc tắt, bài vẫn được đăng bình thường.
 
-AI tắt mặc định. Lấy key miễn phí tại Google AI Studio rồi đặt biến môi trường trước khi chạy (không ghi key vào repo):
+Bản demo luôn chạy có AI. Key Gemini (lấy miễn phí tại [Google AI Studio](https://aistudio.google.com/apikey)) nằm ở **một chỗ duy nhất**: file `gemini-key.txt` ở thư mục gốc dự án. Mở file bằng Notepad, dán key, lưu lại; từ đó mỗi lần chạy `scripts/start-demo.ps1` (hoặc `start-demo.sh`) đều tự đọc key và bật AI. Nếu file chưa có hoặc trống, script hỏi key một lần (ẩn khi dán) rồi tự lưu vào file. File này bị Git bỏ qua, không đưa lên repo; đổi key thì sửa file. Biến môi trường `GEMINI_API_KEY`, nếu đặt, được ưu tiên hơn file.
 
-```powershell
-$env:AI_PROVIDER = 'gemini'
-$env:GEMINI_API_KEY = 'key-cua-ban'
-# Tùy chọn: $env:GEMINI_MODEL = 'gemini-3.5-flash-lite'; $env:AI_REQUESTS_PER_MINUTE = '10'
-```
-
-Cách nhanh cho bản demo: `.\scripts\start-demo.ps1 -SkipBuild -Ai` hỏi key (ẩn khi gõ) nếu chưa đặt `GEMINI_API_KEY`, rồi bật AI. Nếu Gemini trả HTTP 403 "free tier is not available for this project", tạo key mới trong project mới tại AI Studio.
+Tùy chọn: `$env:GEMINI_MODEL = 'gemini-3.5-flash-lite'`, `$env:AI_REQUESTS_PER_MINUTE = '10'`. Nếu Gemini trả HTTP 403 "free tier is not available for this project", tạo key mới trong project mới tại AI Studio rồi thay vào `gemini-key.txt`. Chạy jar trực tiếp (không qua script) thì AI chỉ bật khi tự đặt `AI_PROVIDER=gemini` và `GEMINI_API_KEY`.
 
 Khi có key, làm tiếp 9 test case cần Gemini thật và cập nhật tài liệu theo [hướng dẫn hoàn tất kiểm thử AI](docs/HOAN_TAT_KIEM_THU_AI_VOI_KEY_GEMINI.md).
 
@@ -121,12 +115,11 @@ Các thao tác hiện có được giữ nội dung khi cập nhật: lưu hồ 
 ```powershell
 npm ci
 npx playwright install chromium
-# Khi demo đã chạy ở localhost:8080:
-$env:E2E_BASE_URL = 'http://127.0.0.1:8080'
+# Một lần: CREATE DATABASE course_management_e2e;
 npm run test:e2e
 ```
 
-Nếu không đặt `E2E_BASE_URL`, Playwright tự chạy JAR đã build với profile demo; cần cấu hình database bằng biến môi trường. E2E tạo tài khoản/khóa học mẫu mới mỗi lần chạy, không xóa dữ liệu demo. Báo cáo HTML ở `output/e2e-report/index.html`; ca lỗi có screenshot và trace ở `output/e2e-results`.
+Playwright tự chạy JAR đã build ở cổng 8090 với database riêng `course_management_e2e` (đổi bằng `E2E_PORT`, `E2E_DB_URL`); mật khẩu lấy từ `DB_PASSWORD` hoặc `target/local-demo/application-local.properties`. E2E tạo tài khoản/khóa học mới mỗi lần chạy nên không trỏ `E2E_BASE_URL` vào bản demo ở cổng 8080, tránh lẫn khóa "Regression …" vào dữ liệu trình diễn. Báo cáo HTML ở `output/e2e-report/index.html`; ca lỗi có screenshot và trace ở `output/e2e-results`.
 
 GitHub Actions chạy backend trên cả H2 và PostgreSQL, kiểm tra cú pháp và unit test JavaScript, unit test Python, rồi chạy mười hành trình trên Chromium và lưu báo cáo. Xem [kế hoạch kiểm thử](docs/KE_HOACH_KIEM_THU.md) để đối chiếu lỗi, test và tiêu chí nghiệm thu.
 
@@ -184,9 +177,9 @@ Xem [đánh giá trải nghiệm theo từng vai trò và lộ trình sản ph�
 
 ## Nội dung, video và tài liệu bài học
 
-Bản demo có thêm hai khóa miễn phí **HTML nhập môn · Demo YouTube** và **JavaScript nhập môn · Demo YouTube**, mỗi khóa 5 bài xuất bản và một quiz ôn tập ở bài cuối. Video tiếng Anh từ kênh freeCodeCamp.org (HTML: Dave Gray; JavaScript: Beau Carnes) được nhúng tạm cho đồ án phi thương mại; nguồn và tác giả được ghi trong từng bài. Mỗi khóa dùng một video dài, mở tại mốc thời gian của bài và có hướng dẫn thực hành bằng tiếng Việt. Học viên tự dừng khi hết phần được hướng dẫn, rồi dùng nút **Đánh dấu hoàn thành**; ứng dụng không đo thời lượng xem.
+Bản demo có thêm hai khóa miễn phí **HTML nhập môn qua video** và **JavaScript nhập môn qua video**, mỗi khóa 5 bài xuất bản và một quiz ôn tập ở bài cuối. Video tiếng Anh từ kênh freeCodeCamp.org (HTML: Dave Gray; JavaScript: Beau Carnes) được nhúng tạm cho đồ án phi thương mại; nguồn và tác giả được ghi trong từng bài. Mỗi khóa dùng một video dài, mở tại mốc thời gian của bài và có hướng dẫn thực hành bằng tiếng Việt. Học viên tự dừng khi hết phần được hướng dẫn, rồi dùng nút **Đánh dấu hoàn thành**; ứng dụng không đo thời lượng xem.
 
-Hai khóa được tạo một lần khi chạy profile `demo`, ghi nhận bằng khóa `youtube-demo-courses-v1` trong `demo_seed_runs`; áp dụng cả database demo đang có. Khởi động lại không tạo trùng, không ghi đè chỉnh sửa hoặc khôi phục bài đã xóa. Profile thông thường không tự tạo các khóa này. Tìm “Demo YouTube” trong danh mục để bắt đầu, đăng ký miễn phí rồi vào phòng học.
+Hai khóa được tạo một lần khi chạy profile `demo`, ghi nhận bằng khóa `youtube-demo-courses-v1` trong `demo_seed_runs`; áp dụng cả database demo đang có. Khởi động lại không tạo trùng, không ghi đè chỉnh sửa hoặc khôi phục bài đã xóa. Profile thông thường không tự tạo các khóa này. Tìm “qua video” trong danh mục để bắt đầu, đăng ký miễn phí rồi vào phòng học.
 
 Bộ mẫu sử dụng [video HTML](https://www.youtube.com/watch?v=kUMe1FH4CHE) và [video JavaScript](https://www.youtube.com/watch?v=PkZNo7MFNFg). Chỉ lưu URL trong database, video phát trực tiếp từ YouTube; không tải, sao chép hoặc proxy video qua máy chủ. Cần Internet; video có thể không còn khả dụng hoặc bị tắt nhúng. Link **mở trên YouTube** dưới player giữ mốc thời gian của bài. Nếu nguồn bị xóa, giảng viên thay URL trong trình soạn; không cần YouTube API key hay dịch vụ lưu trữ video.
 

@@ -62,7 +62,9 @@ public class UserController {
   @PutMapping("/{userId}/status")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<UserResponse> updateStatus(
-      @PathVariable Integer userId, @Valid @RequestBody UpdateStatusRequest request) {
+      @PathVariable Integer userId, @Valid @RequestBody UpdateStatusRequest request,
+      @AuthenticationPrincipal CustomUserDetails actor) {
+    if (!Boolean.TRUE.equals(request.getIsActive())) rejectSelf(userId, actor, "khóa");
     return ApiResponse.success(
         "Cập nhật trạng thái thành công", userService.updateStatus(userId, request));
   }
@@ -70,9 +72,18 @@ public class UserController {
   // Endpoint 9: DELETE /api/users/{user_id} — ADMIN
   @DeleteMapping("/{userId}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<Void> deleteUser(@PathVariable Integer userId) {
+  public ApiResponse<Void> deleteUser(
+      @PathVariable Integer userId, @AuthenticationPrincipal CustomUserDetails actor) {
+    rejectSelf(userId, actor, "xóa");
     userService.deleteUser(userId);
     return ApiResponse.success("Xóa người dùng thành công", null);
+  }
+
+  /** An administrator must not lock or delete the account they are signed in with. */
+  private static void rejectSelf(Integer userId, CustomUserDetails actor, String action) {
+    if (actor != null && userId.equals(actor.getUser().getUserId()))
+      throw new com.example.course_management.exception.ConflictException(
+          "Không thể tự " + action + " tài khoản đang đăng nhập. Hãy nhờ quản trị viên khác thực hiện");
   }
 
   // Endpoint 26: PUT /api/users/{user_id} — OWNER hoặc ADMIN

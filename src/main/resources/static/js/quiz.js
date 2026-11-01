@@ -283,7 +283,7 @@ export function mountQuiz(root, lessonId, manager, userId) {
     try {
       const data = await api(`/lessons/${lessonId}/quiz/statistics`);
       if (!active() || !container.isConnected || request !== statisticsRevision) return;
-      container.innerHTML = `<h4>Kết quả phiên bản ${data.revision}</h4><p>${data.attempts} lần làm · ${data.students} học viên · ${data.passedAttempts} lần đạt · Điểm trung bình ${data.averageScore === null ? "—" : data.averageScore.toFixed(1) + "%"}</p><p class="hint">Thống kê tính tất cả lần làm của phiên bản hiện tại, gồm cả các lần làm lại.</p>${data.questions.map((q, i) => `<div class="quiz-stat-row"><strong>Câu ${i + 1}: ${esc(q.prompt)}</strong><span>${q.incorrect}/${q.answered} lần trả lời sai</span></div>`).join("")}`;
+      container.innerHTML = `<h4>Kết quả phiên bản ${data.revision}</h4><p>${data.attempts} lần làm · ${data.students} học viên · ${data.passedAttempts} lần đạt · Điểm trung bình ${data.averageScore === null ? "—" : data.averageScore.toLocaleString("vi-VN", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%"}</p><p class="hint">Thống kê tính tất cả lần làm của phiên bản hiện tại, gồm cả các lần làm lại.</p>${data.questions.map((q, i) => `<div class="quiz-stat-row"><strong>Câu ${i + 1}: ${esc(q.prompt)}</strong><span>${q.incorrect}/${q.answered} lần trả lời sai</span></div>`).join("")}`;
     } catch (error) {
       if (!active() || !container.isConnected || request !== statisticsRevision) return;
       container.innerHTML = `<p role="alert">${esc(error.message)}</p><button class="btn secondary compact" data-retry-stats>Thử lại thống kê</button>`;

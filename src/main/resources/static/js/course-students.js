@@ -1,6 +1,7 @@
 import { dateTime } from './dates.js';
 import { mountPagedList } from './lists.js';
 import { api, appConfig } from './api.js';
+import { aiMarkdown } from './lesson-content.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const labels = {ENROLLED:'Đang học',COMPLETED:'Hoàn thành',DROPPED:'Ngừng học'};
 const number = value => Number(value).toLocaleString('vi-VN',{maximumFractionDigits:1});
@@ -14,14 +15,14 @@ export async function mountCourseStudents(courseId) {
     if (!config?.ai?.enabled || !section.isConnected) return;
     const box = document.createElement('div');
     box.className = 'ai-insights';
-    box.innerHTML = `<button type="button" class="btn secondary compact" data-ai-insights>Nhận xét lớp bằng AI</button><p class="hint">AI đọc số liệu tiến độ, quiz và câu hỏi chờ phản hồi để gợi ý học viên cần chú ý. Tên học viên không được gửi cho AI.</p><div class="ai-turn ai-turn-assistant" hidden><strong>Nhận xét của AI</strong><p></p></div><p role="status" aria-live="polite"></p>`;
+    box.innerHTML = `<button type="button" class="btn secondary compact" data-ai-insights>Nhận xét lớp bằng AI</button><p class="hint">AI đọc số liệu tiến độ, quiz và câu hỏi chờ phản hồi để gợi ý học viên cần chú ý. Tên học viên không được gửi cho AI.</p><div class="ai-turn ai-turn-assistant" hidden><strong>Nhận xét của AI</strong><div class="structured-content"></div></div><p role="status" aria-live="polite"></p>`;
     section.querySelector('#courseStudentSummary').after(box);
     const button = box.querySelector('button'), result = box.querySelector('.ai-turn'), note = box.querySelector('[role=status]');
     button.onclick = async () => {
       button.disabled = true; note.textContent = 'AI đang phân tích lớp…';
       try {
         const data = await api(`/courses/${courseId}/ai/insights`, 'POST', {});
-        result.querySelector('p').textContent = data.answer; result.hidden = false; note.textContent = '';
+        result.querySelector('.structured-content').innerHTML = aiMarkdown(data.answer); result.hidden = false; note.textContent = '';
       } catch (error) { note.textContent = error.message; }
       finally { button.disabled = false; }
     };

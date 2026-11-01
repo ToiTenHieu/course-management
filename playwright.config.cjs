@@ -1,4 +1,10 @@
 const { defineConfig, devices } = require("@playwright/test");
+// E2E creates accounts and courses on every run, so the managed server uses its own
+// port and database instead of the demo at 8080 / course_management_demo.
+const port = process.env.E2E_PORT || "8090";
+const databaseUrl =
+  process.env.E2E_DB_URL ||
+  "jdbc:postgresql://localhost:5432/course_management_e2e";
 module.exports = defineConfig({
   testDir: "./tests/e2e",
   timeout: 45000,
@@ -12,7 +18,7 @@ module.exports = defineConfig({
   ],
   outputDir: "output/e2e-results",
   use: {
-    baseURL: process.env.E2E_BASE_URL || "http://127.0.0.1:8080",
+    baseURL: process.env.E2E_BASE_URL || `http://127.0.0.1:${port}`,
     timezoneId: "UTC",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
@@ -22,8 +28,10 @@ module.exports = defineConfig({
     ? undefined
     : {
         command:
-          "java -jar target/course_management-0.0.1-SNAPSHOT.jar --spring.profiles.active=demo",
-        url: "http://127.0.0.1:8080/api/auth/ready",
+          "java -jar target/course_management-0.0.1-SNAPSHOT.jar --spring.profiles.active=demo" +
+          ` --server.port=${port} --spring.datasource.url=${databaseUrl}` +
+          " --spring.config.additional-location=optional:file:target/local-demo/application-local.properties",
+        url: `http://127.0.0.1:${port}/api/auth/ready`,
         reuseExistingServer: false,
         timeout: 120000,
       },

@@ -288,7 +288,10 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                     p ->
                         lessons.stream()
                             .anyMatch(l -> l.getLessonId().equals(p.getLesson().getLessonId())))
-                .max(Comparator.comparing(LessonProgress::getLastAccessedAt))
+                // Two lessons opened within one clock tick tie; resume the later one in the course.
+                .max(
+                    Comparator.comparing(LessonProgress::getLastAccessedAt)
+                        .thenComparing(p -> p.getLesson().getOrderIndex()))
                 .map(p -> p.getLesson().getLessonId())
                 .orElse(null))
         .build();

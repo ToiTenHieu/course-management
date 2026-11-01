@@ -14,5 +14,6 @@ public class ReviewRequest {
   @Max(value = 5, message = "Điểm tối đa là 5")
   private Integer rating;
 
+  @jakarta.validation.constraints.Size(max = 5000, message = "Nhận xét tối đa 5000 ký tự")
   private String comment;
 }

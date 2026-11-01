@@ -33,6 +33,13 @@ export function enhanceForms(root) {
       .filter((input) => input.type !== "hidden");
     for (const input of controls) {
       const isPassword = input.type === "password";
+      // A native maxlength silently cuts typed or pasted text, so the value saved would differ
+      // from what the user entered. Keep the limit, but report it instead of truncating.
+      const limit = input.maxLength > 0 ? input.maxLength : 0;
+      if (limit) {
+        input.removeAttribute("maxlength");
+        input.dataset.maxLength = String(limit);
+      }
       input.id ||= "form-field-" + ++fieldSequence;
       const error = document.createElement("small");
       error.id = input.id + "-error";
@@ -64,24 +71,30 @@ export function enhanceForms(root) {
       (input.closest(".password-field") || label || input).after(error);
       input.setAttribute("aria-describedby", [input.getAttribute("aria-describedby"), error.id].filter(Boolean).join(" "));
       let counter;
-      if (input.tagName === "TEXTAREA" && input.maxLength > 0) {
+      if (input.tagName === "TEXTAREA" && limit) {
         counter = document.createElement("small");
         counter.className = "character-count";
         counter.id = input.id + "-count";
         (label || input).after(counter);
         input.setAttribute("aria-describedby", input.getAttribute("aria-describedby") + " " + counter.id);
       }
+      const policyChecked = isPassword && input.minLength >= 8 && input.name !== "confirmPassword";
       const validate = (reveal = false) => {
-        if (isPassword && input.minLength >= 8 && input.name !== "confirmPassword")
-          input.setCustomValidity(newPasswordError(input.value));
+        if (policyChecked) input.setCustomValidity(newPasswordError(input.value));
         // Passwords retain literal whitespace; text fields cannot be only whitespace.
         if (input.required && !input.readOnly && !isPassword && ["text", "textarea"].includes(input.type))
           input.setCustomValidity(input.value && !input.value.trim() ? "Vui lòng nhập nội dung, không chỉ khoảng trắng." : "");
+        // The password rule already states its length limit, so its own message is kept.
+        const tooLong = limit > 0 && input.value.length > limit && !(policyChecked && input.validity.customError);
+        if (tooLong) input.setCustomValidity(`Tối đa ${limit.toLocaleString("vi-VN")} ký tự, hiện có ${input.value.length.toLocaleString("vi-VN")} ký tự.`);
+        else if (input.dataset.lengthError && !policyChecked) input.setCustomValidity("");
+        if (tooLong) input.dataset.lengthError = "true";
+        else delete input.dataset.lengthError;
         const v = input.validity;
         const message = v.valueMissing ? "Vui lòng điền mục này." : v.typeMismatch
           ? (input.type === "email" ? "Nhập email hợp lệ, ví dụ: ban@example.com." : "Nhập liên kết đầy đủ, bắt đầu bằng https:// hoặc http://.")
           : v.tooShort ? `Cần ít nhất ${input.minLength} ký tự.`
-          : v.tooLong ? `Tối đa ${input.maxLength} ký tự.`
+          : v.tooLong ? `Tối đa ${limit} ký tự.`
           : v.rangeUnderflow ? `Giá trị tối thiểu là ${input.min}.`
           : v.rangeOverflow ? `Giá trị tối đa là ${input.max}.`
           : v.stepMismatch ? "Nhập giá trị đúng bước tăng của mục này."
@@ -93,7 +106,7 @@ export function enhanceForms(root) {
           error.textContent = message;
           error.hidden = v.valid;
         }
-        if (counter) counter.textContent = `${input.value.length.toLocaleString("vi-VN")} / ${input.maxLength.toLocaleString("vi-VN")} ký tự`;
+        if (counter) counter.textContent = `${input.value.length.toLocaleString("vi-VN")} / ${limit.toLocaleString("vi-VN")} ký tự`;
         return v.valid;
       };
       input.addEventListener("input", () => validate());

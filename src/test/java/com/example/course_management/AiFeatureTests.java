@@ -218,6 +218,16 @@ class AiFeatureTests {
     var sent = turns.getValue().getFirst().text();
     assertTrue(sent.contains("[HV1]"));
     assertFalse(sent.contains("student"));
+    // BUG-009: a course without a published quiz must not ask the model to chase quiz attempts.
+    assertTrue(sent.contains("trong đó có quiz: 0"));
+    assertFalse(sent.contains("quiz chưa làm"));
+    jdbc.update("INSERT INTO lesson_quiz_versions(lesson_id,revision,title,pass_percentage,is_published) VALUES (?,1,'Quiz',70,TRUE)",
+        lesson.getLessonId());
+    ai.classInsights(course.getCourseId(), actor(teacher));
+    verify(client, times(2)).generate(anyString(), turns.capture(), isNull());
+    var withQuiz = turns.getValue().getFirst().text();
+    assertTrue(withQuiz.contains("trong đó có quiz: 1"));
+    assertTrue(withQuiz.contains("quiz chưa làm"));
     assertThrows(ForbiddenException.class, () -> ai.classInsights(course.getCourseId(), actor(user("t3", Role.TEACHER))));
   }
 

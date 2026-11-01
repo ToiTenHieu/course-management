@@ -52,3 +52,6 @@ __pycache__/
 ### OS
 
 .DS_Store
+
+# Gemini API key used by scripts/start-demo.* (never commit it)
+gemini-key.txt

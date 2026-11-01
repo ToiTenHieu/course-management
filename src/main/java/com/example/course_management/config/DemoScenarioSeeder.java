@@ -69,23 +69,25 @@ public class DemoScenarioSeeder {
     var lesson = lessons.findByCourse_CourseIdAndIsPublishedTrueOrderByOrderIndex(shared.getCourseId()).getFirst();
     var quiz = quizzes.save(lesson.getLessonId(), scenario.quiz().request(), actor(shared.getTeacher()));
     for (int i = 1; i <= scenario.studentCount(); i++) {
-      var u = accounts.account(scenario.studentUsernamePrefix() + i, scenario.studentNamePrefix() + String.format("%02d", i), Role.STUDENT);
+      var u = accounts.account(scenario.studentUsernamePrefix() + i, scenario.studentNames().get(i - 1), Role.STUDENT);
       enroll(u, shared, admin);
       var p = payments.createPayment(samples.get(scenario.paymentCourseIndex()).getCourseId(), actor(u));
       if (i % 3 == 0) payments.confirmPayment(p.getPaymentId(), actor(admin));
       else if (i % 3 == 1) payments.rejectPayment(p.getPaymentId(), actor(admin));
       var review = new ReviewRequest(); review.setRating(3 + i % 3);
-      review.setComment(scenario.review().formatted(i));
+      review.setComment(pick(scenario.reviews(), i));
       reviews.create(shared.getCourseId(), review, actor(u));
-      var q = questions.ask(lesson.getLessonId(), scenario.question().formatted(i), actor(u));
-      if (i % 3 == 0) questions.answer(q.questionId(), scenario.answer(), actor(shared.getTeacher()));
+      var q = questions.ask(lesson.getLessonId(), pick(scenario.questions(), i), actor(u));
+      if (i % 3 == 0) questions.answer(q.questionId(), pick(scenario.answers(), i), actor(shared.getTeacher()));
       if (i % 7 == 0) questions.visibility(q.questionId(), true, actor(shared.getTeacher()));
-      quizzes.submit(lesson.getLessonId(), new SubmitQuizRequest(quiz.quizVersionId(), java.util.UUID.randomUUID().toString(), List.of(i % 2)), actor(u));
+      var answers = new ArrayList<Integer>();
+      for (int k = 0; k < scenario.quiz().questions().size(); k++) answers.add((i + k) % 3 == 0 ? 1 : 0);
+      quizzes.submit(lesson.getLessonId(), new SubmitQuizRequest(quiz.quizVersionId(), java.util.UUID.randomUUID().toString(), answers), actor(u));
       if (i > scenario.activeStudents()) { u.setIsActive(false); users.save(u); }
     }
     for (var u : List.of(admin, teacher, otherTeacher, student)) {
       for (int i = 1; i <= scenario.notificationsPerUser(); i++) {
-        var n = new Notification(); n.setUser(u); n.setMessage(scenario.notification().formatted(i));
+        var n = new Notification(); n.setUser(u); n.setMessage(pick(scenario.notifications(), i));
         n.setType(scenario.notificationType()); n.setIsRead(i % 3 == 0); n.setTargetUrl(scenario.notificationTarget()); notifications.save(n);
       }
     }
@@ -102,4 +104,7 @@ public class DemoScenarioSeeder {
   }
 
   private CustomUserDetails actor(User u) { return new CustomUserDetails(u); }
+
+  /** 1-based round-robin so each scenario student gets varied text. */
+  private static String pick(List<String> values, int i) { return values.get((i - 1) % values.size()); }
 }

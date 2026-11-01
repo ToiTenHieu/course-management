@@ -1,4 +1,5 @@
 import { api, appConfig } from "./api.js";
+import { aiMarkdown } from "./lesson-content.js";
 
 const escape = (value) => String(value ?? "").replace(/[&<>"']/g,
   (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -17,7 +18,7 @@ export async function mountAiTutor(root, lessonId) {
   const form = root.querySelector("form");
   const status = root.querySelector(".ai-tutor-status");
   const draw = () => {
-    log.innerHTML = turns.map((t) => `<div class="ai-turn ${t.fromAssistant ? "ai-turn-assistant" : "ai-turn-user"}"><strong>${t.fromAssistant ? "Trợ giảng AI" : "Bạn"}</strong><p>${escape(t.text)}</p></div>`).join("");
+    log.innerHTML = turns.map((t) => `<div class="ai-turn ${t.fromAssistant ? "ai-turn-assistant" : "ai-turn-user"}"><strong>${t.fromAssistant ? "Trợ giảng AI" : "Bạn"}</strong>${t.fromAssistant ? `<div class="structured-content">${aiMarkdown(t.text)}</div>` : `<p>${escape(t.text)}</p>`}</div>`).join("");
     log.hidden = !turns.length;
     log.scrollTop = log.scrollHeight;
   };

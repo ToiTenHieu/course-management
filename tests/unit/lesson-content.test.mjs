@@ -1,7 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 globalThis.location = { origin: "http://localhost:8080" };
-const { markdown, video } = await import("../../src/main/resources/static/js/lesson-content.js");
+const { markdown, video, aiMarkdown } = await import("../../src/main/resources/static/js/lesson-content.js");
+test("AI answers render Markdown but never load images the model names", () => {
+  const html = aiMarkdown("**1. Tình hình chung**\n*   **Bước 1:** tách truy vấn\n    ```sql\n    SELECT 1;\n    ```\n![x](https://tracker.example/p.png)");
+  assert.match(html, /<p><strong>1\. Tình hình chung<\/strong><\/p>/);
+  assert.match(html, /<ul><li><strong>Bước 1:<\/strong>/);
+  assert.match(html, /<pre><code>    SELECT 1;<\/code><\/pre>/);
+  assert.doesNotMatch(html, /<img /);
+  assert.match(html, /<a href="https:\/\/tracker\.example\/p\.png"/);
+});
 test("structured lessons render headings, lists and literal code", () => {
   const html = markdown("# Mục tiêu\n\n- **Học** Java\n- `code`\n\n```java\n<script>alert(1)</script>\n```");
   assert.match(html, /<h3>Mục tiêu<\/h3>/);

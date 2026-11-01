@@ -48,7 +48,8 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserResponse createUser(CreateUserRequest req) {
     com.example.course_management.security.PasswordPolicy.validateNewPassword(req.getPassword());
-    if (userRepository.existsByUsername(req.getUsername())) {
+    // Usernames differing only in letter case would be easy to confuse or impersonate.
+    if (userRepository.existsByUsernameIgnoreCase(req.getUsername())) {
       throw new ConflictException("Username đã tồn tại");
     }
     if (userRepository.existsByEmail(req.getEmail())) {

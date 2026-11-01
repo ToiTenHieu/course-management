@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 # Start the demo in the background on macOS/Linux (also works in Git Bash).
-# Usage: ./scripts/start-demo.sh [--skip-build] [--ai] [--port 8080] [--timeout 90]
+# Usage: ./scripts/start-demo.sh [--skip-build] [--port 8080] [--timeout 90]
 set -euo pipefail
 
 skip_build=0
-use_ai=0
 port="${PORT:-8080}"
 timeout=90
 while [ $# -gt 0 ]; do
     case "$1" in
         --skip-build) skip_build=1 ;;
-        --ai) use_ai=1 ;;
         --port) port="${2:?--port needs a value}"; shift ;;
         --timeout) timeout="${2:?--timeout needs a value}"; shift ;;
         -h|--help) sed -n '2,3p' "$0"; exit 0 ;;
@@ -61,14 +59,19 @@ if [ -z "$java_major" ] || [ "$java_major" -lt 21 ]; then
     exit 1
 fi
 
-if [ "$use_ai" -eq 1 ]; then
-    if [ -z "${GEMINI_API_KEY:-}" ]; then
-        read -rsp 'Dan GEMINI_API_KEY roi nhan Enter: ' GEMINI_API_KEY
-        echo
-    fi
-    if [ -z "$GEMINI_API_KEY" ]; then echo 'GEMINI_API_KEY is empty.' >&2; exit 1; fi
-    export GEMINI_API_KEY AI_PROVIDER=gemini
+# The demo always runs with AI. The key lives in gemini-key.txt (git-ignored) so it is asked for only once.
+key_file="$root/gemini-key.txt"
+if [ -z "${GEMINI_API_KEY:-}" ] && [ -f "$key_file" ]; then
+    GEMINI_API_KEY="$(tr -d '[:space:]' < "$key_file")"
 fi
+if [ -z "${GEMINI_API_KEY:-}" ]; then
+    read -rsp 'Dan GEMINI_API_KEY roi nhan Enter (luu vao gemini-key.txt cho lan sau): ' GEMINI_API_KEY
+    echo
+    GEMINI_API_KEY="$(printf '%s' "$GEMINI_API_KEY" | tr -d '[:space:]')"
+    if [ -z "$GEMINI_API_KEY" ]; then echo 'GEMINI_API_KEY is empty. Paste the key into gemini-key.txt.' >&2; exit 1; fi
+    (umask 077; printf '%s\n' "$GEMINI_API_KEY" > "$key_file")
+fi
+export GEMINI_API_KEY AI_PROVIDER=gemini
 
 if [ "$skip_build" -eq 0 ]; then
     sh ./mvnw -B -ntp -DskipTests package

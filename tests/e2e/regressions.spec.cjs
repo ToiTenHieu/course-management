@@ -169,7 +169,7 @@ test('Lấy lại mật khẩu qua hộp thư demo thu hồi phiên cũ và toke
     await page.getByLabel('Mật khẩu mới', { exact: true }).fill('Changed123!');
     await page.getByLabel('Nhập lại mật khẩu mới', { exact: true }).fill('Changed123!');
     await page.getByRole('button', { name: 'Đổi mật khẩu', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Bạn có thể đăng nhập lại' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Đã đổi mật khẩu. Hãy đăng nhập bằng mật khẩu mới.' })).toBeVisible();
     expect((await previousContext.request.get('/api/auth/me')).status()).toBe(401);
     await login(page, { ...learner, password: 'Changed123!' });
     await page.goto(new URL(url).pathname + new URL(url).hash);

@@ -48,15 +48,15 @@ Trong thư mục dự án:
 
 Lần đầu Maven tải thư viện và build nên mất vài phút. Khi thấy `Demo ready` thì mở <http://127.0.0.1:8080>. Tài khoản `admin_demo`, `teacher_demo`, `student_demo`, cùng mật khẩu `Demo123!`. Dữ liệu mẫu được tạo ở lần chạy đầu và giữ lại cho các lần sau.
 
-- Có AI: thêm `--ai`, script hỏi key Gemini (không hiện khi dán). Muốn khỏi nhập mỗi lần, thêm `export GEMINI_API_KEY=...` vào `~/.zshrc` (chỉ trên máy cá nhân, không đưa vào dự án).
+- AI luôn bật. Key Gemini để trong file `gemini-key.txt` ở thư mục dự án (dán key vào rồi lưu). Chưa có file thì lần chạy đầu script hỏi key (không hiện khi dán) và tự lưu vào file; file bị Git bỏ qua.
 - Đã build rồi, chỉ chạy lại: thêm `--skip-build`.
 - Đổi cổng: `--port 8081`. Máy chậm: `--timeout 180`.
 - Dừng: `./scripts/stop-demo.sh`. Log ở `target/local-demo/server.log`.
 
-Ví dụ chạy lại nhanh có AI:
+Ví dụ chạy lại nhanh:
 
 ```bash
-./scripts/start-demo.sh --skip-build --ai
+./scripts/start-demo.sh --skip-build
 ```
 
 ## Lỗi thường gặp

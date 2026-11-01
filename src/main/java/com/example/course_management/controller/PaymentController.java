@@ -73,7 +73,10 @@ public class PaymentController {
       @PathVariable Integer paymentId,
       @Valid @RequestBody(required=false) com.example.course_management.dto.request.RejectPaymentRequest request,
       @AuthenticationPrincipal CustomUserDetails actor) {
+    // The UI always asks for a reason; the API must not fall back to a default one.
+    if (request == null)
+      throw new com.example.course_management.exception.BadRequestException("Nhập lý do từ chối, tối đa 1000 ký tự");
     return ApiResponse.success(
-        "Đã từ chối yêu cầu thanh toán", paymentService.rejectPayment(paymentId, request == null ? null : request.reason(), actor));
+        "Đã từ chối yêu cầu thanh toán", paymentService.rejectPayment(paymentId, request.reason(), actor));
   }
 }

@@ -33,7 +33,7 @@ export async function mountPasswordRecovery(root,config) {
       await api(reset?'/auth/reset-password':'/auth/forgot-password','POST',body);
       if(reset) {
         password.value='';confirmation.value='';token='';
-        content.innerHTML='<div class="recovery-success"><span class="eyebrow">ĐÃ LƯU MẬT KHẨU MỚI</span><h2>Bạn có thể đăng nhập lại</h2><p>Dùng mật khẩu mới để tiếp tục học. Các phiên đăng nhập cũ đã hết hiệu lực.</p><a class="btn full" href="/login.html">Đăng nhập</a></div>';
+        content.innerHTML='<div class="recovery-success"><span class="eyebrow">ĐÃ LƯU MẬT KHẨU MỚI</span><h2>Đã đổi mật khẩu. Hãy đăng nhập bằng mật khẩu mới.</h2><p>Hệ thống không tự đăng nhập. Các phiên đăng nhập cũ đã hết hiệu lực.</p><a class="btn full" href="/login.html">Đăng nhập</a></div>';
         content.querySelector('h2').tabIndex=-1;content.querySelector('h2').focus();
       } else {
         form.querySelector('[data-status]').textContent=accepted;cooldown=Date.now()+60000;

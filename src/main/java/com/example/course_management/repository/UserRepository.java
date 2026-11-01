@@ -17,6 +17,8 @@ public interface UserRepository
 
   boolean existsByUsername(String username);
 
+  boolean existsByUsernameIgnoreCase(String username);
+
   boolean existsByEmail(String email);
   long countByRoleAndIsActiveTrue(Role role);
 

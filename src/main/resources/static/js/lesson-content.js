@@ -50,6 +50,12 @@ export function markdown(text) {
   if (code !== null) html += `<pre><code>${esc(code.join("\n"))}</code></pre>`;
   return html;
 }
+// AI answers use the lesson Markdown subset. Images the model names become plain links so an
+// answer never makes the browser load a URL by itself; indented fences and list items are unindented.
+export function aiMarkdown(text) {
+  return markdown(String(text ?? "").replace(/!\[/g, "[").replace(/^[ \t]+(?=```|[-*] |\d+\. )/gm, "")
+    .replace(/^([-*]|\d+\.)[ \t]+/gm, "$1 "));
+}
 function videoStart(url) {
   const value = url.searchParams.get("start") ?? url.searchParams.get("t") ?? (url.hash.startsWith("#t=") ? url.hash.slice(3) : "");
   let seconds = 0;

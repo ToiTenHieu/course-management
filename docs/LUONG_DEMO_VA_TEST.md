@@ -10,17 +10,17 @@ Mở từng vai trò trong trình duyệt hoặc profile riêng để giữ các
 |---|---|---|---|
 | Quản trị viên | `admin_demo` | `Demo123!` | Khóa học, tài khoản, thanh toán, báo cáo |
 | Giảng viên | `teacher_demo` | `Demo123!` | Khóa Java/Thiết kế, bài học, quiz, hỏi đáp |
-| Giảng viên mẫu | `teacher_scenario` | `Demo123!` | Báo cáo khóa Figma có nhiều học viên |
-| Học viên mẫu | `student_demo` | `Demo123!` | Dữ liệu có sẵn, ghi chú, thông báo, lịch sử |
+| Giảng viên thứ hai | `teacher_scenario` | `Demo123!` | Báo cáo khóa Figma có nhiều học viên |
+| Học viên có sẵn | `student_demo` | `Demo123!` | Dữ liệu có sẵn, ghi chú, thông báo, lịch sử |
 | Học viên mới | Tự đăng ký, tên có hậu tố thời gian | Tự đặt | Đăng ký mới, thanh toán và học từ 0% |
 
 Dữ liệu đã đối chiếu trên máy hiện tại:
 
 | Khóa | Liên kết | Mục đích |
 |---|---|---|
-| Java từ nền tảng đến ứng dụng | http://127.0.0.1:8080/course-detail.html?id=2 | Miễn phí, 4 bài xuất bản; demo 25% → 50% → 75% → 100% |
-| Thiết kế giao diện với tư duy sản phẩm | http://127.0.0.1:8080/course-detail.html?id=3 | 249.000đ; duyệt thanh toán thủ công |
-| Figma cho sản phẩm số · Nhập môn | http://127.0.0.1:8080/course-detail.html?id=19#students | Giảng viên `teacher_scenario`, 27 học viên; phân trang và báo cáo |
+| Java từ nền tảng đến ứng dụng | http://127.0.0.1:8080/course-detail.html?id=1 | Miễn phí, 4 bài xuất bản; demo 25% → 50% → 75% → 100% |
+| Thiết kế giao diện với tư duy sản phẩm | http://127.0.0.1:8080/course-detail.html?id=2 | 249.000đ; duyệt thanh toán thủ công |
+| Figma từ con số 0: thiết kế giao diện ứng dụng di động | http://127.0.0.1:8080/course-detail.html?id=10#students | Giảng viên `teacher_scenario`, 27 học viên; phân trang và báo cáo |
 
 ID và số liệu có thể thay đổi khi chuyển database hoặc tiếp tục thao tác. Khi đó tìm khóa theo tên trong danh mục. Dữ liệu demo giữ qua khởi động, không tự trở về trạng thái ban đầu. Dùng học viên mới cho luồng đăng ký/thanh toán để tránh gặp khóa đã đăng ký hoặc đã hoàn thành.
 
@@ -50,7 +50,7 @@ Thứ tự gợi ý: khám phá → học miễn phí → thanh toán → soạn
 
 **Mong đợi:** tiến độ lần lượt 25%, 50%, 75%, 100%; cuối cùng trạng thái Hoàn thành. Reload giữ dữ liệu; ghi chú chỉ thuộc học viên hiện tại. Bài nháp không được tính vào tiến độ.
 
-**Nhánh video YouTube:** tìm “Demo YouTube” và chọn **HTML nhập môn · Demo YouTube** hoặc **JavaScript nhập môn · Demo YouTube**. Đăng ký miễn phí, vào phòng học, bấm phát video; chuyển bài thứ hai để kiểm tra video mở đúng mốc. Xem nguồn freeCodeCamp.org/tác giả trong nội dung và thử link **mở trên YouTube** dưới player. Các bài dùng chung một video dài, học viên tự dừng ở cuối phần được hướng dẫn. Hoàn thành 5 bài để thấy tiến độ 20% → 40% → 60% → 80% → 100%; bài cuối có quiz ôn tập. Video tiếng Anh, cần kết nối Internet; ứng dụng chỉ lưu URL. Giảng viên có thể sửa URL như bài học thông thường nếu nguồn không còn khả dụng. Khởi động lại demo không tạo trùng hoặc ghi đè các bài đã sửa.
+**Nhánh video YouTube:** tìm “qua video” và chọn **HTML nhập môn qua video** hoặc **JavaScript nhập môn qua video**. Đăng ký miễn phí, vào phòng học, bấm phát video; chuyển bài thứ hai để kiểm tra video mở đúng mốc. Xem nguồn freeCodeCamp.org/tác giả trong nội dung và thử link **mở trên YouTube** dưới player. Các bài dùng chung một video dài, học viên tự dừng ở cuối phần được hướng dẫn. Hoàn thành 5 bài để thấy tiến độ 20% → 40% → 60% → 80% → 100%; bài cuối có quiz ôn tập. Video tiếng Anh, cần kết nối Internet; ứng dụng chỉ lưu URL. Giảng viên có thể sửa URL như bài học thông thường nếu nguồn không còn khả dụng. Khởi động lại demo không tạo trùng hoặc ghi đè các bài đã sửa.
 
 ### D03. Thanh toán và mở quyền học — 3 phút
 
@@ -228,8 +228,8 @@ node --test tests/unit/*.test.mjs
 npm ci
 npx playwright install chromium
 
-# Sau khi demo đã sẵn sàng:
-$env:E2E_BASE_URL = 'http://127.0.0.1:8080'
+# Một lần: CREATE DATABASE course_management_e2e;
+# Playwright tự chạy server riêng ở cổng 8090, không dùng database demo:
 npm run test:e2e
 ```
 
@@ -237,4 +237,4 @@ Chỉ khởi động demo nếu Maven thành công. Lần kiểm tra gần nhấ
 
 Maven mặc định dùng H2 profile test. Để chạy PostgreSQL thật, tạo database kiểm thử riêng `course_management_test`, rồi cấu hình `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, `SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver` trước khi chạy Maven test. Backend test xóa dữ liệu trước mỗi ca, không trỏ vào database demo. Khi quay lại H2, gỡ các biến `SPRING_DATASOURCE_*` đã đặt.
 
-E2E tạo tài khoản và khóa mới trong database demo, giữ dữ liệu sau chạy. Xem báo cáo tại `output/e2e-report/index.html`; ca lỗi có screenshot/trace trong `output/e2e-results`. Các flow mới có thêm kiểm tra thủ công/Playwright CLI, không mặc định thuộc sáu E2E hiện có. Xem chi tiết bằng chứng trong [kế hoạch kiểm thử](KE_HOACH_KIEM_THU.md).
+E2E tạo tài khoản và khóa mới trong database riêng `course_management_e2e` (cổng 8090), giữ dữ liệu sau chạy; không trỏ `E2E_BASE_URL` vào bản demo để danh mục trình diễn không lẫn khóa "Regression …". Xem báo cáo tại `output/e2e-report/index.html`; ca lỗi có screenshot/trace trong `output/e2e-results`. Các flow mới có thêm kiểm tra thủ công/Playwright CLI, không mặc định thuộc sáu E2E hiện có. Xem chi tiết bằng chứng trong [kế hoạch kiểm thử](KE_HOACH_KIEM_THU.md).

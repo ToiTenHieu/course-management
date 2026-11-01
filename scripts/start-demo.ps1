@@ -1,8 +1,7 @@
 param(
     [switch]$SkipBuild,
     [ValidateRange(1, 65535)][int]$Port = 8080,
-    [ValidateRange(5, 300)][int]$StartupTimeoutSeconds = 90,
-    [switch]$Ai
+    [ValidateRange(5, 300)][int]$StartupTimeoutSeconds = 90
 )
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path $PSScriptRoot -Parent
@@ -51,14 +50,18 @@ if (-not (Test-Path -LiteralPath $taskJava)) { throw 'JAVA_HOME does not point t
 if (-not (Test-Path -LiteralPath $taskLocalConfig) -and -not $env:DB_PASSWORD) {
     throw 'Set DB_PASSWORD before starting. See README.md.'
 }
-if ($Ai) {
-    if (-not $env:GEMINI_API_KEY) {
-        $taskKey = Read-Host 'Dan GEMINI_API_KEY roi nhan Enter' -AsSecureString
-        $env:GEMINI_API_KEY = [Net.NetworkCredential]::new('', $taskKey).Password
-    }
-    if (-not $env:GEMINI_API_KEY) { throw 'GEMINI_API_KEY is empty.' }
-    $env:AI_PROVIDER = 'gemini'
+# The demo always runs with AI. The key lives in gemini-key.txt (git-ignored) so it is asked for only once.
+$taskKeyFile = Join-Path $taskRoot 'gemini-key.txt'
+if (-not $env:GEMINI_API_KEY -and (Test-Path -LiteralPath $taskKeyFile)) {
+    $env:GEMINI_API_KEY = "$(Get-Content -LiteralPath $taskKeyFile -Raw)".Trim()
 }
+if (-not $env:GEMINI_API_KEY) {
+    $taskKey = Read-Host 'Dan GEMINI_API_KEY roi nhan Enter (luu vao gemini-key.txt cho lan sau)' -AsSecureString
+    $env:GEMINI_API_KEY = [Net.NetworkCredential]::new('', $taskKey).Password.Trim()
+    if (-not $env:GEMINI_API_KEY) { throw 'GEMINI_API_KEY is empty. Paste the key into gemini-key.txt.' }
+    [IO.File]::WriteAllText($taskKeyFile, $env:GEMINI_API_KEY)
+}
+$env:AI_PROVIDER = 'gemini'
 if (-not $SkipBuild) {
     & (Join-Path $taskRoot 'mvnw.cmd') -B -ntp -DskipTests package
     if ($LASTEXITCODE -ne 0) { throw 'Build failed' }

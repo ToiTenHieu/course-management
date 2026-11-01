@@ -37,7 +37,8 @@ public class DemoCatalog {
       var s = data.scenario();
       if (s.enrolledCourses() > s.pendingCoursesEnd() || s.pendingCoursesEnd() > data.scenarioCourses().size()
           || s.sharedCourseIndex() >= data.scenarioCourses().size() || s.paymentCourseIndex() >= data.scenarioCourses().size()
-          || s.activeStudents() > s.studentCount() || s.fullyCompletedCourses() > s.enrolledCourses())
+          || s.activeStudents() > s.studentCount() || s.fullyCompletedCourses() > s.enrolledCourses()
+          || s.studentNames().size() < s.studentCount() || s.answers().size() != s.questions().size())
         throw new IllegalArgumentException("Demo scenario ranges exceed the configured dataset");
       loaded = data;
       return loaded;
@@ -79,8 +80,10 @@ public class DemoCatalog {
   public record Scenario(@Positive int enrolledCourses, @Positive int pendingCoursesEnd,
       @PositiveOrZero int fullyCompletedCourses, @PositiveOrZero int sharedCourseIndex,
       @PositiveOrZero int paymentCourseIndex, @Positive int studentCount, @PositiveOrZero int activeStudents,
-      @Positive int notificationsPerUser, @NotBlank String studentUsernamePrefix, @NotBlank String studentNamePrefix,
-      @NotBlank String note, @NotBlank String review, @NotBlank String question, @NotBlank String answer,
-      @NotBlank String notification, @NotBlank String notificationType, @NotBlank String notificationTarget,
+      @Positive int notificationsPerUser, @NotBlank String studentUsernamePrefix,
+      @NotEmpty List<@NotBlank String> studentNames, @NotBlank String note,
+      @NotEmpty List<@NotBlank String> reviews, @NotEmpty List<@NotBlank String> questions,
+      @NotEmpty List<@NotBlank String> answers,
+      @NotEmpty List<@NotBlank String> notifications, @NotBlank String notificationType, @NotBlank String notificationTarget,
       @NotNull @Valid Quiz quiz) {}
 }

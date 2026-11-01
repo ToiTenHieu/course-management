@@ -126,7 +126,7 @@ test("Khóa trả phí chỉ mở sau khi admin duyệt thanh toán", async ({
     baseURL:
       test.info().project.use.baseURL ||
       process.env.E2E_BASE_URL ||
-      "http://127.0.0.1:8080",
+      "http://127.0.0.1:8090",
   });
   try {
     const admin = await context.newPage();

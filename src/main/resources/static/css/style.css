@@ -3592,6 +3592,13 @@ dialog > form {
   margin: 4px 0 0;
   white-space: pre-wrap;
 }
+.ai-turn .structured-content p {
+  margin: .5em 0 0;
+  white-space: normal;
+}
+.ai-turn .structured-content > :first-child {
+  margin-top: 4px;
+}
 .ai-tutor-form {
   display: grid;
   gap: 12px;

@@ -854,6 +854,52 @@ class BusinessFlowTests {
         lessons.findByCourse_CourseIdOrderByOrderIndex(free.getCourseId()).stream().map(Lesson::getLessonId).toList());
   }
 
+  @Test
+  void reportedDefectsStayFixed() throws Exception {
+    String register = "{\"username\":\"%s\",\"email\":\"%s@example.invalid\",\"fullName\":\"Case\",\"password\":\"Password123!\"}";
+    // BUG-001: a username differing only in letter case is a duplicate.
+    mvc.perform(post("/api/auth/register").with(csrf()).contentType("application/json")
+            .content(register.formatted("STUDENT", "case_copy")))
+        .andExpect(status().isConflict()).andExpect(jsonPath("$.message").value("Username đã tồn tại"));
+    // BUG-004: validation messages are Vietnamese, including annotation defaults.
+    mvc.perform(post("/api/auth/register").with(csrf()).contentType("application/json")
+            .content(register.formatted("ab", "short_name")))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Tên đăng nhập từ 3 đến 40 ký tự"));
+    mvc.perform(post("/api/auth/register").with(csrf()).contentType("application/json")
+            .content(register.formatted("valid_name", "long_name").replace("\"Case\"", "\"" + "x".repeat(101) + "\"")))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Họ tên tối đa 100 ký tự"));
+    // BUG-003: the API requires a rejection reason, like the UI.
+    var payment = paymentService.createPayment(paid.getCourseId(), actor(student));
+    var adminSession = login(admin);
+    String reject = "/api/payments/" + payment.getPaymentId() + "/reject";
+    mvc.perform(put(reject).session(adminSession).with(csrf()))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Nhập lý do từ chối, tối đa 1000 ký tự"));
+    mvc.perform(put(reject).session(adminSession).with(csrf()).contentType("application/json")
+            .content("{\"reason\":\"" + "x".repeat(1001) + "\"}"))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Nhập lý do từ chối, tối đa 1000 ký tự"));
+    assertEquals(PaymentStatus.PENDING, payments.findById(payment.getPaymentId()).orElseThrow().getStatus());
+    // BUG-005: review comments are limited to 5000 characters.
+    enrollmentService.enroll(free.getCourseId(), actor(student));
+    var studentSession = login(student);
+    mvc.perform(post("/api/courses/" + free.getCourseId() + "/reviews").session(studentSession).with(csrf())
+            .contentType("application/json").content("{\"rating\":3,\"comment\":\"" + "x".repeat(5001) + "\"}"))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("Nhận xét tối đa 5000 ký tự"));
+    mvc.perform(post("/api/courses/" + free.getCourseId() + "/reviews").session(studentSession).with(csrf())
+            .contentType("application/json").content("{\"rating\":3,\"comment\":\"" + "x".repeat(5000) + "\"}"))
+        .andExpect(status().isOk());
+    // BUG-007 and FUNC 173: an administrator cannot lock or delete themselves, even with another admin active.
+    user("second_admin", Role.ADMIN);
+    mvc.perform(put("/api/users/" + admin.getUserId() + "/status").session(adminSession).with(csrf())
+            .contentType("application/json").content("{\"isActive\":false}"))
+        .andExpect(status().isConflict());
+    mvc.perform(delete("/api/users/" + admin.getUserId()).session(adminSession).with(csrf()))
+        .andExpect(status().isConflict());
+    assertTrue(users.findById(admin.getUserId()).orElseThrow().getIsActive());
+    mvc.perform(put("/api/users/" + student.getUserId() + "/status").session(adminSession).with(csrf())
+            .contentType("application/json").content("{\"isActive\":false}"))
+        .andExpect(status().isOk());
+  }
+
   User user(String name, Role role) {
     var u = new User();
     u.setUsername(name);
@@ -922,7 +968,7 @@ class BusinessFlowTests {
     assertTrue(payments.search(PaymentStatus.PENDING).size() > 10);
     var edited =
         courses.findAll().stream()
-            .filter(c -> c.getTitle().startsWith("Python thực hành"))
+            .filter(c -> c.getTitle().startsWith("Python cơ bản"))
             .findFirst()
             .orElseThrow();
     edited.setTitle("Tên đã được chỉnh sửa");
@@ -947,7 +993,7 @@ class BusinessFlowTests {
     assertEquals(existingLessons + 10, lessons.count());
     assertEquals(2, quizzes.count());
     assertEquals(0, payments.count());
-    var samples = courses.findAll().stream().filter(c -> c.getTitle().endsWith("· Demo YouTube")).toList();
+    var samples = courses.findAll().stream().filter(c -> c.getTitle().endsWith(" qua video")).toList();
     for (var sample : samples) {
       assertEquals(CourseStatus.PUBLISHED, sample.getStatus());
       assertEquals(0, sample.getPrice().signum());
